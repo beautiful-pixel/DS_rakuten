@@ -1,0 +1,41 @@
+{
+  "vectorizer_type": "tfidf",
+  "strategy": "split",
+  "text_columns": [
+    "title_clean",
+    "desc_clean"
+  ],
+  "feature_columns": [
+    "designation_len_char",
+    "designation_len_words",
+    "designation_num_digits",
+    "designation_num_punctuation",
+    "designation_uppercase_ratio",
+    "designation_digit_ratio",
+    "description_len_char",
+    "description_len_words",
+    "description_num_digits",
+    "description_num_punctuation",
+    "description_uppercase_ratio",
+    "description_digit_ratio"
+  ],
+  "max_features_title": 20000,
+  "max_features_desc": 20000,
+  "ngram_range": [
+    1,
+    2
+  ],
+  "title_weight": 1.5,
+  "min_df": 2,
+  "max_df": 0.95,
+  "metadata": {
+    "f1_score": 0.8410278277426677,
+    "accuracy": 0.8404773119799026,
+    "train_time": 45.00063681602478,
+    "notebook": "02_Vectorization_Strategies.ipynb",
+    "baseline_f1": 0.7925,
+    "improvement_pct": 6.123385204122111,
+    "title_weight": 1.5
+  },
+  "saved_at": "2025-12-08T20:06:41.917046"
+}
