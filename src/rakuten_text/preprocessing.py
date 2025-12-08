@@ -165,51 +165,6 @@ def clean_text(
 
 
 def final_text_cleaner(text):
-    """
-    Fonction de nettoyage de texte prête pour la production basée sur la stratégie gagnante du benchmark.
-
-    Cette fonction implémente la configuration 'optimized_traditional' qui a obtenu
-    les meilleures performances (F1: 0.8024, +1.32% vs baseline) lors de l'étude
-    de benchmark complète (Phase 2: Test de Combinaison Champion).
-
-    Pipeline de nettoyage (ordre strict) :
-    1. Gérer les valeurs NaN/None
-    2. Corriger l'encodage de texte cassé (ftfy)
-    3. Décoder les entités HTML (&amp; → &)
-    4. Normaliser Unicode (NFC)
-    5. Supprimer les balises HTML (<tag>contenu</tag> → contenu)
-    6. Convertir en minuscules
-    7. Supprimer la ponctuation isolée (préserver la ponctuation dans les nombres)
-    8. Supprimer les mots vides français/anglais
-    9. Normaliser les espaces blancs
-
-    Args:
-        text (str ou None): Texte d'entrée à nettoyer
-
-    Returns:
-        str: Texte nettoyé prêt pour la vectorisation TF-IDF
-
-    Exemples:
-        >>> text = "<p>Ordinateur <strong>portable</strong> 15.6 pouces</p>"
-        >>> final_text_cleaner(text)
-        'ordinateur portable 15.6 pouces'
-
-        >>> text = "Prix: 299,99&nbsp;€ - Livraison gratuite!"
-        >>> final_text_cleaner(text)
-        'prix 299,99 € livraison gratuite'
-
-    Notes:
-        - Cette configuration a été validée sur 84 916 échantillons de produits Rakuten
-        - A surpassé 22 stratégies de prétraitement alternatives
-        - Optimisée pour la classification de produits e-commerce avec des features TF-IDF
-        - Détails du benchmark : notebooks/01_Text_Preprocessing_Benchmark.ipynb
-
-    Références:
-        Configuration gagnante : optimized_traditional
-        Score F1 (pondéré) : 0.8024
-        Amélioration vs baseline : +1.32%
-        Date de test : 2025-12-07
-    """
     
     if pd.isna(text) or text is None:
         return ""
@@ -257,12 +212,7 @@ def final_text_cleaner(text):
 
 
 def get_available_options():
-    """
-    Retourne un dictionnaire de toutes les options de nettoyage disponibles avec descriptions.
 
-    Returns:
-        dict: {nom_option: description}
-    """
     return {
         # Encodage & Unicode
         "fix_encoding": "Corriger l'encodage de texte cassé avec ftfy",
@@ -295,7 +245,7 @@ def get_available_options():
 
 
 def print_available_options():
-    """Afficher toutes les options de nettoyage disponibles avec descriptions."""
+    
     options = get_available_options()
     print("Options de nettoyage disponibles :")
     print("=" * 80)

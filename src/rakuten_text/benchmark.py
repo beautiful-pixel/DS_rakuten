@@ -200,7 +200,7 @@ def define_experiments():
 def run_benchmark(
     df,
     experiments=None,
-    test_size=0.2,
+    test_size=0.15,
     random_state=42,
     tfidf_max_features=10000,
     tfidf_ngram_range=(1, 2),
@@ -393,6 +393,8 @@ def analyze_results(results_df, top_n=10):
     print("=" * 80)
 
 
-def save_results(results_df, output_path="benchmark_results.csv"):
+def save_results(results_df, output_path="results/benchmark_results.csv"):
+    import os
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     results_df.to_csv(output_path, index=False)
     print(f"✓ Résultats sauvegardés dans : {output_path}")
