@@ -628,36 +628,7 @@ def track_all_scores(
     score_column: str = 'f1_score',
     verbose: bool = True
 ) -> pd.DataFrame:
-    """
-    Collecte et compare tous les scores F1 de différentes expériences.
 
-    Paramètres
-    ----------
-    results_dict : dict
-        Dictionnaire {nom_experience: DataFrame_resultats}
-        Ex: {
-            'exp1_count_tfidf': df_vec,
-            'exp2b_title_weight': results_weighting,
-            'exp3_features': results_strategies,
-            'exp4_grid_search': grid_results
-        }
-    score_column : str, default='f1_score'
-        Nom de la colonne contenant les scores
-    verbose : bool, default=True
-        Afficher le résumé
-
-    Retour
-    ------
-    pd.DataFrame
-        DataFrame consolidé avec tous les scores triés
-
-    Exemples
-    --------
-    >>> all_scores = track_all_scores({
-    ...     'title_weight': results_weighting,
-    ...     'grid_search': grid_results
-    ... })
-    """
     all_results = []
 
     for exp_name, df in results_dict.items():

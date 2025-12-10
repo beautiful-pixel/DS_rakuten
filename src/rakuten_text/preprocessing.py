@@ -165,26 +165,26 @@ def clean_text(
 
 
 def final_text_cleaner(text):
-    
     if pd.isna(text) or text is None:
         return ""
 
     s = str(text)
 
+    # 1) Text normalization
     s = fix_text(s)
-
     s = html.unescape(s)
-
     s = unicodedata.normalize("NFC", s)
 
+    # 2) Remove HTML tags
     s = reg.sub(r"<[^>]+>", " ", s)
 
+    # 3) Lowercase
     s = s.lower()
 
-    # Supprimer les points qui ne sont pas dans les nombres : "Hello. World" → "Hello  World" (garder "3.14")
+    # 4) Remove dots that are not part of numbers ("hello. world" -> "hello  world", keep "3.14")
     s = reg.sub(r"(?<!\d)\.(?!\d)", " ", s)
 
-    # Supprimer les traits d'union/deux-points/etc isolés (mais garder "bien-connu", "3-5")
+    # 5) Remove isolated punctuation like "-" ":" "·" "/" "+" but keep things like "bien-connu", "3-5"
     s = reg.sub(r"(?<!\S)-(?!\S)", " ", s)
     s = reg.sub(r"(?<!\S):(?!\S)", " ", s)
     s = reg.sub(r"(?<!\S)·(?!\S)", " ", s)
@@ -192,23 +192,10 @@ def final_text_cleaner(text):
     s = reg.sub(r"(?<!\S)\+(?!\S)", " ", s)
     s = s.replace("////", " ")
 
-    tokens = s.split()
-    filtered = []
-
-    for token in tokens:
-        # Passer si le token est un mot vide
-        if token in NLTK_STOPWORDS:
-            continue
-
-        # Garder tous les autres tokens
-        filtered.append(token)
-
-    s = " ".join(filtered)
-
+    # 6) Final whitespace normalization
     s = reg.sub(r"\s+", " ", s).strip()
 
     return s
-
 
 
 def get_available_options():
