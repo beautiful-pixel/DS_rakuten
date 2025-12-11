@@ -29,13 +29,13 @@
   "min_df": 2,
   "max_df": 0.95,
   "metadata": {
-    "f1_score": 0.8444292037093792,
-    "accuracy": 0.8444810802323756,
-    "train_time": 37.97206139564514,
+    "f1_score": 0.8442316976753591,
+    "accuracy": 0.8443240697126707,
+    "train_time": 37.28296613693237,
     "notebook": "02_Vectorization_Strategies.ipynb",
     "baseline_f1": 0.7925,
-    "improvement_pct": 6.552580909700853,
+    "improvement_pct": 6.527659012663611,
     "title_weight": 1.5
   },
-  "saved_at": "2025-12-10T20:28:16.796215"
+  "saved_at": "2025-12-11T09:42:12.438356"
 }
