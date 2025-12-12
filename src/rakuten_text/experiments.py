@@ -746,9 +746,7 @@ def generate_vectorization_report(
     import json
     from datetime import datetime
 
-    # ========================================================================
-    # 1. TRACKING GLOBAL
-    # ========================================================================
+    # TRACKING GLOBAL
     all_scores = track_all_scores({
         'exp1_count_vs_tfidf': df_vec,
         'exp2b_title_weighting': results_weighting,
@@ -761,17 +759,13 @@ def generate_vectorization_report(
     os.makedirs('results', exist_ok=True)
     all_scores.to_csv('results/all_scores_tracking.csv', index=False)
 
-    # ========================================================================
-    # 2. VÉRIFICATION OPTIMALITÉ
-    # ========================================================================
+    # VÉRIFICATION OPTIMALITÉ
     with open(exported_config_path) as f:
         exported_config = json.load(f)
 
     is_optimal = verify_best_score(all_scores, exported_config, verbose=False)
 
-    # ========================================================================
-    # 3. EXTRACTION DES DONNÉES
-    # ========================================================================
+    # EXTRACTION DES DONNÉES
     best_overall = all_scores.iloc[0]
     best_from_exp1 = df_vec.iloc[0]
     best_from_exp2b = results_weighting.iloc[0]
@@ -798,9 +792,7 @@ def generate_vectorization_report(
 
     total_improvement = ((best_overall['f1_score'] - baseline_f1) / baseline_f1) * 100
 
-    # ========================================================================
-    # 4. GÉNÉRATION DU RAPPORT
-    # ========================================================================
+    # GÉNÉRATION DU RAPPORT
     report_lines = []
     report_lines.append("=" * 80)
     report_lines.append("📊 RAPPORT DE VECTORISATION - PHASE 2")
