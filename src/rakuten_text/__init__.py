@@ -24,6 +24,9 @@ from .preprocessing import (
     NLTK_STOPWORDS,
     PUNCTUATION,
     BOILERPLATE_PHRASES,
+    text_preprocess,
+    get_decored_labels,
+    complete_txt_preprocess,
 )
 
 # Phase 1: Benchmark
@@ -111,6 +114,9 @@ __all__ = [
     "NLTK_STOPWORDS",
     "PUNCTUATION",
     "BOILERPLATE_PHRASES",
+    "text_preprocess",
+    "get_decored_labels",
+    "complete_txt_preprocess",
 
     # Phase 1: Benchmark
     "load_dataset",
