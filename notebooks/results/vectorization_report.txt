@@ -1,0 +1,60 @@
+================================================================================
+📊 RAPPORT DE VECTORISATION - PHASE 2
+================================================================================
+Généré le: 2025-12-11 20:34:19
+Total expériences: 24
+
+================================================================================
+RÉSUMÉ DES DÉCOUVERTES
+================================================================================
+
+1️⃣  Count vs TF-IDF
+   → TF-IDF (F1=0.8263) surpasse Count (F1=0.8215)
+   → Amélioration: +0.59%
+
+2️⃣  Split vs Merged
+   → Split (F1=0.8263) surpasse Merged (F1=0.7875)
+   → Amélioration: +4.93%
+
+3️⃣  Pondération du Titre
+   → Poids optimal: 1.5x
+   → F1 = 0.8343 (baseline 1.0x: 0.8263)
+   → Amélioration: +0.97%
+
+4️⃣  Features Manuelles
+   → Sans features: F1 = 0.8263
+   → Avec features: F1 = 0.8319
+   → Amélioration: +0.68%
+
+5️⃣  Hyperparamètres Optimaux
+   → Vectorizer: TFIDF
+   → Max features: 20,000
+   → N-gram range: (1, 1)
+   → Title weight: 1.5x
+   → Features manuelles: Oui
+   → F1 Final: 0.8442
+
+================================================================================
+🏆 PERFORMANCE FINALE
+================================================================================
+Baseline (raw data, NB01):              F1 = 0.7925
+Meilleur score (configuration finale):  F1 = 0.8442
+Amélioration totale:                    +6.53%
+
+Statut: ✅ Configuration optimale validée
+
+================================================================================
+🔍 VÉRIFICATION
+================================================================================
+Config exportée: results/configs/best_vectorization_config.json
+Tracking sauvegardé: results/all_scores_tracking.csv
+Score config finale: F1 = 0.8442
+Meilleur score global: F1 = 0.8442
+
+================================================================================
+📋 PROCHAINES ÉTAPES
+================================================================================
+→ Notebook 03: Sélection du meilleur modèle
+→ Phase 3: Intégration des features images
+→ Phase 4: Fusion multimodale
+================================================================================

@@ -1,0 +1,25 @@
+experiment,f1_score,accuracy,vectorizer,max_features,ngram_range,title_weight,use_features,model,strategy
+exp4_grid_search,0.8442316976753591,0.8443240697126707,tfidf,20000.0,"(1, 1)",1.5,True,logreg,
+exp4_grid_search,0.8421333807085478,0.8422829329565081,tfidf,15000.0,"(1, 1)",1.5,True,logreg,
+exp4_grid_search,0.8420128444604297,0.841890406657246,tfidf,20000.0,"(1, 3)",1.5,True,logreg,
+exp4_grid_search,0.8419228451287438,0.841890406657246,tfidf,20000.0,"(1, 2)",1.5,True,logreg,
+exp4_grid_search,0.8407914760062323,0.8407128277594599,tfidf,15000.0,"(1, 2)",1.5,True,logreg,
+exp4_grid_search,0.8397275517409599,0.8400062804207882,tfidf,10000.0,"(1, 1)",1.5,True,logreg,
+exp4_grid_search,0.8392924560667447,0.839221227822264,tfidf,15000.0,"(1, 3)",1.5,True,logreg,
+exp4_grid_search,0.8365823565069593,0.8366305542471345,tfidf,10000.0,"(1, 2)",1.5,True,logreg,
+exp2b_title_weighting,0.8343176939167902,0.8341968911917098,tfidf,10000.0,"(1, 2)",1.5,False,logreg,
+exp2b_title_weighting,0.833472130260798,0.8333333333333334,tfidf,10000.0,"(1, 2)",2.0,False,logreg,
+exp4_grid_search,0.8332992876724872,0.8334118385931858,tfidf,10000.0,"(1, 3)",1.5,True,logreg,
+exp3_manual_features,0.8319373348152242,0.8319987439158424,tfidf,,,,True,logreg,Indicateurs + TF-IDF
+exp2b_title_weighting,0.8310663398007561,0.8308211650180563,tfidf,10000.0,"(1, 2)",2.5,False,logreg,
+exp4_grid_search,0.8275329350020607,0.8276024493641074,tfidf,5000.0,"(1, 1)",1.5,True,logreg,
+exp2b_title_weighting,0.8268890678325225,0.826581880986026,tfidf,10000.0,"(1, 2)",3.0,False,logreg,
+exp1_count_vs_tfidf,0.8263275414474609,0.8262678599466164,,,,,,,
+exp3_manual_features,0.8263275414474609,0.8262678599466164,tfidf,,,,False,logreg,TF-IDF seul
+exp2b_title_weighting,0.8263275414474609,0.8262678599466164,tfidf,10000.0,"(1, 2)",1.0,False,logreg,
+exp3_manual_features,0.8249348303697406,0.8239912074108965,count,,,,True,logreg,Indicateurs + CountVectorizer
+exp4_grid_search,0.8234934068457602,0.8236771863714869,tfidf,5000.0,"(1, 2)",1.5,True,logreg,
+exp1_count_vs_tfidf,0.8214914748751067,0.8199874391584236,,,,,,,
+exp3_manual_features,0.8214914748751067,0.8199874391584236,count,,,,False,logreg,CountVectorizer seul
+exp4_grid_search,0.8203131066965833,0.8203799654576857,tfidf,5000.0,"(1, 3)",1.5,True,logreg,
+exp3_manual_features,0.29249218927404463,0.34024179620034545,None,,,,True,logreg,Indicateurs seuls
