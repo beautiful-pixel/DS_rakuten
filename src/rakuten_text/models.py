@@ -21,7 +21,7 @@ def get_model(model_name, random_state=42, **kwargs):
             'solver': 'lbfgs',           # Optimiseur efficace pour multiclasse
             'max_iter': 1000,            # Nombre max d'itérations pour convergence
             'random_state': random_state,
-            'n_jobs': 1,                # Utiliser tous les cœurs CPU
+            'n_jobs': -1,                # Utiliser tous les cœurs CPU
             'verbose': 0
         }
         default_params.update(kwargs)
@@ -37,7 +37,7 @@ def get_model(model_name, random_state=42, **kwargs):
             'max_iter': 1000,            # Nombre max d'epochs
             'tol': 1e-3,                 # Critère de convergence
             'random_state': random_state,
-            'n_jobs': 1,
+            'n_jobs': -1,
             'verbose': 0
         }
         default_params.update(kwargs)
@@ -54,7 +54,7 @@ def get_model(model_name, random_state=42, **kwargs):
             'max_depth': 6,              # Profondeur max des arbres
             'learning_rate': 0.3,        # Taux d'apprentissage
             'random_state': random_state,
-            'n_jobs': 1,
+            'n_jobs': -1,
             'verbosity': 0
         }
         default_params.update(kwargs)
@@ -70,7 +70,7 @@ def get_model(model_name, random_state=42, **kwargs):
             'min_samples_split': 2,      # Min échantillons pour splitter un nœud
             'min_samples_leaf': 1,       # Min échantillons dans une feuille
             'random_state': random_state,
-            'n_jobs': 1,
+            'n_jobs': -1,
             'verbose': 0
         }
         default_params.update(kwargs)
@@ -85,17 +85,6 @@ def get_model(model_name, random_state=42, **kwargs):
 
 def get_available_models():
     return ['logreg', 'svm', 'xgboost', 'rf']
-
-
-def get_model_info(model_name):
-
-    info = {
-        'logreg': "Régression Logistique: Modèle linéaire baseline, rapide et interprétable.",
-        'svm': "SVM Linéaire: Maximisation de marge, efficace pour espaces haute dimension.",
-        'xgboost': "XGBoost: Gradient Boosting, capture des interactions non-linéaires complexes.",
-        'rf': "Random Forest: Ensemble d'arbres, robuste et parallélisable."
-    }
-    return info.get(model_name.lower(), "Modèle inconnu")
 
 
 

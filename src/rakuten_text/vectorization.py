@@ -160,6 +160,51 @@ class FeatureWeighter(BaseEstimator, TransformerMixin):
         return X * self.weight
 
 
+class WeightedVectorizer(BaseEstimator, TransformerMixin):
+    """
+    Combined vectorizer with feature weighting.
+
+    This class wraps a vectorizer (TfidfVectorizer or CountVectorizer) and
+    applies a weight multiplier to the output features. This avoids using
+    nested Pipelines which can cause issues with ColumnTransformer.
+    """
+
+    def __init__(self, vectorizer, weight=1.0):
+        """
+        Parameters
+        ----------
+        vectorizer : sklearn vectorizer
+            The base vectorizer (TfidfVectorizer or CountVectorizer)
+        weight : float, default=1.0
+            Multiplicative weight to apply to features
+        """
+        self.vectorizer = vectorizer
+        self.weight = weight
+
+    def fit(self, X, y=None):
+        """Fit the vectorizer."""
+        self.vectorizer.fit(X, y)
+        return self
+
+    def transform(self, X):
+        """Transform and apply weight."""
+        X_transformed = self.vectorizer.transform(X)
+        if self.weight != 1.0:
+            X_transformed = X_transformed * self.weight
+        return X_transformed
+
+    def fit_transform(self, X, y=None):
+        """Fit and transform."""
+        X_transformed = self.vectorizer.fit_transform(X, y)
+        if self.weight != 1.0:
+            X_transformed = X_transformed * self.weight
+        return X_transformed
+
+    def get_feature_names_out(self, input_features=None):
+        """Get feature names from underlying vectorizer."""
+        return self.vectorizer.get_feature_names_out(input_features)
+
+
 # Pipelines de Vectorisation
 
 def build_split_vectorizer_pipeline(
@@ -178,7 +223,7 @@ def build_split_vectorizer_pipeline(
 
     transformers = []
 
-    # Vectoriseur pour le titre
+    # Vectorizer for title with optional weighting
     vec_title = build_vectorizer(
         vectorizer_type,
         max_features=max_features_title,
@@ -186,15 +231,11 @@ def build_split_vectorizer_pipeline(
         **kwargs
     )
 
-    # Appliquer la pondération si différente de 1.0
+    # Use WeightedVectorizer to avoid nested Pipeline issues
     if title_weight != 1.0:
-        title_pipeline = Pipeline([
-            ('vectorizer', vec_title),
-            ('weighter', FeatureWeighter(weight=title_weight))
-        ])
-        transformers.append(('vec_title', title_pipeline, text_columns[0]))
-    else:
-        transformers.append(('vec_title', vec_title, text_columns[0]))
+        vec_title = WeightedVectorizer(vec_title, weight=title_weight)
+
+    transformers.append(('vec_title', vec_title, text_columns[0]))
 
     # Vectoriseur pour la description
     vec_desc = build_vectorizer(
@@ -209,13 +250,10 @@ def build_split_vectorizer_pipeline(
     if feature_columns:
         transformers.append(('scaler', StandardScaler(), feature_columns))
 
-    # Désactiver parallélisation si title_weight != 1.0 pour éviter erreurs de sérialisation
-    n_jobs = 1 if title_weight != 1.0 else -1
-
     return ColumnTransformer(
         transformers=transformers,
         remainder='drop',
-        n_jobs=n_jobs
+        n_jobs=-1
     )
 
 
@@ -254,26 +292,8 @@ def build_merged_vectorizer_pipeline(
 # Utilitaires
 # =============================================================================
 
-def get_available_presets() -> Dict[str, Dict]:
-    
-    return PRESET_CONFIGS.copy()
-
-
-def print_available_presets() -> None:
-    
-    print("Configurations prédéfinies disponibles:")
-    print("=" * 80)
-
-    for name, config in PRESET_CONFIGS.items():
-        print(f"\n  {name}:")
-        for key, value in config.items():
-            print(f"    {key}: {value}")
-
-    print("\n" + "=" * 80)
-
-
 def get_vectorizer_info(vectorizer) -> Dict[str, any]:
-    
+
     return {
         'type': type(vectorizer).__name__,
         'max_features': vectorizer.max_features,
@@ -281,25 +301,6 @@ def get_vectorizer_info(vectorizer) -> Dict[str, any]:
         'min_df': vectorizer.min_df,
         'max_df': vectorizer.max_df,
     }
-
-
-def compare_vectorizer_configs(vec1, vec2) -> None:
-    
-    info1 = get_vectorizer_info(vec1)
-    info2 = get_vectorizer_info(vec2)
-
-    print("Comparaison de configurations:")
-    print("=" * 80)
-    print(f"{'Paramètre':<20} {'Vectorizer 1':<30} {'Vectorizer 2':<30}")
-    print("-" * 80)
-
-    all_keys = set(info1.keys()) | set(info2.keys())
-    for key in sorted(all_keys):
-        val1 = info1.get(key, 'N/A')
-        val2 = info2.get(key, 'N/A')
-        print(f"{key:<20} {str(val1):<30} {str(val2):<30}")
-
-    print("=" * 80)
 
 
 # Configuration Management (pour pipeline entre notebooks)

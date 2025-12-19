@@ -164,3 +164,25 @@ cython_debug/
 
 # Data folder
 data/
+
+# Model files (large binaries)
+models/**/*.pkl
+models/**/*.pth
+models/**/*.safetensors
+models/**/*.bin
+models/**/*.h5
+models/**/*.onnx
+models/**/*.pt
+models/**/model.safetensors
+models/**/pytorch_model.bin
+
+# Keep structure and small config files
+!models/**/*.json
+!models/**/*.txt
+!models/**/*.md
+!models/**/README*
+!models/**/*.png
+!models/.gitkeep
+
+# Checkpoint directories
+checkpoints/

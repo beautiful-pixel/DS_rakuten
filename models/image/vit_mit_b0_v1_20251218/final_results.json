@@ -1,0 +1,12 @@
+{
+  "best_epoch": 12,
+  "val_acc": 70.92950227665254,
+  "final_val_acc": 70.92950227665253,
+  "final_val_f1_macro": 0.6804206575989696,
+  "final_val_f1_weighted": 0.7070165082136035,
+  "final_test_acc": 70.92950227665253,
+  "final_test_f1_macro": 0.6804206575989696,
+  "final_test_f1_weighted": 0.7070165082136035,
+  "num_classes": 27,
+  "model": "google/vit-base-patch16-224"
+}

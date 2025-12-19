@@ -1,0 +1,87 @@
+{
+  "additional_special_tokens": [
+    "[petit_volume]",
+    "[volume_moyen]",
+    "[grand_volume]",
+    "[petite_surface]",
+    "[surface_moyenne]",
+    "[grande_surface]",
+    "[petite_longueur]",
+    "[longueur_moyenne]",
+    "[grande_longueur]",
+    "[très_grande_longueur]",
+    "[poids_leger]",
+    "[poids_moyen]",
+    "[poids_lourd]",
+    "[age_bébé]",
+    "[age_enfant]",
+    "[age_adulte]",
+    "[petite_mémoire]",
+    "[grande_mémoire]",
+    "[date_ancienne]",
+    "[date_contemporaine]",
+    "[date_récente]",
+    "[date_future]",
+    "[petit_numero]",
+    "[grand_numero]",
+    "[peu_de_cartes]",
+    "[beaucoup_de_cartes]",
+    "[peu_de_pièces]",
+    "[beaucoup_de_pièces]",
+    "[puissance_exp]",
+    "[tension_exp]",
+    "[temperature_exp]",
+    "[energie_exp]",
+    "[TITRE]",
+    "[DESC]"
+  ],
+  "bos_token": {
+    "content": "[CLS]",
+    "lstrip": false,
+    "normalized": false,
+    "rstrip": false,
+    "single_word": false
+  },
+  "cls_token": {
+    "content": "[CLS]",
+    "lstrip": false,
+    "normalized": false,
+    "rstrip": false,
+    "single_word": false
+  },
+  "eos_token": {
+    "content": "[SEP]",
+    "lstrip": false,
+    "normalized": false,
+    "rstrip": false,
+    "single_word": false
+  },
+  "mask_token": {
+    "content": "[MASK]",
+    "lstrip": false,
+    "normalized": false,
+    "rstrip": false,
+    "single_word": false
+  },
+  "pad_token": {
+    "content": "[PAD]",
+    "lstrip": false,
+    "normalized": false,
+    "rstrip": false,
+    "single_word": false
+  },
+  "sep_token": {
+    "content": "[SEP]",
+    "lstrip": false,
+    "normalized": false,
+    "rstrip": false,
+    "single_word": false
+  },
+  "unk_token": {
+    "content": "[UNK]",
+    "lstrip": false,
+    "normalized": true,
+    "rstrip": false,
+    "single_word": false
+  }
+}

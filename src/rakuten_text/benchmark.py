@@ -169,6 +169,21 @@ def define_experiments():
         }
     })
 
+    # AB TEST: Traditional sans remove_stopwords
+    experiments.append({
+        "name": "traditional_without_stopwords",
+        "group": "7_Combos",
+        "config": {
+            "fix_encoding": True,
+            "unescape_html": True,
+            "normalize_unicode": True,
+            "remove_html_tags": True,
+            "lowercase": True,
+            "remove_punctuation": True,
+            # Pas de remove_stopwords pour tester son impact
+        }
+    })
+
     # Approche conservatrice (encodage + HTML seulement)
     experiments.append({
         "name": "conservative_cleaning",
@@ -178,6 +193,48 @@ def define_experiments():
             "unescape_html": True,
             "normalize_unicode": True,
             "remove_html_tags": True
+        }
+    })
+
+    # AB TEST: Lowercase + remove_stopwords
+    experiments.append({
+        "name": "lowercase_with_stopwords",
+        "group": "8_AB_Tests",
+        "config": {
+            "lowercase": True,
+            "remove_stopwords": True
+        }
+    })
+
+    # AB TEST: Lowercase + remove_punctuation (sans stopwords)
+    experiments.append({
+        "name": "lowercase_with_punctuation",
+        "group": "8_AB_Tests",
+        "config": {
+            "lowercase": True,
+            "remove_punctuation": True
+        }
+    })
+
+    # AB TEST: Lowercase seul (déjà testé mais regroupé pour comparaison)
+    experiments.append({
+        "name": "lowercase_only",
+        "group": "8_AB_Tests",
+        "config": {
+            "lowercase": True
+        }
+    })
+
+    # AB TEST: Encodage + HTML + lowercase (sans ponctuation ni stopwords)
+    experiments.append({
+        "name": "minimal_cleaning_with_lowercase",
+        "group": "8_AB_Tests",
+        "config": {
+            "fix_encoding": True,
+            "unescape_html": True,
+            "normalize_unicode": True,
+            "remove_html_tags": True,
+            "lowercase": True
         }
     })
 
@@ -282,14 +339,14 @@ def run_benchmark(
                 min_df=2,
                 max_df=0.95,
                 lowercase=False,  # La fonction de nettoyage gère cela
-                sublinear_tf=True
+                # 1 + log(tf) replace tf(si un mot apparaît nombreux, son poids n'augmente pas linéair brutalement)
+                sublinear_tf=True 
             )),
             ("clf", LogisticRegression(
                 C=2.0,
                 max_iter=1000,
                 random_state=random_state,
-                solver="lbfgs",
-                multi_class="multinomial"
+                solver="lbfgs"
             ))
         ])
 
@@ -398,3 +455,213 @@ def save_results(results_df, output_path="results/benchmark_results.csv"):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     results_df.to_csv(output_path, index=False)
     print(f"✓ Résultats sauvegardés dans : {output_path}")
+
+
+def analyze_stopwords_impact(results_df, show_plot=True):
+    """
+    Analyse l'impact de remove_stopwords dans différents contextes.
+
+    Cette fonction effectue une analyse A/B pour déterminer si remove_stopwords
+    améliore ou dégrade la performance dans différentes configurations.
+    """
+    print("\n" + "="*80)
+    print("🔬 ANALYSE A/B : IMPACT DE REMOVE_STOPWORDS")
+    print("="*80)
+
+    # 1. Test isolé
+    print("\n1️⃣  TEST ISOLÉ")
+    print("-"*80)
+    if 'remove_stopwords' in results_df['experiment'].values:
+        sw_alone = results_df[results_df['experiment'] == 'remove_stopwords'].iloc[0]
+        baseline = results_df[results_df['experiment'] == 'baseline_raw'].iloc[0]
+        print(f"Remove_stopwords seul  : F1 = {sw_alone['f1_weighted']:.6f} (Δ = {sw_alone['delta_f1']:+.6f})")
+        print(f"Baseline (aucun clean) : F1 = {baseline['f1_weighted']:.6f}")
+        if sw_alone['delta_f1'] > 0:
+            print("✅ Conclusion : remove_stopwords AMÉLIORE la performance en isolation")
+        else:
+            print("❌ Conclusion : remove_stopwords DÉGRADE la performance en isolation")
+
+    # 2. Comparaison Traditional avec vs sans stopwords
+    print("\n2️⃣  TEST DANS PIPELINE COMPLET (Traditional Cleaning)")
+    print("-"*80)
+    if 'traditional_cleaning' in results_df['experiment'].values and \
+       'traditional_without_stopwords' in results_df['experiment'].values:
+
+        with_sw = results_df[results_df['experiment'] == 'traditional_cleaning'].iloc[0]
+        without_sw = results_df[results_df['experiment'] == 'traditional_without_stopwords'].iloc[0]
+
+        diff = with_sw['f1_weighted'] - without_sw['f1_weighted']
+        diff_pct = (diff / without_sw['f1_weighted']) * 100
+
+        print(f"Avec remove_stopwords  : F1 = {with_sw['f1_weighted']:.6f}")
+        print(f"Sans remove_stopwords  : F1 = {without_sw['f1_weighted']:.6f}")
+        print(f"Différence             : {diff:+.6f} ({diff_pct:+.2f}%)")
+
+        if abs(diff) < 0.0001:
+            print("➖ Conclusion : remove_stopwords n'a PAS d'impact significatif dans le pipeline")
+        elif diff > 0:
+            print("✅ Conclusion : remove_stopwords AMÉLIORE la performance dans le pipeline complet")
+        else:
+            print("❌ Conclusion : remove_stopwords DÉGRADE la performance dans le pipeline complet")
+    else:
+        print("⚠️  Expérience 'traditional_without_stopwords' non trouvée")
+        print("    Exécutez le benchmark complet pour obtenir cette comparaison")
+
+    # 3. Combinaisons avec lowercase
+    print("\n3️⃣  COMBINAISONS AVEC LOWERCASE")
+    print("-"*80)
+    lowercase_tests = {
+        'lowercase': 'Lowercase seul',
+        'lowercase_with_stopwords': 'Lowercase + stopwords',
+        'lowercase_with_punctuation': 'Lowercase + punctuation'
+    }
+
+    lowercase_results = []
+    for exp, label in lowercase_tests.items():
+        if exp in results_df['experiment'].values:
+            row = results_df[results_df['experiment'] == exp].iloc[0]
+            lowercase_results.append({
+                'experiment': exp,
+                'label': label,
+                'f1': row['f1_weighted'],
+                'delta': row['delta_f1']
+            })
+            print(f"{label:30s} : F1 = {row['f1_weighted']:.6f} (Δ = {row['delta_f1']:+.6f})")
+
+    # Calculer l'effet synergique
+    if len(lowercase_results) >= 2:
+        baseline_lower = next((r['f1'] for r in lowercase_results if r['experiment'] == 'lowercase'), None)
+        lower_sw = next((r['f1'] for r in lowercase_results if r['experiment'] == 'lowercase_with_stopwords'), None)
+
+        if baseline_lower and lower_sw:
+            synergy = lower_sw - baseline_lower
+            print(f"\nEffet synergique (lowercase + stopwords) : {synergy:+.6f}")
+            if synergy > 0:
+                print("✅ Stopwords renforce l'effet de lowercase")
+            else:
+                print("❌ Stopwords affaiblit l'effet de lowercase")
+
+    # 4. Résumé et recommandations
+    print("\n" + "="*80)
+    print("📊 RÉSUMÉ ET RECOMMANDATIONS")
+    print("="*80)
+
+    # Collecter les preuves
+    evidence = []
+
+    # Preuve 1: Test isolé
+    if 'remove_stopwords' in results_df['experiment'].values:
+        sw_alone = results_df[results_df['experiment'] == 'remove_stopwords'].iloc[0]
+        if sw_alone['delta_f1'] > 0:
+            evidence.append(('isolé', '+', sw_alone['delta_f1']))
+        else:
+            evidence.append(('isolé', '-', sw_alone['delta_f1']))
+
+    # Preuve 2: Pipeline complet
+    if 'traditional_cleaning' in results_df['experiment'].values and \
+       'traditional_without_stopwords' in results_df['experiment'].values:
+        with_sw = results_df[results_df['experiment'] == 'traditional_cleaning'].iloc[0]
+        without_sw = results_df[results_df['experiment'] == 'traditional_without_stopwords'].iloc[0]
+        diff = with_sw['f1_weighted'] - without_sw['f1_weighted']
+
+        if abs(diff) < 0.0001:
+            evidence.append(('pipeline', '=', diff))
+        elif diff > 0:
+            evidence.append(('pipeline', '+', diff))
+        else:
+            evidence.append(('pipeline', '-', diff))
+
+    print("\nPREUVES COLLECTÉES :")
+    for context, effect, value in evidence:
+        symbol = "✅" if effect == '+' else "❌" if effect == '-' else "➖"
+        print(f"  {symbol} Contexte {context:10s} : {effect} {abs(value):.6f}")
+
+    # Recommandation finale
+    positive_count = sum(1 for _, effect, _ in evidence if effect == '+')
+    negative_count = sum(1 for _, effect, _ in evidence if effect == '-')
+
+    print("\n" + "="*80)
+    if positive_count > negative_count:
+        print("🎯 RECOMMANDATION : UTILISER remove_stopwords")
+        print("   → La majorité des tests montrent une amélioration")
+    elif negative_count > positive_count:
+        print("🎯 RECOMMANDATION : NE PAS UTILISER remove_stopwords")
+        print("   → La majorité des tests montrent une dégradation")
+    else:
+        print("🎯 RECOMMANDATION : EFFET NEUTRE")
+        print("   → L'impact de remove_stopwords dépend du contexte")
+    print("="*80 + "\n")
+
+    # Visualisation
+    if show_plot:
+        try:
+            import matplotlib.pyplot as plt
+
+            # Graphique de comparaison Traditional
+            if 'traditional_cleaning' in results_df['experiment'].values and \
+               'traditional_without_stopwords' in results_df['experiment'].values:
+
+                with_sw = results_df[results_df['experiment'] == 'traditional_cleaning'].iloc[0]
+                without_sw = results_df[results_df['experiment'] == 'traditional_without_stopwords'].iloc[0]
+
+                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+
+                # Graphique 1: Comparaison directe
+                configs = ['Sans stopwords', 'Avec stopwords']
+                scores = [without_sw['f1_weighted'], with_sw['f1_weighted']]
+                diff = with_sw['f1_weighted'] - without_sw['f1_weighted']
+                colors = ['#e74c3c', '#2ecc71'] if diff > 0 else ['#2ecc71', '#e74c3c']
+
+                bars = ax1.bar(configs, scores, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
+                ax1.set_ylabel('F1 Score', fontsize=12, fontweight='bold')
+                ax1.set_title('Impact de remove_stopwords\ndans Traditional Cleaning',
+                             fontsize=13, fontweight='bold')
+                ax1.set_ylim([min(scores) - 0.002, max(scores) + 0.003])
+                ax1.grid(axis='y', alpha=0.3, linestyle='--')
+
+                for bar, score in zip(bars, scores):
+                    height = bar.get_height()
+                    ax1.text(bar.get_x() + bar.get_width()/2., height + 0.0003,
+                            f'{score:.6f}',
+                            ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+                # Graphique 2: Tous les tests A/B
+                ab_tests_data = []
+                ab_labels = []
+
+                test_configs = [
+                    ('baseline_raw', 'Baseline'),
+                    ('remove_stopwords', 'Stopwords seul'),
+                    ('lowercase', 'Lowercase'),
+                    ('lowercase_with_stopwords', 'Lower + SW'),
+                    ('traditional_without_stopwords', 'Trad sans SW'),
+                    ('traditional_cleaning', 'Trad avec SW')
+                ]
+
+                for exp, label in test_configs:
+                    if exp in results_df['experiment'].values:
+                        score = results_df[results_df['experiment'] == exp].iloc[0]['f1_weighted']
+                        ab_tests_data.append(score)
+                        ab_labels.append(label)
+
+                if ab_tests_data:
+                    colors_ab = plt.cm.RdYlGn([(s - min(ab_tests_data)) / (max(ab_tests_data) - min(ab_tests_data))
+                                               for s in ab_tests_data])
+                    bars2 = ax2.barh(ab_labels, ab_tests_data, color=colors_ab, edgecolor='black', linewidth=1.5)
+                    ax2.set_xlabel('F1 Score', fontsize=12, fontweight='bold')
+                    ax2.set_title('Vue d\'ensemble des configurations', fontsize=13, fontweight='bold')
+                    ax2.grid(axis='x', alpha=0.3, linestyle='--')
+
+                    for bar, score in zip(bars2, ab_tests_data):
+                        width = bar.get_width()
+                        ax2.text(width + 0.0002, bar.get_y() + bar.get_height()/2.,
+                                f'{score:.6f}',
+                                ha='left', va='center', fontsize=9, fontweight='bold')
+
+                plt.tight_layout()
+                plt.show()
+
+        except ImportError:
+            print("⚠️  matplotlib non disponible pour la visualisation")
+
+    return evidence

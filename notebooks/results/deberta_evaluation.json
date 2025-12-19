@@ -1,0 +1,25 @@
+{
+  "model": "DeBERTa (Gaby)",
+  "model_path": "../models/gaby_deberta_v1/",
+  "preprocessing": "gaby_preprocessing.text_preprocess",
+  "config": {
+    "max_length": 128,
+    "batch_size": 16,
+    "val_size": 0.15,
+    "random_state": 42
+  },
+  "stage1_dev_val": {
+    "dataset": "X_dev validation split",
+    "samples": 10827,
+    "accuracy": 0.8538838089960284,
+    "f1_weighted": 0.8528672081607593,
+    "f1_macro": 0.8355509580339899
+  },
+  "stage2_holdout": {
+    "dataset": "X_holdout (unseen)",
+    "samples": 12738,
+    "accuracy": 0.8358455016486105,
+    "f1_weighted": 0.8344328246437329,
+    "f1_macro": 0.8121268833939135
+  }
+}

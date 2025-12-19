@@ -1,0 +1,18 @@
+{
+  "data_dir": "..\\..\\data\\raw",
+  "img_dir": "..\\..\\data\\raw\\images\\image_train",
+  "checkpoint_dir": "..\\..\\checkpoints\\vit_production",
+  "model_name": "google/vit-base-patch16-224",
+  "img_size": "224",
+  "batch_size": "32",
+  "num_epochs": "20",
+  "learning_rate": "2e-05",
+  "weight_decay": "0.05",
+  "warmup_ratio": "0.1",
+  "val_split": "0.15",
+  "random_state": "42",
+  "early_stopping_patience": "3",
+  "device": "cuda",
+  "num_workers": "2",
+  "use_amp": "True"
+}

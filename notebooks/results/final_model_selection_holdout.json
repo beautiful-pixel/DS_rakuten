@@ -1,0 +1,12 @@
+{
+  "best_model": "logreg",
+  "val_f1": 0.8351405676166618,
+  "val_accuracy": 0.8344878544379791,
+  "holdout_f1": 0.8442880041504937,
+  "holdout_accuracy": 0.8444025749725231,
+  "difference_f1": 0.009147436533831876,
+  "train_time_full": 40.09802603721619,
+  "predict_time": 1.4569222927093506,
+  "dev_samples": 72178,
+  "holdout_samples": 12738
+}

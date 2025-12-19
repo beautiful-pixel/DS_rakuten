@@ -21,7 +21,7 @@ from .preprocessing import (
     clean_text,
     get_available_options,
     print_available_options,
-    NLTK_STOPWORDS,
+    get_nltk_stopwords,
     PUNCTUATION,
     BOILERPLATE_PHRASES,
 )
@@ -38,12 +38,9 @@ from .benchmark import (
 # Phase 2: Features
 from .features import (
     extract_text_features,
-    add_text_features,
     get_feature_names,
     get_length_features,
     get_composition_features,
-    describe_features,
-    print_feature_summary,
 )
 
 # Phase 2: Vectorization
@@ -54,10 +51,7 @@ from .vectorization import (
     build_vectorizer,
     build_split_vectorizer_pipeline,
     build_merged_vectorizer_pipeline,
-    get_available_presets,
-    print_available_presets,
     get_vectorizer_info,
-    compare_vectorizer_configs,
     save_vectorization_config,
     load_vectorization_config,
     get_config_summary,
@@ -67,7 +61,6 @@ from .vectorization import (
 from .models import (
     get_model,
     get_available_models,
-    get_model_info,
     build_full_pipeline,
     evaluate_pipeline,
     train_and_evaluate,
@@ -80,13 +73,6 @@ from .categories import (
     CATEGORY_GROUPS,
     get_category_name,
     get_all_categories,
-    get_category_codes,
-    get_category_group,
-    format_category_label,
-    map_categories_in_dataframe,
-    get_category_distribution,
-    validate_category_code,
-    print_category_summary,
 )
 
 # Phase 2: Experiments
@@ -108,7 +94,7 @@ __all__ = [
     "clean_text",
     "get_available_options",
     "print_available_options",
-    "NLTK_STOPWORDS",
+    "get_nltk_stopwords",
     "PUNCTUATION",
     "BOILERPLATE_PHRASES",
 
@@ -121,12 +107,9 @@ __all__ = [
 
     # Phase 2: Features
     "extract_text_features",
-    "add_text_features",
     "get_feature_names",
     "get_length_features",
     "get_composition_features",
-    "describe_features",
-    "print_feature_summary",
 
     # Phase 2: Vectorization
     "FeatureWeighter",
@@ -135,10 +118,7 @@ __all__ = [
     "build_vectorizer",
     "build_split_vectorizer_pipeline",
     "build_merged_vectorizer_pipeline",
-    "get_available_presets",
-    "print_available_presets",
     "get_vectorizer_info",
-    "compare_vectorizer_configs",
     "save_vectorization_config",
     "load_vectorization_config",
     "get_config_summary",
@@ -146,7 +126,6 @@ __all__ = [
     # Phase 2: Models
     "get_model",
     "get_available_models",
-    "get_model_info",
     "build_full_pipeline",
     "evaluate_pipeline",
     "train_and_evaluate",
@@ -157,13 +136,6 @@ __all__ = [
     "CATEGORY_GROUPS",
     "get_category_name",
     "get_all_categories",
-    "get_category_codes",
-    "get_category_group",
-    "format_category_label",
-    "map_categories_in_dataframe",
-    "get_category_distribution",
-    "validate_category_code",
-    "print_category_summary",
 
     # Phase 2: Experiments
     "run_single_experiment",
