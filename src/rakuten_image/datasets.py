@@ -1,11 +1,12 @@
 import warnings
 from pathlib import Path
-from typing import Optional, Callable, Tuple
+from typing import Optional, Callable, Tuple, Dict
 
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
+from tqdm import tqdm
 
 
 class RakutenImageDataset(Dataset):
@@ -29,6 +30,9 @@ class RakutenImageDataset(Dataset):
         missing_cols = [c for c in required_cols if c not in self.dataframe.columns]
         if missing_cols:
             raise ValueError(f"DataFrame missing required columns: {missing_cols}")
+
+        # Pre-build and cache all image paths (lightweight, avoids repeated path construction)
+        self.image_paths = self._build_image_paths()
 
         # Label mapping: try to detect if labels are already 0..n-1
         unique_labels = sorted(self.dataframe[label_col].unique())
@@ -63,6 +67,10 @@ class RakutenImageDataset(Dataset):
         if verify_images:
             self._verify_images(remove_missing=remove_missing)
 
+        # Pre-build and cache paths & labels (avoids DataFrame access in __getitem__)
+        self.image_paths = self._build_image_paths()
+        self.labels = self.dataframe["label_idx"].tolist()
+
         print(
             f"✓ RakutenImageDataset initialized: {len(self)} samples, "
             f"{self.num_classes} classes"
@@ -71,8 +79,22 @@ class RakutenImageDataset(Dataset):
     # ------------------------------------------------------------------ #
     # Internal helpers
     # ------------------------------------------------------------------ #
+    def _build_image_paths(self) -> list:
+        """
+        Pre-build all image paths at initialization time.
+        This avoids repeated path construction in __getitem__.
+        Returns a list of Path objects indexed by dataset position.
+        """
+        print("Pre-building image paths...")
+        paths = []
+        for row in self.dataframe.itertuples():
+            filename = f"image_{row.imageid}_product_{row.productid}.jpg"
+            paths.append(self.image_dir / filename)
+        print(f"✓ Cached {len(paths)} image paths")
+        return paths
+
     def _construct_image_path(self, imageid: int, productid: int) -> Path:
-        """Construct the image file path dynamically."""
+        """Construct the image file path dynamically (used only for verification)."""
         filename = f"image_{imageid}_product_{productid}.jpg"
         return self.image_dir / filename
 
@@ -127,15 +149,11 @@ class RakutenImageDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        row = self.dataframe.iloc[idx]
-        imageid = row["imageid"]
-        productid = row["productid"]
-        label = int(row["label_idx"])
+        # Use pre-cached path and label (avoids DataFrame access)
+        image_path = self.image_paths[idx]
+        label = self.labels[idx]
 
-        image_path = self._construct_image_path(imageid, productid)
-
-        # At this point images should exist if verify_images=True and
-        # remove_missing=True; if not, raise an explicit error.
+        # Load image from disk (on-demand, relies on DataLoader num_workers for parallelism)
         try:
             image = Image.open(image_path).convert("RGB")
         except FileNotFoundError:
