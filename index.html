@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Recherche" href="search.html" />
-    <link rel="next" title="src" href="api/modules.html" /> 
+    <link rel="next" title="data package" href="api/data.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,7 +45,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/data.html">data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/features.html">features package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/models.html">models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/visualization.html">visualization package</a></li>
 </ul>
 
         </div>
@@ -75,20 +78,85 @@
   <section id="ds-rakuten-documentation">
 <h1>DS Rakuten documentation<a class="headerlink" href="#ds-rakuten-documentation" title="Lien vers cette rubrique"></a></h1>
 <p class="rubric">Présentation</p>
-<p>Faire une petite présentation rapide du projet et de la documentation ici.</p>
-<p>Faire une petite présentation rapide du projet et de la doc ici.
-See the
-<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a>
-documentation for details.</p>
+<p>Ce projet s’inscrit dans le cadre d’un projet de data science visant à résoudre une
+problématique de <strong>classification de produits e-commerce</strong> à partir de données
+<strong>textuelles, visuelles et multimodales</strong>, inspirée du challenge Rakuten.</p>
+<p>L’objectif est de concevoir, comparer et analyser plusieurs approches de modélisation
+(allant de méthodes classiques à des modèles de deep learning) en mettant l’accent sur :</p>
+<ul class="simple">
+<li><p>la qualité du prétraitement des données,</p></li>
+<li><p>l’ingénierie de features spécialisées,</p></li>
+<li><p>la reproductibilité des expériences,</p></li>
+<li><p>l’interprétabilité des résultats.</p></li>
+</ul>
+<p>Cette documentation décrit la structure du projet, les modules principaux, ainsi que
+les composants techniques utilisés tout au long du pipeline.</p>
+<p>—</p>
+<p class="rubric">Organisation du projet</p>
+<p>Le code source est organisé en modules fonctionnels clairement séparés, afin de
+faciliter la maintenance, l’extension et la compréhension du projet.</p>
+<dl class="simple">
+<dt><strong>data</strong></dt><dd><p>Gestion des données et de leur organisation.
+Ce module contient les fonctions de chargement des données brutes, les jeux de
+données prétraités, ainsi que les découpages train/validation/test utilisés pour
+garantir la reproductibilité des expériences.</p>
+</dd>
+<dt><strong>features</strong></dt><dd><p>Prétraitement et extraction de caractéristiques.
+Ce module regroupe l’ensemble des transformateurs scikit-learn dédiés au traitement
+du texte (nettoyage, tokenisation numérique, détection de langue, statistiques),
+des images (redimensionnement, nettoyage, extraction de formes, textures, couleurs),
+ainsi que des pipelines multimodaux combinant plusieurs sources d’information.</p>
+</dd>
+<dt><strong>models</strong></dt><dd><p>Modélisation et entraînement.
+Ce module contient l’implémentation des modèles de machine learning et de deep
+learning (PyTorch), les classes <cite>Dataset</cite>, les boucles d’entraînement, les fonctions
+d’évaluation et les scripts d’inférence pour les approches texte, image et multimodales.</p>
+</dd>
+<dt><strong>visualization</strong></dt><dd><p>Analyse exploratoire et visualisation.
+Ce module est dédié à l’EDA (Exploratory Data Analysis) et à la génération de
+visualisations permettant de comprendre les données, d’analyser les distributions,
+d’évaluer les performances des modèles et d’illustrer les résultats dans le rapport
+final.</p>
+</dd>
+</dl>
+<p>—</p>
+<p>Cette documentation est conçue pour servir à la fois de <strong>référence technique</strong> et de
+<strong>support méthodologique</strong> pour la compréhension du projet et la justification des choix
+effectués.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">src</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/data.html">data package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/features.html">features package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/models.html">models package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/rakuten_text.html">rakuten_text package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/visualization.html">visualization package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/data.html">data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/data.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data.html#module-data.categories">data.categories module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data.html#module-data.dataset">data.dataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data.html#module-data.load_data">data.load_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data.html#module-data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/features.html">features package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/features.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/features.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/features.html#module-features.build_image_features">features.build_image_features module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/features.html#module-features.build_multimodal_features">features.build_multimodal_features module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/features.html#module-features.build_text_features">features.build_text_features module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/features.html#module-features">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/models.html">models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/models.html#models-evaluate-module">models.evaluate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/models.html#module-models.predict_model">models.predict_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/models.html#module-models.train_model">models.train_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/models.html#module-models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/visualization.html">visualization package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/visualization.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/visualization.html#module-visualization.testing_plot">visualization.testing_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/visualization.html#module-visualization.training_curve">visualization.training_curve module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/visualization.html#module-visualization.visualize">visualization.visualize module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/visualization.html#module-visualization">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -99,7 +167,7 @@ documentation for details.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
-        <a href="api/modules.html" class="btn btn-neutral float-right" title="src" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api/data.html" class="btn btn-neutral float-right" title="data package" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
