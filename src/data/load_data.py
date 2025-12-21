@@ -20,7 +20,6 @@ def split_data():
     )
     return X_train, X_test, y_train, y_test
 
-
 def get_path(df):
     """
     retourne les chemins des images depuis ce module
@@ -32,7 +31,6 @@ def get_path(df):
         df['productid'].astype('str') + ".jpg"
     )
     return IMG_DIR + file_names
-
 
 def split_path():
     """
@@ -52,26 +50,6 @@ def split_txt():
     X_train = X_train[['designation', 'description']]
     X_test = X_test[['designation', 'description']]
     return X_train, X_test, y_train, y_test
-
-def get_mask(tags_path, columns):
-    """
-    les tags doivent être du genre True pour les entrées à supprimer
-    retourne True pour celles qui ont False sur toute les lignes
-    
-    :param tags_path: chemin vers le fichier contenant les tags
-    :param columns: columns à prendre en compte
-    """
-    tags = pd.read_csv(tags_path)[columns]
-    mask = (~tags).all(axis=1)
-    return mask
-
-def load_image(path):
-    img = Image.open(path).convert("RGB")
-    return img
-
-
-# max_load 
-# le nombre d'images retourné se fera en fonction de ce paramètre
 
 def images_read(impath, dsize=(500,500), grayscale=False, max_load=10**9):
     """
