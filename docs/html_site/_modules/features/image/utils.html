@@ -1,0 +1,236 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features.image.utils &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">features.image.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de features.image.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<div class="viewcode-block" id="get_squared_shape">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.utils.get_squared_shape">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_squared_shape</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Détermine la forme carrée originale d’une image aplatie.</span>
+
+<span class="sd">    Cette fonction permet de retrouver la forme originale (carrée)</span>
+<span class="sd">    d’une image à partir d’un vecteur 1D représentant une image</span>
+<span class="sd">    en niveaux de gris ou en couleur.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (np.ndarray): Tableau de forme (n_samples, n_features).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Forme de l’image (H, W) ou (H, W, 3).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Si le vecteur ne correspond pas à une image carrée.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+        <span class="n">side</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">side</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+        <span class="n">side</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">side</span><span class="p">,</span> <span class="n">side</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Le vecteur image doit représenter une image carrée.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="to_square_shape">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.utils.to_square_shape">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_square_shape</span><span class="p">(</span><span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span><span class="p">,</span> <span class="n">im_size</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcule les coordonnées permettant un recadrage carré.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        r_min (int): Ligne minimale.</span>
+<span class="sd">        r_max (int): Ligne maximale.</span>
+<span class="sd">        c_min (int): Colonne minimale.</span>
+<span class="sd">        c_max (int): Colonne maximale.</span>
+<span class="sd">        im_size (int): Taille de l’image carrée originale.</span>
+<span class="sd">        padding (int): Marge ajoutée autour de l’objet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Coordonnées (r_min, r_max, c_min, c_max).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">r_max</span> <span class="o">-</span> <span class="n">r_min</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">c_max</span> <span class="o">-</span> <span class="n">c_min</span>
+    <span class="n">padding</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">im_size</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+    <span class="n">crop_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span>
+
+    <span class="k">if</span> <span class="n">h</span> <span class="o">&lt;</span> <span class="n">crop_size</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">:</span>
+        <span class="n">r_max</span> <span class="o">+=</span> <span class="p">(</span><span class="n">crop_size</span> <span class="o">-</span> <span class="n">h</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">r_min</span> <span class="o">=</span> <span class="n">r_max</span> <span class="o">-</span> <span class="n">crop_size</span>
+        <span class="n">c_min</span> <span class="o">-=</span> <span class="n">padding</span>
+        <span class="n">c_max</span> <span class="o">+=</span> <span class="n">padding</span>
+
+    <span class="k">if</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="n">crop_size</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">:</span>
+        <span class="n">c_max</span> <span class="o">+=</span> <span class="p">(</span><span class="n">crop_size</span> <span class="o">-</span> <span class="n">w</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">c_min</span> <span class="o">=</span> <span class="n">c_max</span> <span class="o">-</span> <span class="n">crop_size</span>
+        <span class="n">r_min</span> <span class="o">-=</span> <span class="n">padding</span>
+        <span class="n">r_max</span> <span class="o">+=</span> <span class="n">padding</span>
+
+    <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">r_min</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">im_size</span><span class="p">,</span> <span class="n">r_max</span><span class="p">)</span>
+    <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">c_min</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">im_size</span><span class="p">,</span> <span class="n">c_max</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span></div>
+
+
+
+<div class="viewcode-block" id="are_parallel">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.utils.are_parallel">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">are_parallel</span><span class="p">(</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.03</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vérifie si deux segments sont parallèles.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        line1 (tuple): Segment ((x1, y1), (x2, y2)).</span>
+<span class="sd">        line2 (tuple): Segment ((x3, y3), (x4, y4)).</span>
+<span class="sd">        tol (float): Tolérance angulaire (en fraction de π).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True si les segments sont parallèles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">),</span> <span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span> <span class="o">=</span> <span class="n">line1</span>
+    <span class="p">(</span><span class="n">x3</span><span class="p">,</span> <span class="n">y3</span><span class="p">),</span> <span class="p">(</span><span class="n">x4</span><span class="p">,</span> <span class="n">y4</span><span class="p">)</span> <span class="o">=</span> <span class="n">line2</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="p">])</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x4</span> <span class="o">-</span> <span class="n">x3</span><span class="p">,</span> <span class="n">y4</span> <span class="o">-</span> <span class="n">y3</span><span class="p">])</span>
+
+    <span class="n">u</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tol</span> <span class="ow">or</span> <span class="n">theta</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">tol</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mask_background">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.utils.mask_background">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mask_background</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">,</span>
+    <span class="n">contours</span><span class="p">,</span>
+    <span class="n">max_bg_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">white_bg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Masque l’arrière-plan d’une image à partir de contours.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        image (np.ndarray): Image d’entrée.</span>
+<span class="sd">        contours (list): Contours à conserver.</span>
+<span class="sd">        max_bg_ratio (float): Ratio maximal de fond autorisé.</span>
+<span class="sd">        white_bg (bool): Remplace le fond par du blanc si True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Image avec arrière-plan masqué.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">drawContours</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">contours</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">background_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">background_ratio</span> <span class="o">&gt;</span> <span class="n">max_bg_ratio</span><span class="p">:</span>
+        <span class="n">masked_image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">masked_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">bitwise_and</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">white_bg</span><span class="p">:</span>
+            <span class="n">masked_image</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="k">return</span> <span class="n">masked_image</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

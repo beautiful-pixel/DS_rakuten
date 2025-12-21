@@ -1,0 +1,1001 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features.image package &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="features.text package" href="features.text.html" />
+    <link rel="prev" title="features package" href="features.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data.html">data package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="features.html">features package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="features.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">features.image package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html">features.text package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features.build_image_features">features.build_image_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features.build_multimodal_features">features.build_multimodal_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features.build_text_features">features.build_text_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rakuten_text.html">rakuten_text package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="features.html">features package</a></li>
+      <li class="breadcrumb-item active">features.image package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/features.image.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="features-image-package">
+<h1>features.image package<a class="headerlink" href="#features-image-package" title="Lien vers cette rubrique"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Lien vers cette rubrique"></a></h2>
+</section>
+<section id="module-features.image.color">
+<span id="features-image-color-module"></span><h2>features.image.color module<a class="headerlink" href="#module-features.image.color" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.color.is_pixel_in_bin">
+<span class="sig-prename descclassname"><span class="pre">features.image.color.</span></span><span class="sig-name descname"><span class="pre">is_pixel_in_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#is_pixel_in_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.is_pixel_in_bin" title="Lien vers cette définition"></a></dt>
+<dd><p>Détermine si les pixels appartiennent à un intervalle HSV donné.</p>
+<p>Les intervalles sont semi-ouverts à droite.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Images HSV de forme (n, h, w, 3).</p></li>
+<li><p><strong>ranges</strong> (<em>list</em>) – Intervalles [[Hmin, Hmax], [Smin, Smax], [Vmin, Vmax]].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Masque booléen des pixels appartenant à l’intervalle.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.color.ColorEncoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.color.</span></span><span class="sig-name descname"><span class="pre">ColorEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ohe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#ColorEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.ColorEncoder" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Encode chaque pixel selon des catégories de couleur HSV.</p>
+<p>Chaque pixel est associé à une classe de couleur prédéfinie.
+Une option permet de retourner un encodage one-hot par pixel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ohe</strong> (<em>bool</em>) – Si True, applique un encodage one-hot.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.color.ColorEncoder.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#ColorEncoder.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.ColorEncoder.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.color.ColorEncoder.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#ColorEncoder.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.ColorEncoder.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.color.MeanRGBTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.color.</span></span><span class="sig-name descname"><span class="pre">MeanRGBTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_white_black</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#MeanRGBTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.MeanRGBTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Calcule la moyenne des canaux RGB d’une image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channels</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Canaux RGB à utiliser.</p></li>
+<li><p><strong>ignore_white_black</strong> (<em>bool</em>) – Ignore les pixels blancs et noirs.</p></li>
+<li><p><strong>impute_value</strong> (<em>int</em>) – Valeur utilisée si aucun pixel valide.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.color.MeanRGBTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#MeanRGBTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.MeanRGBTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.color.MeanRGBTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#MeanRGBTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.MeanRGBTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.color.HistRGBTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.color.</span></span><span class="sig-name descname"><span class="pre">HistRGBTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[256]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[0,</span> <span class="pre">256],</span> <span class="pre">[0,</span> <span class="pre">256],</span> <span class="pre">[0,</span> <span class="pre">256]]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#HistRGBTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.HistRGBTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Calcule des histogrammes RGB par canal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>histSize</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Nombre de bins.</p></li>
+<li><p><strong>channels</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Canaux RGB.</p></li>
+<li><p><strong>ranges</strong> (<em>list</em>) – Intervalles des valeurs.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.color.HistRGBTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#HistRGBTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.HistRGBTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.color.HistRGBTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#HistRGBTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.color.HistRGBTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.image.contours">
+<span id="features-image-contours-module"></span><h2>features.image.contours module<a class="headerlink" href="#module-features.image.contours" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.contours.get_length_and_vertex">
+<span class="sig-prename descclassname"><span class="pre">features.image.contours.</span></span><span class="sig-name descname"><span class="pre">get_length_and_vertex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contours</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_dist_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/contours.html#get_length_and_vertex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.contours.get_length_and_vertex" title="Lien vers cette définition"></a></dt>
+<dd><p>Calcule la longueur et le nombre de sommets des contours.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contours</strong> (<em>list</em>) – Liste de contours OpenCV.</p></li>
+<li><p><strong>delta_dist_tol</strong> (<em>float</em>) – Tolérance d’approximation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Longueurs et nombre de sommets.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.contours.get_main_contours">
+<span class="sig-prename descclassname"><span class="pre">features.image.contours.</span></span><span class="sig-name descname"><span class="pre">get_main_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vertex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_vertex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_dist_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_contours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/contours.html#get_main_contours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.contours.get_main_contours" title="Lien vers cette définition"></a></dt>
+<dd><p>Détecte et filtre les contours principaux des images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>images</strong> (<em>np.ndarray</em>) – Images d’entrée.</p></li>
+<li><p><strong>min_len</strong> (<em>float</em>) – Longueur minimale du contour.</p></li>
+<li><p><strong>min_vertex</strong> (<em>int</em>) – Nombre minimal de sommets.</p></li>
+<li><p><strong>max_vertex</strong> (<em>int</em><em>, </em><em>optional</em>) – Nombre maximal de sommets.</p></li>
+<li><p><strong>delta_dist_tol</strong> (<em>float</em>) – Tolérance pour l’approximation polygonale.</p></li>
+<li><p><strong>n_max_contours</strong> (<em>int</em><em>, </em><em>optional</em>) – Nombre maximal de contours conservés.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Liste de contours filtrés pour chaque image.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-features.image.keypoint">
+<span id="features-image-keypoint-module"></span><h2>features.image.keypoint module<a class="headerlink" href="#module-features.image.keypoint" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.keypoint.get_SIFT_descriptors">
+<span class="sig-prename descclassname"><span class="pre">features.image.keypoint.</span></span><span class="sig-name descname"><span class="pre">get_SIFT_descriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#get_SIFT_descriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.get_SIFT_descriptors" title="Lien vers cette définition"></a></dt>
+<dd><p>Extrait les descripteurs SIFT d’un ensemble d’images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.ndarray</em>) – Images RGB.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Liste des descripteurs par image.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.keypoint.CornerCounter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.keypoint.</span></span><span class="sig-name descname"><span class="pre">CornerCounter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_dilate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#CornerCounter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.CornerCounter" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Compte les coins détectés par l’algorithme de Harris.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block_size</strong> (<em>int</em>) – Taille du voisinage.</p></li>
+<li><p><strong>ksize</strong> (<em>int</em>) – Taille du noyau Sobel.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Seuil de détection.</p></li>
+<li><p><strong>apply_dilate</strong> (<em>bool</em>) – Applique une dilatation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.keypoint.CornerCounter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#CornerCounter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.CornerCounter.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.keypoint.CornerCounter.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#CornerCounter.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.CornerCounter.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.keypoint.BoVWTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.keypoint.</span></span><span class="sig-name descname"><span class="pre">BoVWTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#BoVWTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.BoVWTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Bag of Visual Words basé sur les descripteurs SIFT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_clusters</strong> (<em>int</em>) – Nombre de clusters visuels.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Graine aléatoire.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.keypoint.BoVWTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#BoVWTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.BoVWTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.keypoint.BoVWTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#BoVWTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.keypoint.BoVWTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.image.shape">
+<span id="features-image-shape-module"></span><h2>features.image.shape module<a class="headerlink" href="#module-features.image.shape" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.shape.ParallelogramCounter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.shape.</span></span><span class="sig-name descname"><span class="pre">ParallelogramCounter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_dist_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_perimeter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0.3,</span> <span class="pre">0.6,</span> <span class="pre">0.8,</span> <span class="pre">1.1]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/shape.html#ParallelogramCounter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.shape.ParallelogramCounter" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Compte les parallélogrammes détectés dans une image.</p>
+<p>Les parallélogrammes sont regroupés par intervalles de ratio largeur/longueur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta_dist_tol</strong> (<em>float</em>) – Tolérance d’approximation des contours.</p></li>
+<li><p><strong>min_perimeter</strong> (<em>float</em>) – Périmètre minimal.</p></li>
+<li><p><strong>bins</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Intervalles de ratios.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.shape.ParallelogramCounter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/shape.html#ParallelogramCounter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.shape.ParallelogramCounter.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.shape.ParallelogramCounter.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/shape.html#ParallelogramCounter.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.shape.ParallelogramCounter.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.image.texture">
+<span id="features-image-texture-module"></span><h2>features.image.texture module<a class="headerlink" href="#module-features.image.texture" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.texture.HOGTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.texture.</span></span><span class="sig-name descname"><span class="pre">HOGTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixels_per_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(8,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells_per_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">3)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/texture.html#HOGTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.texture.HOGTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Extracteur de descripteurs HOG (Histogram of Oriented Gradients).</p>
+<p>Ce transformateur calcule des histogrammes d’orientations de gradients
+afin de représenter la texture et la structure locale des images.
+Les descripteurs HOG sont couramment utilisés pour la reconnaissance
+d’objets et l’analyse de formes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orientations</strong> (<em>int</em>) – Nombre de bins d’orientation des gradients.</p></li>
+<li><p><strong>pixels_per_cell</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Taille (en pixels) d’une cellule.</p></li>
+<li><p><strong>cells_per_block</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Nombre de cellules par bloc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tableau de forme (n_samples, n_features) contenant les descripteurs
+HOG calculés pour chaque image.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.texture.HOGTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/texture.html#HOGTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.texture.HOGTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Méthode factice requise pour la compatibilité sklearn.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Images d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.image.texture.HOGTransformer" title="features.image.texture.HOGTransformer">HOGTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.texture.HOGTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/texture.html#HOGTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.texture.HOGTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Calcule les descripteurs HOG pour chaque image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.ndarray</em>) – Tableau d’images de forme
+(n_samples, height, width) ou
+(n_samples, height, width, channels).</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Descripteurs HOG pour chaque image.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.image.transforms">
+<span id="features-image-transforms-module"></span><h2>features.image.transforms module<a class="headerlink" href="#module-features.image.transforms" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.transforms.Flattener">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.transforms.</span></span><span class="sig-name descname"><span class="pre">Flattener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inverse_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Flattener"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.Flattener" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Aplati des images en vecteurs ou reconstruit des images carrées.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inverse_transform</strong> (<em>bool</em>) – Si True, reconstruit les images à partir
+de vecteurs aplatis.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.Flattener.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Flattener.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.Flattener.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.Flattener.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Flattener.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.Flattener.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.transforms.Resizer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.transforms.</span></span><span class="sig-name descname"><span class="pre">Resizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(64,</span> <span class="pre">64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grayscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Resizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.Resizer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Redimensionne les images et permet une conversion en niveaux de gris.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dsize</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Taille cible (hauteur, largeur).</p></li>
+<li><p><strong>grayscale</strong> (<em>bool</em>) – Si True, convertit les images en niveaux de gris.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.Resizer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Resizer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.Resizer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.Resizer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Resizer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.Resizer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.transforms.crop">
+<span class="sig-prename descclassname"><span class="pre">features.image.transforms.</span></span><span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contours</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_proportion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#crop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.crop" title="Lien vers cette définition"></a></dt>
+<dd><p>permet de recarder des images sur des objets en fonctions de leurs contours</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.transforms.bg_crop">
+<span class="sig-prename descclassname"><span class="pre">features.image.transforms.</span></span><span class="sig-name descname"><span class="pre">bg_crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_proportion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#bg_crop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.bg_crop" title="Lien vers cette définition"></a></dt>
+<dd><p>Recadre les images en supprimant l’arrière-plan selon un seuil.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>images</strong> (<em>np.ndarray</em>) – Images d’entrée.</p></li>
+<li><p><strong>threshold</strong> (<em>int</em>) – Seuil de détection du fond.</p></li>
+<li><p><strong>sup</strong> (<em>bool</em>) – Si True, supprime les pixels supérieurs au seuil.</p></li>
+<li><p><strong>keep_proportion</strong> (<em>bool</em>) – Conserve un recadrage carré.</p></li>
+<li><p><strong>padding</strong> (<em>int</em>) – Marge ajoutée autour de la zone d’intérêt.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Images recadrées.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.transforms.ImageCleaner">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.transforms.</span></span><span class="sig-name descname"><span class="pre">ImageCleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_proportion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_bg_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">white_bg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_len_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vertex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_contours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#ImageCleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.ImageCleaner" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Nettoie les images en uniformisant le fond et en recadrant sur les contours.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keep_proportion</strong> (<em>bool</em>)</p></li>
+<li><p><strong>padding</strong> (<em>int</em>)</p></li>
+<li><p><strong>max_bg_ratio</strong> (<em>float</em>)</p></li>
+<li><p><strong>white_bg</strong> (<em>bool</em>)</p></li>
+<li><p><strong>min_len_ratio</strong> (<em>float</em>)</p></li>
+<li><p><strong>min_vertex</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_max_contours</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.ImageCleaner.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#ImageCleaner.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.ImageCleaner.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.ImageCleaner.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#ImageCleaner.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.ImageCleaner.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.transforms.CropTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.transforms.</span></span><span class="sig-name descname"><span class="pre">CropTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#CropTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.CropTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Recadre automatiquement les images selon les zones de fond clair et sombre.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>padding</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.CropTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#CropTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.CropTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.transforms.CropTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#CropTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.transforms.CropTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.image.utils">
+<span id="features-image-utils-module"></span><h2>features.image.utils module<a class="headerlink" href="#module-features.image.utils" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.utils.get_squared_shape">
+<span class="sig-prename descclassname"><span class="pre">features.image.utils.</span></span><span class="sig-name descname"><span class="pre">get_squared_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/utils.html#get_squared_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.utils.get_squared_shape" title="Lien vers cette définition"></a></dt>
+<dd><p>Détermine la forme carrée originale d’une image aplatie.</p>
+<p>Cette fonction permet de retrouver la forme originale (carrée)
+d’une image à partir d’un vecteur 1D représentant une image
+en niveaux de gris ou en couleur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.ndarray</em>) – Tableau de forme (n_samples, n_features).</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Forme de l’image (H, W) ou (H, W, 3).</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Lève<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Si le vecteur ne correspond pas à une image carrée.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.utils.to_square_shape">
+<span class="sig-prename descclassname"><span class="pre">features.image.utils.</span></span><span class="sig-name descname"><span class="pre">to_square_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">im_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/utils.html#to_square_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.utils.to_square_shape" title="Lien vers cette définition"></a></dt>
+<dd><p>Calcule les coordonnées permettant un recadrage carré.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r_min</strong> (<em>int</em>) – Ligne minimale.</p></li>
+<li><p><strong>r_max</strong> (<em>int</em>) – Ligne maximale.</p></li>
+<li><p><strong>c_min</strong> (<em>int</em>) – Colonne minimale.</p></li>
+<li><p><strong>c_max</strong> (<em>int</em>) – Colonne maximale.</p></li>
+<li><p><strong>im_size</strong> (<em>int</em>) – Taille de l’image carrée originale.</p></li>
+<li><p><strong>padding</strong> (<em>int</em>) – Marge ajoutée autour de l’objet.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Coordonnées (r_min, r_max, c_min, c_max).</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.utils.are_parallel">
+<span class="sig-prename descclassname"><span class="pre">features.image.utils.</span></span><span class="sig-name descname"><span class="pre">are_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/utils.html#are_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.utils.are_parallel" title="Lien vers cette définition"></a></dt>
+<dd><p>Vérifie si deux segments sont parallèles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line1</strong> (<em>tuple</em>) – Segment ((x1, y1), (x2, y2)).</p></li>
+<li><p><strong>line2</strong> (<em>tuple</em>) – Segment ((x3, y3), (x4, y4)).</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – Tolérance angulaire (en fraction de π).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si les segments sont parallèles.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.image.utils.mask_background">
+<span class="sig-prename descclassname"><span class="pre">features.image.utils.</span></span><span class="sig-name descname"><span class="pre">mask_background</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contours</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_bg_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">white_bg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/utils.html#mask_background"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.utils.mask_background" title="Lien vers cette définition"></a></dt>
+<dd><p>Masque l’arrière-plan d’une image à partir de contours.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>np.ndarray</em>) – Image d’entrée.</p></li>
+<li><p><strong>contours</strong> (<em>list</em>) – Contours à conserver.</p></li>
+<li><p><strong>max_bg_ratio</strong> (<em>float</em>) – Ratio maximal de fond autorisé.</p></li>
+<li><p><strong>white_bg</strong> (<em>bool</em>) – Remplace le fond par du blanc si True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image avec arrière-plan masqué.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-features.image">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-features.image" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.ColorEncoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">ColorEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ohe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#ColorEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ColorEncoder" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Encode chaque pixel selon des catégories de couleur HSV.</p>
+<p>Chaque pixel est associé à une classe de couleur prédéfinie.
+Une option permet de retourner un encodage one-hot par pixel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ohe</strong> (<em>bool</em>) – Si True, applique un encodage one-hot.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.ColorEncoder.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#ColorEncoder.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ColorEncoder.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.ColorEncoder.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#ColorEncoder.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ColorEncoder.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.MeanRGBTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">MeanRGBTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_white_black</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#MeanRGBTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.MeanRGBTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Calcule la moyenne des canaux RGB d’une image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channels</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Canaux RGB à utiliser.</p></li>
+<li><p><strong>ignore_white_black</strong> (<em>bool</em>) – Ignore les pixels blancs et noirs.</p></li>
+<li><p><strong>impute_value</strong> (<em>int</em>) – Valeur utilisée si aucun pixel valide.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.MeanRGBTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#MeanRGBTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.MeanRGBTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.MeanRGBTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#MeanRGBTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.MeanRGBTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.HistRGBTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">HistRGBTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[256]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[0,</span> <span class="pre">256],</span> <span class="pre">[0,</span> <span class="pre">256],</span> <span class="pre">[0,</span> <span class="pre">256]]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#HistRGBTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.HistRGBTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Calcule des histogrammes RGB par canal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>histSize</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Nombre de bins.</p></li>
+<li><p><strong>channels</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Canaux RGB.</p></li>
+<li><p><strong>ranges</strong> (<em>list</em>) – Intervalles des valeurs.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.HistRGBTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#HistRGBTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.HistRGBTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.HistRGBTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/color.html#HistRGBTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.HistRGBTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.CornerCounter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">CornerCounter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_dilate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#CornerCounter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.CornerCounter" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Compte les coins détectés par l’algorithme de Harris.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block_size</strong> (<em>int</em>) – Taille du voisinage.</p></li>
+<li><p><strong>ksize</strong> (<em>int</em>) – Taille du noyau Sobel.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Seuil de détection.</p></li>
+<li><p><strong>apply_dilate</strong> (<em>bool</em>) – Applique une dilatation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.CornerCounter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#CornerCounter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.CornerCounter.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.CornerCounter.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#CornerCounter.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.CornerCounter.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.BoVWTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">BoVWTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#BoVWTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.BoVWTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Bag of Visual Words basé sur les descripteurs SIFT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_clusters</strong> (<em>int</em>) – Nombre de clusters visuels.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Graine aléatoire.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.BoVWTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#BoVWTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.BoVWTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.BoVWTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/keypoint.html#BoVWTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.BoVWTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.ParallelogramCounter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">ParallelogramCounter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_dist_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_perimeter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0.3,</span> <span class="pre">0.6,</span> <span class="pre">0.8,</span> <span class="pre">1.1]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/shape.html#ParallelogramCounter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ParallelogramCounter" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Compte les parallélogrammes détectés dans une image.</p>
+<p>Les parallélogrammes sont regroupés par intervalles de ratio largeur/longueur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta_dist_tol</strong> (<em>float</em>) – Tolérance d’approximation des contours.</p></li>
+<li><p><strong>min_perimeter</strong> (<em>float</em>) – Périmètre minimal.</p></li>
+<li><p><strong>bins</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Intervalles de ratios.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.ParallelogramCounter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/shape.html#ParallelogramCounter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ParallelogramCounter.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.ParallelogramCounter.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/shape.html#ParallelogramCounter.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ParallelogramCounter.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.HOGTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">HOGTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixels_per_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(8,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells_per_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">3)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/texture.html#HOGTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.HOGTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Extracteur de descripteurs HOG (Histogram of Oriented Gradients).</p>
+<p>Ce transformateur calcule des histogrammes d’orientations de gradients
+afin de représenter la texture et la structure locale des images.
+Les descripteurs HOG sont couramment utilisés pour la reconnaissance
+d’objets et l’analyse de formes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orientations</strong> (<em>int</em>) – Nombre de bins d’orientation des gradients.</p></li>
+<li><p><strong>pixels_per_cell</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Taille (en pixels) d’une cellule.</p></li>
+<li><p><strong>cells_per_block</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Nombre de cellules par bloc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tableau de forme (n_samples, n_features) contenant les descripteurs
+HOG calculés pour chaque image.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.HOGTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/texture.html#HOGTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.HOGTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Méthode factice requise pour la compatibilité sklearn.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Images d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.image.HOGTransformer" title="features.image.HOGTransformer">HOGTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.HOGTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/texture.html#HOGTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.HOGTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Calcule les descripteurs HOG pour chaque image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.ndarray</em>) – Tableau d’images de forme
+(n_samples, height, width) ou
+(n_samples, height, width, channels).</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Descripteurs HOG pour chaque image.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.Flattener">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">Flattener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inverse_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Flattener"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.Flattener" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Aplati des images en vecteurs ou reconstruit des images carrées.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inverse_transform</strong> (<em>bool</em>) – Si True, reconstruit les images à partir
+de vecteurs aplatis.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.Flattener.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Flattener.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.Flattener.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.Flattener.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Flattener.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.Flattener.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.Resizer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">Resizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(64,</span> <span class="pre">64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grayscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Resizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.Resizer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Redimensionne les images et permet une conversion en niveaux de gris.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dsize</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Taille cible (hauteur, largeur).</p></li>
+<li><p><strong>grayscale</strong> (<em>bool</em>) – Si True, convertit les images en niveaux de gris.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.Resizer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Resizer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.Resizer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.Resizer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#Resizer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.Resizer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.ImageCleaner">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">ImageCleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_proportion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_bg_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">white_bg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_len_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vertex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_contours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#ImageCleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ImageCleaner" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Nettoie les images en uniformisant le fond et en recadrant sur les contours.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keep_proportion</strong> (<em>bool</em>)</p></li>
+<li><p><strong>padding</strong> (<em>int</em>)</p></li>
+<li><p><strong>max_bg_ratio</strong> (<em>float</em>)</p></li>
+<li><p><strong>white_bg</strong> (<em>bool</em>)</p></li>
+<li><p><strong>min_len_ratio</strong> (<em>float</em>)</p></li>
+<li><p><strong>min_vertex</strong> (<em>int</em>)</p></li>
+<li><p><strong>n_max_contours</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.ImageCleaner.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#ImageCleaner.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ImageCleaner.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.ImageCleaner.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#ImageCleaner.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.ImageCleaner.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.image.CropTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.image.</span></span><span class="sig-name descname"><span class="pre">CropTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#CropTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.CropTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Recadre automatiquement les images selon les zones de fond clair et sombre.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>padding</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.CropTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#CropTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.CropTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.image.CropTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/image/transforms.html#CropTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.image.CropTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="features.html" class="btn btn-neutral float-left" title="features package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="features.text.html" class="btn btn-neutral float-right" title="features.text package" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

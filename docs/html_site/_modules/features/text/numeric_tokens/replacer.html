@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features.text.numeric_tokens.replacer &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">features.text.numeric_tokens.replacer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de features.text.numeric_tokens.replacer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dictionaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">LABELS_DICT</span><span class="p">,</span> <span class="n">CONVERSION</span><span class="p">,</span> <span class="n">UNIT_NORMALIZATION</span>
+
+<div class="viewcode-block" id="get_label">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.get_label">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_label</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">measure_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Associe une valeur numérique à un label discret selon un type de mesure.</span>
+
+<span class="sd">    La discrétisation repose sur des seuils prédéfinis dans LABELS_DICT.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (float): Valeur numérique exprimée dans l&#39;unité de base.</span>
+<span class="sd">        measure_type (str): Type de mesure (ex: &#39;volume&#39;, &#39;length&#39;, &#39;weight&#39;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Label discret correspondant à la valeur.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">thresholds</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">LABELS_DICT</span><span class="p">[</span><span class="n">measure_type</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">label</span>
+    <span class="k">return</span> <span class="n">measure_type</span> <span class="o">+</span> <span class="s2">&quot;inconnu&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="convert_to_base_unit">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.convert_to_base_unit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_to_base_unit</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convertit une valeur exprimée dans une unité donnée vers l&#39;unité de base.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (float): Valeur numérique.</span>
+<span class="sd">        unit (str): Unité associée à la valeur.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Valeur convertie dans l&#39;unité de base.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">CONVERSION</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">CONVERSION</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="to_float">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.to_float">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_float</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retourne value sous forme de float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="multiply_values">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.multiply_values">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">multiply_values</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multiplie une liste de valeurs numériques.</span>
+
+<span class="sd">    Utilisé notamment pour le calcul de volumes à partir de dimensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values (list[float]): Liste de valeurs.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Produit des valeurs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">computed_value</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="n">computed_value</span> <span class="o">=</span> <span class="n">computed_value</span> <span class="o">*</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">computed_value</span></div>
+
+
+<div class="viewcode-block" id="decor_labels">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.decor_labels">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decor_labels</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encapsule des labels sous forme de tokens textuels.</span>
+
+<span class="sd">    Les labels sont entourés de crochets et les espaces sont remplacés</span>
+<span class="sd">    par des underscores afin de former des tokens exploitables par les modèles.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        labels (list[str]): Liste de labels à encapsuler.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Représentation textuelle des tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">decored_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">decored_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;entre </span><span class="si">{</span><span class="n">decored_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> et </span><span class="si">{</span><span class="n">decored_labels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">decored_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">txt</span></div>
+
+
+<div class="viewcode-block" id="normalize_unit">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.normalize_unit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">normalized</span> <span class="ow">in</span> <span class="n">UNIT_NORMALIZATION</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">normalized</span>
+    <span class="k">return</span> <span class="n">u</span></div>
+
+
+<div class="viewcode-block" id="replace_numeric">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.replace_numeric">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">replace_numeric</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">measure_type</span><span class="p">,</span> <span class="n">unit_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">int_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remplace une expression numérique détectée par un token sémantique.</span>
+
+<span class="sd">    Cette fonction :</span>
+<span class="sd">    - extrait les valeurs numériques capturées par une expression régulière,</span>
+<span class="sd">    - normalise et convertit les unités si nécessaire,</span>
+<span class="sd">    - discrétise la valeur obtenue selon le type de mesure,</span>
+<span class="sd">    - retourne un ou plusieurs tokens textuels.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        match (re.Match): Correspondance regex contenant les groupes capturés.</span>
+<span class="sd">        measure_type (str): Type de mesure (ex: &#39;volume&#39;, &#39;length&#39;, &#39;age&#39;).</span>
+<span class="sd">        unit_pos (int, optional): Position du groupe correspondant à l&#39;unité.</span>
+<span class="sd">        int_pos (int, optional): Position du premier élément d&#39;un intervalle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Token(s) textuel(s) remplaçant l&#39;expression numérique.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">measure_type</span> <span class="ow">in</span> <span class="n">LABELS_DICT</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">unit_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">unit_pos</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">normalize_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert_to_base_unit</span><span class="p">(</span><span class="n">to_float</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">unit</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">to_float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">int_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_label</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">measure_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+            <span class="c1"># labels = [</span>
+            <span class="c1">#     get_label(values[int_pos], measure_type),</span>
+            <span class="c1">#     get_label(values[int_pos+1], measure_type)</span>
+            <span class="c1"># ]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">multiply_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_label</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">measure_type</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">measure_type</span><span class="p">]</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">decor_labels</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">txt</span></div>
+
+
+
+<span class="n">REG_DIST</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(mm|millim[eèé]tres?|cm|centim[eèé]tres?|m|m[eèé]tres?)&quot;</span>
+<span class="n">REG_VOL</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([mcd]?m3|[mcd]?l|millilitres?|centilitres?|litres?)&quot;</span>
+<span class="n">REG_WEIGHT</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(g|grammes?|kg|kilogrammes?|kilo|tonnes?)&quot;</span>
+
+<span class="n">pattern_volume_m</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)\s*</span><span class="si">{</span><span class="n">REG_DIST</span><span class="si">}</span><span class="s2">\b&quot;</span>
+<span class="n">pattern_volume</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*</span><span class="si">{</span><span class="n">REG_VOL</span><span class="si">}</span><span class="s2">\b&quot;</span>
+<span class="n">pattern_surface_m</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)\s*</span><span class="si">{</span><span class="n">REG_DIST</span><span class="si">}</span><span class="s2">\b&quot;</span>
+<span class="n">pattern_surface</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*([mcd]?m2)\b&quot;</span>
+<span class="n">pattern_length</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;\b(?:(\d+[.,]?\d*)\s*-\s*)?(\d+[.,]?\d*)\s*</span><span class="si">{</span><span class="n">REG_DIST</span><span class="si">}</span><span class="s2">\b&quot;</span>
+<span class="n">pattern_weight</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*</span><span class="si">{</span><span class="n">REG_WEIGHT</span><span class="si">}</span><span class="s2">\b&quot;</span>
+<span class="n">pattern_age</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:(\d+)\s*-\s*)?(\d+)\s*(mois|ans?)\b&quot;</span>
+<span class="n">pattern_memory</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+)\s*([gmt][ob])\b&quot;</span>
+<span class="n">pattern_date</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:\d</span><span class="si">{2}</span><span class="s2">/\d</span><span class="si">{2}</span><span class="s2">/|\d</span><span class="si">{2}</span><span class="s2">/)?((?:18|19|20)\d</span><span class="si">{2}</span><span class="s2">)\b&quot;</span>
+<span class="n">pattern_numero</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(num[eé]ro|num|n°|n.?|no.?)\s*(\d+)\b&quot;</span>
+<span class="n">pattern_power</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*(cv|w|watts?)\b&quot;</span>
+<span class="n">pattern_temperature</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*(°[ck]?|degr[eé]s?)\b&quot;</span>
+<span class="n">pattern_energy</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*(kw|kilowatts?)\b&quot;</span>
+<span class="n">pattern_capacity</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*(m?ah)\b&quot;</span>
+<span class="n">pattern_tension</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+[.,]?\d*)\s*(v|volts?)\b&quot;</span>
+<span class="n">pattern_card</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+)\s*(cartes?)\b&quot;</span>
+<span class="n">pattern_piece</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+)\s*(pi[eè]ces?|pcs)\b&quot;</span>
+<span class="n">pattern_number</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(\d+)\b&quot;</span>
+
+<span class="n">PATTERNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="n">pattern_volume_m</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="n">pattern_volume</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span> <span class="n">pattern_surface_m</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span> <span class="n">pattern_surface</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="n">pattern_length</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;int_pos&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="n">pattern_weight</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="n">pattern_age</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;int_pos&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">,</span> <span class="n">pattern_memory</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="n">pattern_date</span><span class="p">,</span> <span class="p">{}),</span>
+    <span class="p">(</span><span class="s2">&quot;numero&quot;</span><span class="p">,</span> <span class="n">pattern_numero</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">pattern_power</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="n">pattern_energy</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;capacity&quot;</span><span class="p">,</span> <span class="n">pattern_capacity</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="n">pattern_temperature</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;tension&quot;</span><span class="p">,</span> <span class="n">pattern_tension</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;card&quot;</span><span class="p">,</span> <span class="n">pattern_card</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;piece&quot;</span><span class="p">,</span> <span class="n">pattern_piece</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;unit_pos&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="n">pattern_number</span><span class="p">,</span> <span class="p">{}),</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="replace_numeric_expressions">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.replace_numeric_expressions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">replace_numeric_expressions</span><span class="p">(</span><span class="n">txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remplace toutes les expressions numériques du texte par des tokens sémantiques.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        txt (str): Texte brut.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Texte avec tokens numériques.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">measure</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">PATTERNS</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+            <span class="n">pattern</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">replace_numeric</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">measure</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">),</span>
+            <span class="n">txt</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">txt</span></div>
+
+
+<span class="n">USED_MEASURES</span> <span class="o">=</span> <span class="p">{</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">PATTERNS</span><span class="p">}</span>
+
+<div class="viewcode-block" id="get_all_numeric_tokens">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.get_all_numeric_tokens">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_all_numeric_tokens</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retourne l&#39;ensemble de tous les tokens numériques possibles.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[str]: Liste de tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">measure</span> <span class="ow">in</span> <span class="n">USED_MEASURES</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">measure</span> <span class="ow">in</span> <span class="n">LABELS_DICT</span><span class="p">:</span>
+            <span class="n">tokens</span> <span class="o">+=</span> <span class="p">[</span><span class="n">decor_labels</span><span class="p">([</span><span class="n">l</span><span class="p">])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">LABELS_DICT</span><span class="p">[</span><span class="n">measure</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decor_labels</span><span class="p">([</span><span class="n">measure</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">tokens</span></div>
+
+
+<div class="viewcode-block" id="get_numeric_tokens">
+<a class="viewcode-back" href="../../../../api/features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.get_numeric_tokens">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_numeric_tokens</span><span class="p">(</span><span class="n">measure_types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retourne la liste des tokens numériques associés aux types de mesures demandés.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        measure_types (list[str] | None): Liste des types de mesures à considérer</span>
+<span class="sd">            (par exemple `[&quot;length&quot;, &quot;weight&quot;, &quot;date&quot;]`).  </span>
+<span class="sd">            Si `None`, l&#39;ensemble des tokens numériques possibles est retourné.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[str]: Liste des tokens numériques formatés, prêts à être utilisés</span>
+<span class="sd">        dans un pipeline de traitement du texte ou pour l&#39;analyse exploratoire.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">measure_types</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">get_numeric_tokens</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">measure</span> <span class="ow">in</span> <span class="n">measure_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">measure</span> <span class="ow">in</span> <span class="n">LABELS_DICT</span><span class="p">:</span>
+                <span class="n">tokens</span> <span class="o">+=</span> <span class="p">[</span><span class="n">decor_labels</span><span class="p">([</span><span class="n">l</span><span class="p">])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">LABELS_DICT</span><span class="p">[</span><span class="n">measure</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">measure</span> <span class="ow">in</span> <span class="n">USED_MEASURES</span><span class="p">:</span>
+                <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decor_labels</span><span class="p">([</span><span class="n">measure</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">tokens</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

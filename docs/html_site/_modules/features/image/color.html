@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features.image.color &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">features.image.color</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de features.image.color</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+
+
+<div class="viewcode-block" id="is_pixel_in_bin">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.is_pixel_in_bin">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_pixel_in_bin</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ranges</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Détermine si les pixels appartiennent à un intervalle HSV donné.</span>
+
+<span class="sd">    Les intervalles sont semi-ouverts à droite.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (np.ndarray): Images HSV de forme (n, h, w, 3).</span>
+<span class="sd">        ranges (list): Intervalles [[Hmin, Hmax], [Smin, Smax], [Vmin, Vmax]].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Masque booléen des pixels appartenant à l’intervalle.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ranges</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">channel</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">channel</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">channel</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">channel</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="ColorEncoder">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.ColorEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ColorEncoder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encode chaque pixel selon des catégories de couleur HSV.</span>
+
+<span class="sd">    Chaque pixel est associé à une classe de couleur prédéfinie.</span>
+<span class="sd">    Une option permet de retourner un encodage one-hot par pixel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ohe (bool): Si True, applique un encodage one-hot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ohe</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ohe</span> <span class="o">=</span> <span class="n">ohe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;noir&quot;</span><span class="p">,</span> <span class="s2">&quot;gris&quot;</span><span class="p">,</span> <span class="s2">&quot;blanc&quot;</span><span class="p">,</span> <span class="s2">&quot;rouge&quot;</span><span class="p">,</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span> <span class="s2">&quot;jaune&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vert&quot;</span><span class="p">,</span> <span class="s2">&quot;turquoise&quot;</span><span class="p">,</span> <span class="s2">&quot;cyan&quot;</span><span class="p">,</span> <span class="s2">&quot;bleu&quot;</span><span class="p">,</span> <span class="s2">&quot;violet&quot;</span><span class="p">,</span> <span class="s2">&quot;rose&quot;</span>
+        <span class="p">]</span>
+
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">181</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">70</span><span class="p">]],</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">181</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mi">200</span><span class="p">]],</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">181</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">256</span><span class="p">]],</span>
+        <span class="p">]</span>
+
+        <span class="n">ncolors</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="n">half_step</span> <span class="o">=</span> <span class="p">(</span><span class="mi">180</span> <span class="o">//</span> <span class="n">ncolors</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">half_step</span><span class="p">,</span> <span class="n">ncolors</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ranges</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="mi">180</span> <span class="o">-</span> <span class="n">half_step</span><span class="p">,</span> <span class="n">half_step</span><span class="p">],</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mi">256</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ranges</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">i</span> <span class="o">-</span> <span class="n">half_step</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">half_step</span><span class="p">],</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mi">256</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ranges</span> <span class="o">=</span> <span class="n">ranges</span>
+
+<div class="viewcode-block" id="ColorEncoder.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.ColorEncoder.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="ColorEncoder.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.ColorEncoder.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2HSV</span><span class="p">)</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span>
+        <span class="n">encoded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ranges</span><span class="p">):</span>
+            <span class="n">encoded</span><span class="p">[</span><span class="n">is_pixel_in_bin</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">r</span><span class="p">)]</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ohe</span><span class="p">:</span>
+            <span class="n">encoded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">))[</span><span class="n">encoded</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">encoded</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MeanRGBTransformer">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.MeanRGBTransformer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeanRGBTransformer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcule la moyenne des canaux RGB d’une image.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        channels (list[int]): Canaux RGB à utiliser.</span>
+<span class="sd">        ignore_white_black (bool): Ignore les pixels blancs et noirs.</span>
+<span class="sd">        impute_value (int): Valeur utilisée si aucun pixel valide.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">ignore_white_black</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">impute_value</span><span class="o">=</span><span class="mi">127</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore_white_black</span> <span class="o">=</span> <span class="n">ignore_white_black</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">impute_value</span> <span class="o">=</span> <span class="n">impute_value</span>
+
+<div class="viewcode-block" id="MeanRGBTransformer.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.MeanRGBTransformer.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="MeanRGBTransformer.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.MeanRGBTransformer.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore_white_black</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+                <span class="n">hsv</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2HSV</span><span class="p">)</span>
+                <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">hsv</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">hsv</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">s</span> <span class="o">&gt;</span> <span class="mi">40</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">v</span> <span class="o">&lt;</span> <span class="mi">200</span><span class="p">)))</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masks</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="n">means</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">c</span><span class="p">][</span><span class="n">masks</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">impute_value</span><span class="p">)</span>
+            <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">means</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="HistRGBTransformer">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.HistRGBTransformer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HistRGBTransformer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcule des histogrammes RGB par canal.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        histSize (list[int]): Nombre de bins.</span>
+<span class="sd">        channels (list[int]): Canaux RGB.</span>
+<span class="sd">        ranges (list): Intervalles des valeurs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">histSize</span><span class="o">=</span><span class="p">[</span><span class="mi">256</span><span class="p">],</span> <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                 <span class="n">ranges</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">]]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histSize</span> <span class="o">=</span> <span class="n">histSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ranges</span> <span class="o">=</span> <span class="n">ranges</span>
+
+<div class="viewcode-block" id="HistRGBTransformer.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.HistRGBTransformer.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="HistRGBTransformer.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.color.HistRGBTransformer.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">hist_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">col_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="s2">&quot;rgb&quot;</span>
+
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="n">channel</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="n">channel</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">base</span>
+            <span class="n">col_names</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="n">cols</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">histSize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histSize</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">]</span>
+
+            <span class="n">hists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">calcHist</span><span class="p">([</span><span class="n">im</span><span class="p">],</span> <span class="p">[</span><span class="n">channel</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">histSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="n">channel</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">X</span>
+            <span class="p">])</span>
+            <span class="n">hist_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hists</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">hist_list</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">col_names</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

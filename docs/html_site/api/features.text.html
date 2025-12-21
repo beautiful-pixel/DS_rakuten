@@ -1,0 +1,671 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features.text package &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="features.text.numeric_tokens package" href="features.text.numeric_tokens.html" />
+    <link rel="prev" title="features.image package" href="features.image.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data.html">data package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="features.html">features package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="features.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="features.image.html">features.image package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">features.text package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features.build_image_features">features.build_image_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features.build_multimodal_features">features.build_multimodal_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features.build_text_features">features.build_text_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.html#module-features">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rakuten_text.html">rakuten_text package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="features.html">features package</a></li>
+      <li class="breadcrumb-item active">features.text package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/features.text.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="features-text-package">
+<h1>features.text package<a class="headerlink" href="#features-text-package" title="Lien vers cette rubrique"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Lien vers cette rubrique"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.text.numeric_tokens.html">features.text.numeric_tokens package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="features.text.numeric_tokens.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens.dictionaries">features.text.numeric_tokens.dictionaries module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens.replacer">features.text.numeric_tokens.replacer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.get_label"><code class="docutils literal notranslate"><span class="pre">get_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.convert_to_base_unit"><code class="docutils literal notranslate"><span class="pre">convert_to_base_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.to_float"><code class="docutils literal notranslate"><span class="pre">to_float()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.multiply_values"><code class="docutils literal notranslate"><span class="pre">multiply_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.decor_labels"><code class="docutils literal notranslate"><span class="pre">decor_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.normalize_unit"><code class="docutils literal notranslate"><span class="pre">normalize_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.replace_numeric"><code class="docutils literal notranslate"><span class="pre">replace_numeric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.replace_numeric_expressions"><code class="docutils literal notranslate"><span class="pre">replace_numeric_expressions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.get_all_numeric_tokens"><code class="docutils literal notranslate"><span class="pre">get_all_numeric_tokens()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replacer.get_numeric_tokens"><code class="docutils literal notranslate"><span class="pre">get_numeric_tokens()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens.transformers">features.text.numeric_tokens.transformers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.transformers.NumericTokensTransformer"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.transformers.NumericTokensTransformer.fit"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.transformers.NumericTokensTransformer.transform"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.transformers.NumericTokensTransformer.get_tokens"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.get_tokens()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.replace_numeric_expressions"><code class="docutils literal notranslate"><span class="pre">replace_numeric_expressions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.get_numeric_tokens"><code class="docutils literal notranslate"><span class="pre">get_numeric_tokens()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.NumericTokensTransformer"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.NumericTokensTransformer.fit"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.NumericTokensTransformer.get_tokens"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.get_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#features.text.numeric_tokens.NumericTokensTransformer.transform"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Lien vers cette rubrique"></a></h2>
+</section>
+<section id="module-features.text.cleaning">
+<span id="features-text-cleaning-module"></span><h2>features.text.cleaning module<a class="headerlink" href="#module-features.text.cleaning" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.cleaning.TextCleaner">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.cleaning.</span></span><span class="sig-name descname"><span class="pre">TextCleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['designation',</span> <span class="pre">'description']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/cleaning.html#TextCleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.cleaning.TextCleaner" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn appliquant un nettoyage de base du texte.</p>
+<p>Ce transformateur applique une série d’opérations de normalisation
+(encodage, HTML, Unicode) sur les colonnes textuelles spécifiées.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.cleaning.TextCleaner.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/cleaning.html#TextCleaner.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.cleaning.TextCleaner.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.cleaning.TextCleaner" title="features.text.cleaning.TextCleaner">TextCleaner</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.cleaning.TextCleaner.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/cleaning.html#TextCleaner.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.cleaning.TextCleaner.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Applique le nettoyage du texte aux colonnes spécifiées.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les colonnes textuelles.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame contenant les textes nettoyés.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.text.frequency">
+<span id="features-text-frequency-module"></span><h2>features.text.frequency module<a class="headerlink" href="#module-features.text.frequency" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.frequency.TokenFrequencyTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.frequency.</span></span><span class="sig-name descname"><span class="pre">TokenFrequencyTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/frequency.html#TokenFrequencyTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.frequency.TokenFrequencyTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur permettant de compter la fréquence
+d’apparition de tokens ou motifs dans une série de textes.</p>
+<p>Ce transformateur est générique et peut être utilisé pour :
+- le comptage de balises HTML (ex. « &lt;li&gt; »),
+- le comptage de tokens numériques (ex. « [petite_longueur] »),
+- le comptage d’unités ou de mots-clés spécifiques.</p>
+<p>Il retourne un DataFrame dont chaque colonne correspond à un token,
+et chaque ligne à un document texte.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.frequency.TokenFrequencyTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/frequency.html#TokenFrequencyTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.frequency.TokenFrequencyTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ce transformateur ne nécessite aucun apprentissage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.Series</em>) – Série de textes d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.frequency.TokenFrequencyTransformer" title="features.text.frequency.TokenFrequencyTransformer">TokenFrequencyTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.frequency.TokenFrequencyTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/frequency.html#TokenFrequencyTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.frequency.TokenFrequencyTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Applique le comptage des tokens sur les textes d’entrée.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.Series</em>) – Série pandas contenant les textes à analyser.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame contenant les fréquences de chaque token.
+Chaque colonne correspond à un token, et chaque ligne à un texte.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.text.language">
+<span id="features-text-language-module"></span><h2>features.text.language module<a class="headerlink" href="#module-features.text.language" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.text.language.detect_lang">
+<span class="sig-prename descclassname"><span class="pre">features.text.language.</span></span><span class="sig-name descname"><span class="pre">detect_lang</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#detect_lang"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.language.detect_lang" title="Lien vers cette définition"></a></dt>
+<dd><p>Détecte la langue principale d’un texte.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – Texte à analyser.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Code langue (“fr”, “en”, “other”).</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.language.LanguageDetector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.language.</span></span><span class="sig-name descname"><span class="pre">LanguageDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">designation_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'designation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'description'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#LanguageDetector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.language.LanguageDetector" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn extrayant des indicateurs de langue du texte.</p>
+<p>La langue est détectée à partir de la concaténation du titre et de la
+description, puis encodée sous forme de variables binaires.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.language.LanguageDetector.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#LanguageDetector.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.language.LanguageDetector.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.language.LanguageDetector" title="features.text.language.LanguageDetector">LanguageDetector</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.language.LanguageDetector.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#LanguageDetector.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.language.LanguageDetector.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Détecte la langue du texte et génère des indicateurs binaires.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les colonnes textuelles.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>DataFrame contenant les variables binaires :</dt><dd><ul class="simple">
+<li><p>txt_fr : texte en français</p></li>
+<li><p>txt_en : texte en anglais</p></li>
+<li><p>txt_other : autre langue</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.text.length">
+<span id="features-text-length-module"></span><h2>features.text.length module<a class="headerlink" href="#module-features.text.length" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.length.TextLengthTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.length.</span></span><span class="sig-name descname"><span class="pre">TextLengthTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'char'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[['designation',</span> <span class="pre">'description']]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/length.html#TextLengthTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.length.TextLengthTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn calculant la longueur de champs textuels.</p>
+<p>La longueur peut être mesurée en nombre de caractères ou en nombre
+de mots selon le paramètre <cite>length_unit</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.length.TextLengthTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/length.html#TextLengthTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.length.TextLengthTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.length.TextLengthTransformer" title="features.text.length.TextLengthTransformer">TextLengthTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.length.TextLengthTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/length.html#TextLengthTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.length.TextLengthTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Calcule les longueurs des champs textuels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les textes.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame des longueurs calculées.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-features.text">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-features.text" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.TextCleaner">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.</span></span><span class="sig-name descname"><span class="pre">TextCleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['designation',</span> <span class="pre">'description']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/cleaning.html#TextCleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TextCleaner" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn appliquant un nettoyage de base du texte.</p>
+<p>Ce transformateur applique une série d’opérations de normalisation
+(encodage, HTML, Unicode) sur les colonnes textuelles spécifiées.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.TextCleaner.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/cleaning.html#TextCleaner.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TextCleaner.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.TextCleaner" title="features.text.TextCleaner">TextCleaner</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.TextCleaner.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/cleaning.html#TextCleaner.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TextCleaner.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Applique le nettoyage du texte aux colonnes spécifiées.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les colonnes textuelles.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame contenant les textes nettoyés.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.NumericTokensTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.</span></span><span class="sig-name descname"><span class="pre">NumericTokensTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">designation_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'designation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'description'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/numeric_tokens/transformers.html#NumericTokensTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.NumericTokensTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn remplaçant les expressions numériques
+dans le texte par des tokens sémantiques.</p>
+<p>Ce transformateur applique une tokenisation numérique sur les champs
+textuels (titre et description) en remplaçant les valeurs quantitatives
+(dimensions, poids, dates, quantités, etc.) par des tokens discrets.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.NumericTokensTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/numeric_tokens/transformers.html#NumericTokensTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.NumericTokensTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.NumericTokensTransformer" title="features.text.NumericTokensTransformer">NumericTokensTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.NumericTokensTransformer.get_tokens">
+<span class="sig-name descname"><span class="pre">get_tokens</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/numeric_tokens/transformers.html#NumericTokensTransformer.get_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.NumericTokensTransformer.get_tokens" title="Lien vers cette définition"></a></dt>
+<dd><p>Retourne la liste des tokens numériques utilisés par le transformateur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Liste des tokens numériques possibles.</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.NumericTokensTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/numeric_tokens/transformers.html#NumericTokensTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.NumericTokensTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Applique la tokenisation numérique aux champs textuels.</p>
+<p>Les champs titre et description sont concaténés en ajoutant
+des tokens de séparation afin de préserver la structure du texte.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les colonnes textuelles.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Série contenant le texte transformé avec tokens numériques.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.TokenFrequencyTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.</span></span><span class="sig-name descname"><span class="pre">TokenFrequencyTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/frequency.html#TokenFrequencyTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TokenFrequencyTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur permettant de compter la fréquence
+d’apparition de tokens ou motifs dans une série de textes.</p>
+<p>Ce transformateur est générique et peut être utilisé pour :
+- le comptage de balises HTML (ex. « &lt;li&gt; »),
+- le comptage de tokens numériques (ex. « [petite_longueur] »),
+- le comptage d’unités ou de mots-clés spécifiques.</p>
+<p>Il retourne un DataFrame dont chaque colonne correspond à un token,
+et chaque ligne à un document texte.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.TokenFrequencyTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/frequency.html#TokenFrequencyTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TokenFrequencyTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ce transformateur ne nécessite aucun apprentissage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.Series</em>) – Série de textes d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.TokenFrequencyTransformer" title="features.text.TokenFrequencyTransformer">TokenFrequencyTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.TokenFrequencyTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/frequency.html#TokenFrequencyTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TokenFrequencyTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Applique le comptage des tokens sur les textes d’entrée.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.Series</em>) – Série pandas contenant les textes à analyser.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame contenant les fréquences de chaque token.
+Chaque colonne correspond à un token, et chaque ligne à un texte.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.TextLengthTransformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.</span></span><span class="sig-name descname"><span class="pre">TextLengthTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'char'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[['designation',</span> <span class="pre">'description']]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/length.html#TextLengthTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TextLengthTransformer" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn calculant la longueur de champs textuels.</p>
+<p>La longueur peut être mesurée en nombre de caractères ou en nombre
+de mots selon le paramètre <cite>length_unit</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.TextLengthTransformer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/length.html#TextLengthTransformer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TextLengthTransformer.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.TextLengthTransformer" title="features.text.TextLengthTransformer">TextLengthTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.TextLengthTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/length.html#TextLengthTransformer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.TextLengthTransformer.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Calcule les longueurs des champs textuels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les textes.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame des longueurs calculées.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="features.text.LanguageDetector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">features.text.</span></span><span class="sig-name descname"><span class="pre">LanguageDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">designation_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'designation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'description'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#LanguageDetector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.LanguageDetector" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerMixin</span></code></p>
+<p>Transformateur scikit-learn extrayant des indicateurs de langue du texte.</p>
+<p>La langue est détectée à partir de la concaténation du titre et de la
+description, puis encodée sous forme de variables binaires.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.LanguageDetector.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#LanguageDetector.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.LanguageDetector.fit" title="Lien vers cette définition"></a></dt>
+<dd><p>Ajuste le transformateur (aucun apprentissage nécessaire).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em>) – Données d’entrée.</p></li>
+<li><p><strong>y</strong> (<em>Any</em><em>, </em><em>optional</em>) – Variable cible ignorée.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p>Instance du transformateur.</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#features.text.LanguageDetector" title="features.text.LanguageDetector">LanguageDetector</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="features.text.LanguageDetector.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/text/language.html#LanguageDetector.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.text.LanguageDetector.transform" title="Lien vers cette définition"></a></dt>
+<dd><p>Détecte la langue du texte et génère des indicateurs binaires.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>pd.DataFrame</em>) – DataFrame contenant les colonnes textuelles.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>DataFrame contenant les variables binaires :</dt><dd><ul class="simple">
+<li><p>txt_fr : texte en français</p></li>
+<li><p>txt_en : texte en anglais</p></li>
+<li><p>txt_other : autre langue</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="features.image.html" class="btn btn-neutral float-left" title="features.image package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="features.text.numeric_tokens.html" class="btn btn-neutral float-right" title="features.text.numeric_tokens package" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
