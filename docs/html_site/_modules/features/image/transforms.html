@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features.image.transforms &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">features.image.transforms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de features.image.transforms</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_squared_shape</span><span class="p">,</span> <span class="n">to_square_shape</span><span class="p">,</span> <span class="n">mask_background</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.contours</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_main_contours</span>
+
+
+<div class="viewcode-block" id="Flattener">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.Flattener">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Flattener</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Aplati des images en vecteurs ou reconstruit des images carrées.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inverse_transform (bool): Si True, reconstruit les images à partir</span>
+<span class="sd">            de vecteurs aplatis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform</span> <span class="o">=</span> <span class="n">inverse_transform</span>
+
+<div class="viewcode-block" id="Flattener.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.Flattener.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Flattener.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.Flattener.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">get_squared_shape</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Resizer">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.Resizer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Resizer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Redimensionne les images et permet une conversion en niveaux de gris.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dsize (tuple[int, int]): Taille cible (hauteur, largeur).</span>
+<span class="sd">        grayscale (bool): Si True, convertit les images en niveaux de gris.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">grayscale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dsize</span> <span class="o">=</span> <span class="n">dsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grayscale</span> <span class="o">=</span> <span class="n">grayscale</span>
+
+<div class="viewcode-block" id="Resizer.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.Resizer.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Resizer.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.Resizer.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grayscale</span> <span class="ow">and</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2GRAY</span><span class="p">)</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dsize</span><span class="p">)</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span></div>
+</div>
+
+    
+<div class="viewcode-block" id="crop">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.crop">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">crop</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">contours</span><span class="p">,</span> <span class="n">keep_proportion</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    permet de recarder des images sur des objets en fonctions de leurs contours</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">im_size</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cropped_images</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">im</span><span class="p">,</span> <span class="n">conts</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">contours</span><span class="p">):</span>
+        <span class="n">r_min</span><span class="p">,</span> <span class="n">c_min</span> <span class="o">=</span> <span class="n">im_size</span><span class="p">,</span> <span class="n">im_size</span>
+        <span class="n">r_max</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">cont</span> <span class="ow">in</span> <span class="n">conts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">cont</span><span class="p">:</span>
+                <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">r_min</span><span class="p">:</span> <span class="n">r_min</span> <span class="o">=</span> <span class="n">r</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="n">r_max</span><span class="p">:</span> <span class="n">r_max</span> <span class="o">=</span> <span class="n">r</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">c_min</span><span class="p">:</span> <span class="n">c_min</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="n">c_max</span><span class="p">:</span> <span class="n">c_max</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="k">if</span> <span class="n">r_min</span> <span class="o">&gt;=</span> <span class="n">r_max</span> <span class="ow">or</span> <span class="n">c_min</span> <span class="o">&gt;=</span> <span class="n">c_max</span><span class="p">:</span>
+            <span class="n">cropped_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">keep_proportion</span><span class="p">:</span>
+                <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="n">to_square_shape</span><span class="p">(</span>
+                    <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span><span class="p">,</span> <span class="n">im_size</span><span class="p">,</span> <span class="n">padding</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">cropped_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="n">r_min</span> <span class="p">:</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span> <span class="p">:</span> <span class="n">c_max</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="n">im_size</span><span class="p">,</span> <span class="n">im_size</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cropped_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="n">r_min</span> <span class="p">:</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span> <span class="p">:</span> <span class="n">c_max</span><span class="p">],</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="n">im_size</span><span class="p">,</span> <span class="n">im_size</span><span class="p">))</span>
+                <span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cropped_images</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bg_crop">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.bg_crop">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">bg_crop</span><span class="p">(</span>
+    <span class="n">images</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">sup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">keep_proportion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recadre les images en supprimant l’arrière-plan selon un seuil.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        images (np.ndarray): Images d’entrée.</span>
+<span class="sd">        threshold (int): Seuil de détection du fond.</span>
+<span class="sd">        sup (bool): Si True, supprime les pixels supérieurs au seuil.</span>
+<span class="sd">        keep_proportion (bool): Conserve un recadrage carré.</span>
+<span class="sd">        padding (int): Marge ajoutée autour de la zone d’intérêt.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Images recadrées.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">gray_images</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2GRAY</span><span class="p">)</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">images</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">gray_images</span> <span class="o">=</span> <span class="n">images</span>
+    <span class="n">im_size</span> <span class="o">=</span> <span class="n">gray_images</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># on fait un mask qui représente les pixels d&#39;interets (i.e. ceux qu&#39;il ne faut pas couper) </span>
+    <span class="k">if</span> <span class="n">sup</span><span class="p">:</span>
+        <span class="n">poi</span> <span class="o">=</span> <span class="n">gray_images</span> <span class="o">&lt;=</span> <span class="n">threshold</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">poi</span> <span class="o">=</span> <span class="n">gray_images</span> <span class="o">&gt;=</span> <span class="n">threshold</span>
+
+    <span class="n">cropped_images</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">im</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+        <span class="c1"># pour chaque axe de l&#39;image on récupère les index des vecteurs (ligne ou colonne)</span>
+        <span class="c1"># d&#39;interêt (la ou il y a un pixel ne doit pas être coupé)</span>
+        <span class="n">row_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">poi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">col_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">poi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># si on ne trouve pas de région d&#39;interêt on renvoi l&#39;image originale</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row_idx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_idx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">cropped_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+        <span class="c1"># sinon on retourne l&#39;image reacdrée</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="n">row_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">col_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># si on garde les proportions on doit avoir une région d&#39;interêt carrée</span>
+            <span class="k">if</span> <span class="n">keep_proportion</span><span class="p">:</span>
+                <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="n">to_square_shape</span><span class="p">(</span>
+                    <span class="n">r_min</span><span class="p">,</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span><span class="p">,</span> <span class="n">im_size</span><span class="p">,</span> <span class="n">padding</span>
+                    <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">cropped_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="n">r_min</span> <span class="p">:</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span> <span class="p">:</span> <span class="n">c_max</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="n">im_size</span><span class="p">,</span> <span class="n">im_size</span><span class="p">))</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cropped_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="n">r_min</span> <span class="p">:</span> <span class="n">r_max</span><span class="p">,</span> <span class="n">c_min</span> <span class="p">:</span> <span class="n">c_max</span><span class="p">],</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="n">im_size</span><span class="p">,</span> <span class="n">im_size</span><span class="p">))</span>
+                    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cropped_images</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImageCleaner">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.ImageCleaner">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ImageCleaner</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Nettoie les images en uniformisant le fond et en recadrant sur les contours.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">keep_proportion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_bg_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="n">white_bg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">min_len_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">min_vertex</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">n_max_contours</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_proportion</span> <span class="o">=</span> <span class="n">keep_proportion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_bg_ratio</span> <span class="o">=</span> <span class="n">max_bg_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">white_bg</span> <span class="o">=</span> <span class="n">white_bg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_len_ratio</span> <span class="o">=</span> <span class="n">min_len_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_vertex</span> <span class="o">=</span> <span class="n">min_vertex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_max_contours</span> <span class="o">=</span> <span class="n">n_max_contours</span>
+    
+<div class="viewcode-block" id="ImageCleaner.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.ImageCleaner.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    
+<div class="viewcode-block" id="ImageCleaner.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.ImageCleaner.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">min_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_len_ratio</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">contours</span> <span class="o">=</span> <span class="n">get_main_contours</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="n">min_len</span><span class="p">,</span> <span class="n">min_vertex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_vertex</span><span class="p">,</span>
+            <span class="n">n_max_contours</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_max_contours</span>
+            <span class="p">)</span>
+        <span class="n">masked_ims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span><span class="p">,</span> <span class="n">conts</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">contours</span><span class="p">):</span>
+            <span class="n">masked_ims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask_background</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">conts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_bg_ratio</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">white_bg</span><span class="p">))</span>
+        <span class="n">masked_ims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masked_ims</span><span class="p">)</span>
+        <span class="n">new_X</span> <span class="o">=</span> <span class="n">crop</span><span class="p">(</span><span class="n">masked_ims</span><span class="p">,</span> <span class="n">contours</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_proportion</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_X</span></div>
+</div>
+
+    
+<div class="viewcode-block" id="CropTransformer">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.CropTransformer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CropTransformer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recadre automatiquement les images selon les zones de fond clair et sombre.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+
+<div class="viewcode-block" id="CropTransformer.fit">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.CropTransformer.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="CropTransformer.transform">
+<a class="viewcode-back" href="../../../api/features.image.html#features.image.transforms.CropTransformer.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="c1"># on recadre les images par rapport aux zones blanches</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">bg_crop</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span>
+        <span class="c1"># puis au zones noires</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">bg_crop</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">sup</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

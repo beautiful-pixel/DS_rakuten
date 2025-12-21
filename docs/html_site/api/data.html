@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data package &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="features package" href="features.html" />
+    <link rel="prev" title="src" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">data package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-data.categories">data.categories module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.get_category_name"><code class="docutils literal notranslate"><span class="pre">get_category_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.get_all_categories"><code class="docutils literal notranslate"><span class="pre">get_all_categories()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.get_category_codes"><code class="docutils literal notranslate"><span class="pre">get_category_codes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.get_category_group"><code class="docutils literal notranslate"><span class="pre">get_category_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.format_category_label"><code class="docutils literal notranslate"><span class="pre">format_category_label()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.map_categories_in_dataframe"><code class="docutils literal notranslate"><span class="pre">map_categories_in_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.get_category_distribution"><code class="docutils literal notranslate"><span class="pre">get_category_distribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.validate_category_code"><code class="docutils literal notranslate"><span class="pre">validate_category_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.categories.print_category_summary"><code class="docutils literal notranslate"><span class="pre">print_category_summary()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-data.dataset">data.dataset module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data.dataset.ImageDataset"><code class="docutils literal notranslate"><span class="pre">ImageDataset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.dataset.TextDataset"><code class="docutils literal notranslate"><span class="pre">TextDataset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.dataset.CombinedDataset"><code class="docutils literal notranslate"><span class="pre">CombinedDataset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-data.load_data">data.load_data module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data.load_data.split_data"><code class="docutils literal notranslate"><span class="pre">split_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.load_data.get_path"><code class="docutils literal notranslate"><span class="pre">get_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.load_data.split_path"><code class="docutils literal notranslate"><span class="pre">split_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.load_data.split_txt"><code class="docutils literal notranslate"><span class="pre">split_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.load_data.images_read"><code class="docutils literal notranslate"><span class="pre">images_read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.html">features package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rakuten_text.html">rakuten_text package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+      <li class="breadcrumb-item active">data package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/data.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-package">
+<h1>data package<a class="headerlink" href="#data-package" title="Lien vers cette rubrique"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Lien vers cette rubrique"></a></h2>
+</section>
+<section id="module-data.categories">
+<span id="data-categories-module"></span><h2>data.categories module<a class="headerlink" href="#module-data.categories" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.get_category_name">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">get_category_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#get_category_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.get_category_name" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>code</strong> (<em>int</em>)</p></li>
+<li><p><strong>short</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.get_all_categories">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">get_all_categories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">short</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#get_all_categories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.get_all_categories" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>short</strong> (<em>bool</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.get_category_codes">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">get_category_codes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#get_category_codes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.get_category_codes" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.get_category_group">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">get_category_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#get_category_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.get_category_group" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>code</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.format_category_label">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">format_category_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#format_category_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.format_category_label" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>code</strong> (<em>int</em>)</p></li>
+<li><p><strong>show_code</strong> (<em>bool</em>)</p></li>
+<li><p><strong>short</strong> (<em>bool</em>)</p></li>
+<li><p><strong>max_length</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.map_categories_in_dataframe">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">map_categories_in_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'prdtypecode'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'category_name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#map_categories_in_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.map_categories_in_dataframe" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>)</p></li>
+<li><p><strong>code_column</strong> (<em>str</em>)</p></li>
+<li><p><strong>target_column</strong> (<em>str</em>)</p></li>
+<li><p><strong>short</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.get_category_distribution">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">get_category_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">codes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'count'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#get_category_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.get_category_distribution" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>codes</strong> (<em>Series</em>)</p></li>
+<li><p><strong>short</strong> (<em>bool</em>)</p></li>
+<li><p><strong>sort_by</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.validate_category_code">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">validate_category_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#validate_category_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.validate_category_code" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Paramètres<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>code</strong> (<em>int</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.categories.print_category_summary">
+<span class="sig-prename descclassname"><span class="pre">data.categories.</span></span><span class="sig-name descname"><span class="pre">print_category_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/categories.html#print_category_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.categories.print_category_summary" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-data.dataset">
+<span id="data-dataset-module"></span><h2>data.dataset module<a class="headerlink" href="#module-data.dataset" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="data.dataset.ImageDataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.dataset.</span></span><span class="sig-name descname"><span class="pre">ImageDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/dataset.html#ImageDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.dataset.ImageDataset" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="data.dataset.TextDataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.dataset.</span></span><span class="sig-name descname"><span class="pre">TextDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/dataset.html#TextDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.dataset.TextDataset" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="data.dataset.CombinedDataset">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.dataset.</span></span><span class="sig-name descname"><span class="pre">CombinedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/dataset.html#CombinedDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.dataset.CombinedDataset" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+</dd></dl>
+
+</section>
+<section id="module-data.load_data">
+<span id="data-load-data-module"></span><h2>data.load_data module<a class="headerlink" href="#module-data.load_data" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_data.split_data">
+<span class="sig-prename descclassname"><span class="pre">data.load_data.</span></span><span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/load_data.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_data.split_data" title="Lien vers cette définition"></a></dt>
+<dd><p>retourne les données splitées entre le jeu de test utilisé pour ce projet
+et le jeu d’entraintement / validation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_data.get_path">
+<span class="sig-prename descclassname"><span class="pre">data.load_data.</span></span><span class="sig-name descname"><span class="pre">get_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/load_data.html#get_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_data.get_path" title="Lien vers cette définition"></a></dt>
+<dd><p>retourne les chemins des images depuis ce module</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> – dataframe comprenant productid et imageid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_data.split_path">
+<span class="sig-prename descclassname"><span class="pre">data.load_data.</span></span><span class="sig-name descname"><span class="pre">split_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/load_data.html#split_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_data.split_path" title="Lien vers cette définition"></a></dt>
+<dd><p>retourne les chemins des images splités entre le jeu de test utilisé pour ce projet
+et le jeu d’entraintement / validation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_data.split_txt">
+<span class="sig-prename descclassname"><span class="pre">data.load_data.</span></span><span class="sig-name descname"><span class="pre">split_txt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/load_data.html#split_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_data.split_txt" title="Lien vers cette définition"></a></dt>
+<dd><p>retourne les données textuelles splitées entre le jeu de test utilisé pour ce projet
+et le jeu d’entraintement / validation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_data.images_read">
+<span class="sig-prename descclassname"><span class="pre">data.load_data.</span></span><span class="sig-name descname"><span class="pre">images_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">impath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(500,</span> <span class="pre">500)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grayscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data/load_data.html#images_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_data.images_read" title="Lien vers cette définition"></a></dt>
+<dd><p>Docstring for images_read
+:type impath: 
+:param impath: chemin des images
+:type dsize: 
+:param dsize: dimension des images souhaitée
+:type grayscale: 
+:param grayscale: pour charger l’image en niveau de gris
+:type max_load: 
+:param max_load: représente le nombre d’octet maximum chargé en mémoire 10**9 =&gt; 1 Go</p>
+</dd></dl>
+
+</section>
+<section id="module-data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-data" title="Lien vers cette rubrique"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="modules.html" class="btn btn-neutral float-left" title="src" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="features.html" class="btn btn-neutral float-right" title="features package" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

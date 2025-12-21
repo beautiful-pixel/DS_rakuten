@@ -1,0 +1,562 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rakuten_text.vectorization &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">rakuten_text.vectorization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de rakuten_text.vectorization</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.feature_extraction.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">CountVectorizer</span><span class="p">,</span> <span class="n">TfidfVectorizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span> <span class="n">FunctionTransformer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<span class="c1"># Configurations par Défaut</span>
+
+<span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="s1">&#39;lowercase&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Déjà fait dans preprocessing</span>
+    <span class="s1">&#39;strip_accents&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Déjà fait dans preprocessing</span>
+<span class="p">}</span>
+
+<span class="c1"># Configurations prédéfinies pour tests rapides</span>
+<span class="n">PRESET_CONFIGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;small&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;large&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">20000</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;unigram&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;trigram&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">15000</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="c1"># Constructeurs de Vectoriseurs</span>
+
+<div class="viewcode-block" id="build_count_vectorizer">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.build_count_vectorizer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_count_vectorizer</span><span class="p">(</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">min_df</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">max_df</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CountVectorizer</span><span class="p">:</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">max_features</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="n">ngram_range</span><span class="p">,</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="n">min_df</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="n">max_df</span><span class="p">,</span>
+        <span class="s1">&#39;lowercase&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Assumé déjà fait</span>
+        <span class="s1">&#39;strip_accents&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_tfidf_vectorizer">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.build_tfidf_vectorizer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_tfidf_vectorizer</span><span class="p">(</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">min_df</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">max_df</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">sublinear_tf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TfidfVectorizer</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">max_features</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="n">ngram_range</span><span class="p">,</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="n">min_df</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="n">max_df</span><span class="p">,</span>
+        <span class="s1">&#39;sublinear_tf&#39;</span><span class="p">:</span> <span class="n">sublinear_tf</span><span class="p">,</span>
+        <span class="s1">&#39;lowercase&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;strip_accents&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">TfidfVectorizer</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_vectorizer">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.build_vectorizer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_vectorizer</span><span class="p">(</span>
+    <span class="n">vectorizer_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+    <span class="n">preset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CountVectorizer</span> <span class="o">|</span> <span class="n">TfidfVectorizer</span><span class="p">:</span>
+    
+    <span class="c1"># Charger le preset si fourni</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">preset</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">preset</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PRESET_CONFIGS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Preset &#39;</span><span class="si">{</span><span class="n">preset</span><span class="si">}</span><span class="s2">&#39; inconnu. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Disponibles: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">PRESET_CONFIGS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">PRESET_CONFIGS</span><span class="p">[</span><span class="n">preset</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Fusionner avec kwargs (kwargs prioritaires)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Créer le vectoriseur approprié</span>
+    <span class="k">if</span> <span class="n">vectorizer_type</span> <span class="o">==</span> <span class="s1">&#39;count&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">build_count_vectorizer</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">vectorizer_type</span> <span class="o">==</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">build_tfidf_vectorizer</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;vectorizer_type &#39;</span><span class="si">{</span><span class="n">vectorizer_type</span><span class="si">}</span><span class="s2">&#39; invalide. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Choisir &#39;count&#39; ou &#39;tfidf&#39;.&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="c1"># Custom Transformers</span>
+
+<div class="viewcode-block" id="FeatureWeighter">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.FeatureWeighter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FeatureWeighter</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transformer personnalisé pour pondérer les features par un facteur multiplicatif.</span>
+
+<span class="sd">    Utilisé pour augmenter l&#39;importance relative de certaines features</span>
+<span class="sd">    (ex: multiplier les features du titre par 2x ou 3x).</span>
+
+<span class="sd">    Hérite de BaseEstimator et TransformerMixin pour être compatible avec</span>
+<span class="sd">    sklearn et picklable pour le multiprocessing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Paramètres</span>
+<span class="sd">        ----------</span>
+<span class="sd">        weight : float, default=1.0</span>
+<span class="sd">            Facteur multiplicatif à appliquer aux features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+
+<div class="viewcode-block" id="FeatureWeighter.fit">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.FeatureWeighter.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit method (no-op).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="FeatureWeighter.transform">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.FeatureWeighter.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Multiplie les features par le poids.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span></div>
+</div>
+
+
+
+<span class="c1"># Pipelines de Vectorisation</span>
+
+<div class="viewcode-block" id="build_split_vectorizer_pipeline">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.build_split_vectorizer_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_split_vectorizer_pipeline</span><span class="p">(</span>
+    <span class="n">vectorizer_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+    <span class="n">text_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title_clean&#39;</span><span class="p">,</span> <span class="s1">&#39;desc_clean&#39;</span><span class="p">],</span>
+    <span class="n">feature_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_features_title</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">max_features_desc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">title_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnTransformer</span><span class="p">:</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_columns</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;split_vectorizer_pipeline requiert au moins 2 colonnes texte&quot;</span><span class="p">)</span>
+
+    <span class="n">transformers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Vectoriseur pour le titre</span>
+    <span class="n">vec_title</span> <span class="o">=</span> <span class="n">build_vectorizer</span><span class="p">(</span>
+        <span class="n">vectorizer_type</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="n">max_features_title</span><span class="p">,</span>
+        <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Appliquer la pondération si différente de 1.0</span>
+    <span class="k">if</span> <span class="n">title_weight</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="n">title_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+            <span class="p">(</span><span class="s1">&#39;vectorizer&#39;</span><span class="p">,</span> <span class="n">vec_title</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;weighter&#39;</span><span class="p">,</span> <span class="n">FeatureWeighter</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">title_weight</span><span class="p">))</span>
+        <span class="p">])</span>
+        <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;vec_title&#39;</span><span class="p">,</span> <span class="n">title_pipeline</span><span class="p">,</span> <span class="n">text_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;vec_title&#39;</span><span class="p">,</span> <span class="n">vec_title</span><span class="p">,</span> <span class="n">text_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="c1"># Vectoriseur pour la description</span>
+    <span class="n">vec_desc</span> <span class="o">=</span> <span class="n">build_vectorizer</span><span class="p">(</span>
+        <span class="n">vectorizer_type</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="n">max_features_desc</span><span class="p">,</span>
+        <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+    <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;vec_desc&#39;</span><span class="p">,</span> <span class="n">vec_desc</span><span class="p">,</span> <span class="n">text_columns</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="c1"># Features manuelles (si fournies)</span>
+    <span class="k">if</span> <span class="n">feature_columns</span><span class="p">:</span>
+        <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">feature_columns</span><span class="p">))</span>
+
+    <span class="c1"># Désactiver parallélisation si title_weight != 1.0 pour éviter erreurs de sérialisation</span>
+    <span class="n">n_jobs</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">title_weight</span> <span class="o">!=</span> <span class="mf">1.0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">ColumnTransformer</span><span class="p">(</span>
+        <span class="n">transformers</span><span class="o">=</span><span class="n">transformers</span><span class="p">,</span>
+        <span class="n">remainder</span><span class="o">=</span><span class="s1">&#39;drop&#39;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_merged_vectorizer_pipeline">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.build_merged_vectorizer_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_merged_vectorizer_pipeline</span><span class="p">(</span>
+    <span class="n">vectorizer_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+    <span class="n">text_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;text_merged&#39;</span><span class="p">,</span>
+    <span class="n">feature_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnTransformer</span><span class="p">:</span>
+    
+    <span class="n">transformers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Vectoriseur pour le texte fusionné</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">build_vectorizer</span><span class="p">(</span>
+        <span class="n">vectorizer_type</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+        <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+    <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;vectorizer&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">text_column</span><span class="p">))</span>
+
+    <span class="c1"># Features manuelles (si fournies)</span>
+    <span class="k">if</span> <span class="n">feature_columns</span><span class="p">:</span>
+        <span class="n">transformers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">feature_columns</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">ColumnTransformer</span><span class="p">(</span>
+        <span class="n">transformers</span><span class="o">=</span><span class="n">transformers</span><span class="p">,</span>
+        <span class="n">remainder</span><span class="o">=</span><span class="s1">&#39;drop&#39;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># Utilitaires</span>
+<span class="c1"># =============================================================================</span>
+
+<div class="viewcode-block" id="get_available_presets">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.get_available_presets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_available_presets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+    
+    <span class="k">return</span> <span class="n">PRESET_CONFIGS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="print_available_presets">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.print_available_presets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_available_presets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Configurations prédéfinies disponibles:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">PRESET_CONFIGS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_vectorizer_info">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.get_vectorizer_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_vectorizer_info</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">max_features</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">ngram_range</span><span class="p">,</span>
+        <span class="s1">&#39;min_df&#39;</span><span class="p">:</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">min_df</span><span class="p">,</span>
+        <span class="s1">&#39;max_df&#39;</span><span class="p">:</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">max_df</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="compare_vectorizer_configs">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.compare_vectorizer_configs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compare_vectorizer_configs</span><span class="p">(</span><span class="n">vec1</span><span class="p">,</span> <span class="n">vec2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    
+    <span class="n">info1</span> <span class="o">=</span> <span class="n">get_vectorizer_info</span><span class="p">(</span><span class="n">vec1</span><span class="p">)</span>
+    <span class="n">info2</span> <span class="o">=</span> <span class="n">get_vectorizer_info</span><span class="p">(</span><span class="n">vec2</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Comparaison de configurations:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Paramètre&#39;</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Vectorizer 1&#39;</span><span class="si">:</span><span class="s2">&lt;30</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Vectorizer 2&#39;</span><span class="si">:</span><span class="s2">&lt;30</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+    <span class="n">all_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">info1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">info2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_keys</span><span class="p">):</span>
+        <span class="n">val1</span> <span class="o">=</span> <span class="n">info1</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+        <span class="n">val2</span> <span class="o">=</span> <span class="n">info2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">val1</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;30</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">val2</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;30</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Configuration Management (pour pipeline entre notebooks)</span>
+
+<div class="viewcode-block" id="save_vectorization_config">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.save_vectorization_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_vectorization_config</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">],</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+    <span class="c1"># Créer le dictionnaire complet</span>
+    <span class="n">full_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">**</span><span class="n">config</span><span class="p">,</span>
+        <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="p">{},</span>
+        <span class="s1">&#39;saved_at&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Convertir tuples en listes pour JSON</span>
+    <span class="k">if</span> <span class="s1">&#39;ngram_range&#39;</span> <span class="ow">in</span> <span class="n">full_config</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">full_config</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">full_config</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">full_config</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Créer le répertoire si nécessaire</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Sauvegarder</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">full_config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Configuration sauvegardée: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_vectorization_config">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.load_vectorization_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_vectorization_config</span><span class="p">(</span><span class="n">config_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnTransformer</span><span class="p">:</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="c1"># Charger la configuration</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration chargée depuis: </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Vectorizer: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vectorizer_type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Strategy: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strategy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convertir listes en tuples</span>
+    <span class="k">if</span> <span class="s1">&#39;ngram_range&#39;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">config</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Construire le vectorizer selon la stratégie</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strategy&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;split&#39;</span><span class="p">:</span>
+        <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">build_split_vectorizer_pipeline</span><span class="p">(</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;vectorizer_type&#39;</span><span class="p">],</span>
+            <span class="n">text_columns</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;text_columns&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;title_clean&#39;</span><span class="p">,</span> <span class="s1">&#39;desc_clean&#39;</span><span class="p">]),</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;feature_columns&#39;</span><span class="p">),</span>
+            <span class="n">max_features_title</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_features_title&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">),</span>
+            <span class="n">max_features_desc</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_features_desc&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">),</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+            <span class="n">title_weight</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title_weight&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="n">min_df</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_df&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">max_df</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_df&#39;</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># merged</span>
+        <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">build_merged_vectorizer_pipeline</span><span class="p">(</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;vectorizer_type&#39;</span><span class="p">],</span>
+            <span class="n">text_column</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;text_column&#39;</span><span class="p">,</span> <span class="s1">&#39;text_merged&#39;</span><span class="p">),</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;feature_columns&#39;</span><span class="p">),</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_features&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">),</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+            <span class="n">min_df</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_df&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">max_df</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_df&#39;</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Vectorizer construit avec succès&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vectorizer</span></div>
+
+
+
+<div class="viewcode-block" id="get_config_summary">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.vectorization.get_config_summary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_config_summary</span><span class="p">(</span><span class="n">config_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RÉSUMÉ DE LA CONFIGURATION&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Vectorizer: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vectorizer_type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Strategy: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strategy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;N-gram range: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strategy&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;split&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max features (title): </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_features_title&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max features (desc): </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_features_desc&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max features: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_features&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Min df: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_df&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max df: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_df&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;feature_columns&#39;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Features manuelles: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;feature_columns&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> colonnes&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Features manuelles: Non&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;metadata&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Métadonnées:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rakuten_text.models &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">rakuten_text.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de rakuten_text.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span><span class="p">,</span> <span class="n">SGDClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">classification_report</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.categories</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_category_name</span>
+
+
+<div class="viewcode-block" id="get_model">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.models.get_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="n">model_name</span> <span class="o">=</span> <span class="n">model_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s1">&#39;logreg&#39;</span><span class="p">:</span>
+        <span class="c1"># Régression Logistique multinomiale</span>
+        <span class="c1"># Baseline solide pour la classification de texte</span>
+        <span class="c1"># solver=&#39;lbfgs&#39; est robuste pour les données multiclasses</span>
+        <span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>                    <span class="c1"># Régularisation inverse (plus haut = moins de régularisation)</span>
+            <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span>           <span class="c1"># Optimiseur efficace pour multiclasse</span>
+            <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>            <span class="c1"># Nombre max d&#39;itérations pour convergence</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                <span class="c1"># Utiliser tous les cœurs CPU</span>
+            <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        <span class="n">default_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="o">**</span><span class="n">default_params</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s1">&#39;svm&#39;</span><span class="p">:</span>
+        <span class="c1"># SVM linéaire via Stochastic Gradient Descent</span>
+        <span class="c1"># Approximation efficace du SVM pour grands datasets</span>
+        <span class="c1"># loss=&#39;hinge&#39; correspond au SVM classique</span>
+        <span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="s1">&#39;hinge&#39;</span><span class="p">,</span>             <span class="c1"># Fonction de perte SVM</span>
+            <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>               <span class="c1"># Coefficient de régularisation L2</span>
+            <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>            <span class="c1"># Nombre max d&#39;epochs</span>
+            <span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>                 <span class="c1"># Critère de convergence</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        <span class="n">default_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SGDClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">default_params</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">:</span>
+        <span class="c1"># XGBoost: Gradient Boosting optimisé</span>
+        <span class="c1"># Capture les interactions non-linéaires entre features</span>
+        <span class="c1"># Très performant pour la classification multiclasse</span>
+        <span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;use_label_encoder&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Désactivé (deprecated)</span>
+            <span class="s1">&#39;eval_metric&#39;</span><span class="p">:</span> <span class="s1">&#39;mlogloss&#39;</span><span class="p">,</span>   <span class="c1"># Log-loss multiclasse</span>
+            <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>         <span class="c1"># Nombre d&#39;arbres (augmenter si sous-apprentissage)</span>
+            <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>              <span class="c1"># Profondeur max des arbres</span>
+            <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>        <span class="c1"># Taux d&#39;apprentissage</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;verbosity&#39;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        <span class="n">default_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">default_params</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">model_name</span> <span class="o">==</span> <span class="s1">&#39;rf&#39;</span><span class="p">:</span>
+        <span class="c1"># Random Forest: Ensemble de decision trees</span>
+        <span class="c1"># Robuste au surapprentissage, parallélisable</span>
+        <span class="c1"># Baseline non-linéaire complémentaire à LogReg</span>
+        <span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>         <span class="c1"># Nombre d&#39;arbres dans la forêt</span>
+            <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># Profondeur illimitée (contrôlée par min_samples_split)</span>
+            <span class="s1">&#39;min_samples_split&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>      <span class="c1"># Min échantillons pour splitter un nœud</span>
+            <span class="s1">&#39;min_samples_leaf&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>       <span class="c1"># Min échantillons dans une feuille</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        <span class="n">default_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">default_params</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Modèle &#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&#39; non reconnu. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Choisir parmi: &#39;logreg&#39;, &#39;svm&#39;, &#39;xgboost&#39;, &#39;rf&#39;&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_available_models">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.models.get_available_models">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_available_models</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;logreg&#39;</span><span class="p">,</span> <span class="s1">&#39;svm&#39;</span><span class="p">,</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">,</span> <span class="s1">&#39;rf&#39;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_model_info">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.models.get_model_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_model_info</span><span class="p">(</span><span class="n">model_name</span><span class="p">):</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;logreg&#39;</span><span class="p">:</span> <span class="s2">&quot;Régression Logistique: Modèle linéaire baseline, rapide et interprétable.&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;svm&#39;</span><span class="p">:</span> <span class="s2">&quot;SVM Linéaire: Maximisation de marge, efficace pour espaces haute dimension.&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;xgboost&#39;</span><span class="p">:</span> <span class="s2">&quot;XGBoost: Gradient Boosting, capture des interactions non-linéaires complexes.&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="s2">&quot;Random Forest: Ensemble d&#39;arbres, robuste et parallélisable.&quot;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;Modèle inconnu&quot;</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="build_full_pipeline">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.models.build_full_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_full_pipeline</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;logreg&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+        <span class="p">(</span><span class="s1">&#39;vectorizer&#39;</span><span class="p">,</span> <span class="n">vectorizer</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">pipeline</span></div>
+
+
+
+<div class="viewcode-block" id="evaluate_pipeline">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.models.evaluate_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluate_pipeline</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">,</span>
+    <span class="n">X_val</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_category_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+
+    <span class="c1"># Prédiction avec mesure du temps</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val</span><span class="p">)</span>
+    <span class="n">predict_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+
+    <span class="c1"># Calcul des métriques</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;weighted&#39;</span><span class="p">)</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="c1"># Affichage verbose</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RÉSULTATS DE L&#39;ÉVALUATION&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;F1-Score (weighted): </span><span class="si">{</span><span class="n">f1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy:            </span><span class="si">{</span><span class="n">acc</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Temps prédiction:    </span><span class="si">{</span><span class="n">predict_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rapport de classification:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="c1"># Ajouter les noms de catégories si demandé</span>
+        <span class="k">if</span> <span class="n">show_category_names</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+            <span class="n">unique_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">]))</span>
+            <span class="n">target_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_category_name</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">short</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">unique_labels</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="n">target_names</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">f1</span><span class="p">,</span>
+        <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span>
+        <span class="s1">&#39;y_pred&#39;</span><span class="p">:</span> <span class="n">y_pred</span><span class="p">,</span>
+        <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">predict_time</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="train_and_evaluate">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.models.train_and_evaluate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_and_evaluate</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">,</span>
+    <span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">,</span>
+    <span class="n">X_val</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_category_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Entraînement du pipeline...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Entraînement avec mesure du temps</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">train_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Entraînement terminé en </span><span class="si">{</span><span class="n">train_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Évaluation</span>
+    <span class="n">eval_results</span> <span class="o">=</span> <span class="n">evaluate_pipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                                     <span class="n">show_category_names</span><span class="o">=</span><span class="n">show_category_names</span><span class="p">)</span>
+
+    <span class="c1"># Combiner les résultats</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">**</span><span class="n">eval_results</span><span class="p">,</span>
+        <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">train_time</span><span class="p">,</span>
+        <span class="s1">&#39;pipeline&#39;</span><span class="p">:</span> <span class="n">pipeline</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
