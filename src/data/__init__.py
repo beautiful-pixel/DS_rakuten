@@ -19,6 +19,5 @@ from .load_data import(
     split_data,
     split_path,
     split_txt,
-    get_mask,
     images_read,
 )
