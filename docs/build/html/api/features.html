@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>features package &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="features.image package" href="features.image.html" />
+    <link rel="prev" title="data package" href="data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data.html">data package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">features package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html">features.image package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html">features.text package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-features.build_image_features">features.build_image_features module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#features.build_image_features.build_image_pipeline"><code class="docutils literal notranslate"><span class="pre">build_image_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-features.build_multimodal_features">features.build_multimodal_features module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-features.build_text_features">features.build_text_features module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#features.build_text_features.build_text_pipeline"><code class="docutils literal notranslate"><span class="pre">build_text_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-features">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#features.build_text_pipeline"><code class="docutils literal notranslate"><span class="pre">build_text_pipeline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#features.build_image_pipeline"><code class="docutils literal notranslate"><span class="pre">build_image_pipeline()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rakuten_text.html">rakuten_text package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+      <li class="breadcrumb-item active">features package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/features.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="features-package">
+<h1>features package<a class="headerlink" href="#features-package" title="Lien vers cette rubrique"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Lien vers cette rubrique"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.image.html">features.image package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.color">features.image.color module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.color.is_pixel_in_bin"><code class="docutils literal notranslate"><span class="pre">is_pixel_in_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.color.ColorEncoder"><code class="docutils literal notranslate"><span class="pre">ColorEncoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.color.ColorEncoder.fit"><code class="docutils literal notranslate"><span class="pre">ColorEncoder.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.color.ColorEncoder.transform"><code class="docutils literal notranslate"><span class="pre">ColorEncoder.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.color.MeanRGBTransformer"><code class="docutils literal notranslate"><span class="pre">MeanRGBTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.color.MeanRGBTransformer.fit"><code class="docutils literal notranslate"><span class="pre">MeanRGBTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.color.MeanRGBTransformer.transform"><code class="docutils literal notranslate"><span class="pre">MeanRGBTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.color.HistRGBTransformer"><code class="docutils literal notranslate"><span class="pre">HistRGBTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.color.HistRGBTransformer.fit"><code class="docutils literal notranslate"><span class="pre">HistRGBTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.color.HistRGBTransformer.transform"><code class="docutils literal notranslate"><span class="pre">HistRGBTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.contours">features.image.contours module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.contours.get_length_and_vertex"><code class="docutils literal notranslate"><span class="pre">get_length_and_vertex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.contours.get_main_contours"><code class="docutils literal notranslate"><span class="pre">get_main_contours()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.keypoint">features.image.keypoint module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.keypoint.get_SIFT_descriptors"><code class="docutils literal notranslate"><span class="pre">get_SIFT_descriptors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.keypoint.CornerCounter"><code class="docutils literal notranslate"><span class="pre">CornerCounter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.keypoint.CornerCounter.fit"><code class="docutils literal notranslate"><span class="pre">CornerCounter.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.keypoint.CornerCounter.transform"><code class="docutils literal notranslate"><span class="pre">CornerCounter.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.keypoint.BoVWTransformer"><code class="docutils literal notranslate"><span class="pre">BoVWTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.keypoint.BoVWTransformer.fit"><code class="docutils literal notranslate"><span class="pre">BoVWTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.keypoint.BoVWTransformer.transform"><code class="docutils literal notranslate"><span class="pre">BoVWTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.shape">features.image.shape module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.shape.ParallelogramCounter"><code class="docutils literal notranslate"><span class="pre">ParallelogramCounter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.shape.ParallelogramCounter.fit"><code class="docutils literal notranslate"><span class="pre">ParallelogramCounter.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.shape.ParallelogramCounter.transform"><code class="docutils literal notranslate"><span class="pre">ParallelogramCounter.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.texture">features.image.texture module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.texture.HOGTransformer"><code class="docutils literal notranslate"><span class="pre">HOGTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.texture.HOGTransformer.fit"><code class="docutils literal notranslate"><span class="pre">HOGTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.texture.HOGTransformer.transform"><code class="docutils literal notranslate"><span class="pre">HOGTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.transforms">features.image.transforms module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.transforms.Flattener"><code class="docutils literal notranslate"><span class="pre">Flattener</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.Flattener.fit"><code class="docutils literal notranslate"><span class="pre">Flattener.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.Flattener.transform"><code class="docutils literal notranslate"><span class="pre">Flattener.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.transforms.Resizer"><code class="docutils literal notranslate"><span class="pre">Resizer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.Resizer.fit"><code class="docutils literal notranslate"><span class="pre">Resizer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.Resizer.transform"><code class="docutils literal notranslate"><span class="pre">Resizer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.transforms.crop"><code class="docutils literal notranslate"><span class="pre">crop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.transforms.bg_crop"><code class="docutils literal notranslate"><span class="pre">bg_crop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.transforms.ImageCleaner"><code class="docutils literal notranslate"><span class="pre">ImageCleaner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.ImageCleaner.fit"><code class="docutils literal notranslate"><span class="pre">ImageCleaner.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.ImageCleaner.transform"><code class="docutils literal notranslate"><span class="pre">ImageCleaner.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.transforms.CropTransformer"><code class="docutils literal notranslate"><span class="pre">CropTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.CropTransformer.fit"><code class="docutils literal notranslate"><span class="pre">CropTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.transforms.CropTransformer.transform"><code class="docutils literal notranslate"><span class="pre">CropTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image.utils">features.image.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.utils.get_squared_shape"><code class="docutils literal notranslate"><span class="pre">get_squared_shape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.utils.to_square_shape"><code class="docutils literal notranslate"><span class="pre">to_square_shape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.utils.are_parallel"><code class="docutils literal notranslate"><span class="pre">are_parallel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.utils.mask_background"><code class="docutils literal notranslate"><span class="pre">mask_background()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.image.html#module-features.image">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.ColorEncoder"><code class="docutils literal notranslate"><span class="pre">ColorEncoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.ColorEncoder.fit"><code class="docutils literal notranslate"><span class="pre">ColorEncoder.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.ColorEncoder.transform"><code class="docutils literal notranslate"><span class="pre">ColorEncoder.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.MeanRGBTransformer"><code class="docutils literal notranslate"><span class="pre">MeanRGBTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.MeanRGBTransformer.fit"><code class="docutils literal notranslate"><span class="pre">MeanRGBTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.MeanRGBTransformer.transform"><code class="docutils literal notranslate"><span class="pre">MeanRGBTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.HistRGBTransformer"><code class="docutils literal notranslate"><span class="pre">HistRGBTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.HistRGBTransformer.fit"><code class="docutils literal notranslate"><span class="pre">HistRGBTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.HistRGBTransformer.transform"><code class="docutils literal notranslate"><span class="pre">HistRGBTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.CornerCounter"><code class="docutils literal notranslate"><span class="pre">CornerCounter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.CornerCounter.fit"><code class="docutils literal notranslate"><span class="pre">CornerCounter.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.CornerCounter.transform"><code class="docutils literal notranslate"><span class="pre">CornerCounter.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.BoVWTransformer"><code class="docutils literal notranslate"><span class="pre">BoVWTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.BoVWTransformer.fit"><code class="docutils literal notranslate"><span class="pre">BoVWTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.BoVWTransformer.transform"><code class="docutils literal notranslate"><span class="pre">BoVWTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.ParallelogramCounter"><code class="docutils literal notranslate"><span class="pre">ParallelogramCounter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.ParallelogramCounter.fit"><code class="docutils literal notranslate"><span class="pre">ParallelogramCounter.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.ParallelogramCounter.transform"><code class="docutils literal notranslate"><span class="pre">ParallelogramCounter.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.HOGTransformer"><code class="docutils literal notranslate"><span class="pre">HOGTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.HOGTransformer.fit"><code class="docutils literal notranslate"><span class="pre">HOGTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.HOGTransformer.transform"><code class="docutils literal notranslate"><span class="pre">HOGTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.Flattener"><code class="docutils literal notranslate"><span class="pre">Flattener</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.Flattener.fit"><code class="docutils literal notranslate"><span class="pre">Flattener.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.Flattener.transform"><code class="docutils literal notranslate"><span class="pre">Flattener.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.Resizer"><code class="docutils literal notranslate"><span class="pre">Resizer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.Resizer.fit"><code class="docutils literal notranslate"><span class="pre">Resizer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.Resizer.transform"><code class="docutils literal notranslate"><span class="pre">Resizer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.ImageCleaner"><code class="docutils literal notranslate"><span class="pre">ImageCleaner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.ImageCleaner.fit"><code class="docutils literal notranslate"><span class="pre">ImageCleaner.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.ImageCleaner.transform"><code class="docutils literal notranslate"><span class="pre">ImageCleaner.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.image.html#features.image.CropTransformer"><code class="docutils literal notranslate"><span class="pre">CropTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.CropTransformer.fit"><code class="docutils literal notranslate"><span class="pre">CropTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.image.html#features.image.CropTransformer.transform"><code class="docutils literal notranslate"><span class="pre">CropTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="features.text.html">features.text package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.numeric_tokens.html">features.text.numeric_tokens package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens.dictionaries">features.text.numeric_tokens.dictionaries module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens.replacer">features.text.numeric_tokens.replacer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens.transformers">features.text.numeric_tokens.transformers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.numeric_tokens.html#module-features.text.numeric_tokens">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#module-features.text.cleaning">features.text.cleaning module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.cleaning.TextCleaner"><code class="docutils literal notranslate"><span class="pre">TextCleaner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.cleaning.TextCleaner.fit"><code class="docutils literal notranslate"><span class="pre">TextCleaner.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.cleaning.TextCleaner.transform"><code class="docutils literal notranslate"><span class="pre">TextCleaner.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#module-features.text.frequency">features.text.frequency module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.frequency.TokenFrequencyTransformer"><code class="docutils literal notranslate"><span class="pre">TokenFrequencyTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.frequency.TokenFrequencyTransformer.fit"><code class="docutils literal notranslate"><span class="pre">TokenFrequencyTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.frequency.TokenFrequencyTransformer.transform"><code class="docutils literal notranslate"><span class="pre">TokenFrequencyTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#module-features.text.language">features.text.language module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.language.detect_lang"><code class="docutils literal notranslate"><span class="pre">detect_lang()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.language.LanguageDetector"><code class="docutils literal notranslate"><span class="pre">LanguageDetector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.language.LanguageDetector.fit"><code class="docutils literal notranslate"><span class="pre">LanguageDetector.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.language.LanguageDetector.transform"><code class="docutils literal notranslate"><span class="pre">LanguageDetector.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#module-features.text.length">features.text.length module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.length.TextLengthTransformer"><code class="docutils literal notranslate"><span class="pre">TextLengthTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.length.TextLengthTransformer.fit"><code class="docutils literal notranslate"><span class="pre">TextLengthTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.length.TextLengthTransformer.transform"><code class="docutils literal notranslate"><span class="pre">TextLengthTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.text.html#module-features.text">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.TextCleaner"><code class="docutils literal notranslate"><span class="pre">TextCleaner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.TextCleaner.fit"><code class="docutils literal notranslate"><span class="pre">TextCleaner.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.TextCleaner.transform"><code class="docutils literal notranslate"><span class="pre">TextCleaner.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.NumericTokensTransformer"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.NumericTokensTransformer.fit"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.NumericTokensTransformer.get_tokens"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.get_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.NumericTokensTransformer.transform"><code class="docutils literal notranslate"><span class="pre">NumericTokensTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.TokenFrequencyTransformer"><code class="docutils literal notranslate"><span class="pre">TokenFrequencyTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.TokenFrequencyTransformer.fit"><code class="docutils literal notranslate"><span class="pre">TokenFrequencyTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.TokenFrequencyTransformer.transform"><code class="docutils literal notranslate"><span class="pre">TokenFrequencyTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.TextLengthTransformer"><code class="docutils literal notranslate"><span class="pre">TextLengthTransformer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.TextLengthTransformer.fit"><code class="docutils literal notranslate"><span class="pre">TextLengthTransformer.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.TextLengthTransformer.transform"><code class="docutils literal notranslate"><span class="pre">TextLengthTransformer.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="features.text.html#features.text.LanguageDetector"><code class="docutils literal notranslate"><span class="pre">LanguageDetector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.LanguageDetector.fit"><code class="docutils literal notranslate"><span class="pre">LanguageDetector.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="features.text.html#features.text.LanguageDetector.transform"><code class="docutils literal notranslate"><span class="pre">LanguageDetector.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Lien vers cette rubrique"></a></h2>
+</section>
+<section id="module-features.build_image_features">
+<span id="features-build-image-features-module"></span><h2>features.build_image_features module<a class="headerlink" href="#module-features.build_image_features" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.build_image_features.build_image_pipeline">
+<span class="sig-prename descclassname"><span class="pre">features.build_image_features.</span></span><span class="sig-name descname"><span class="pre">build_image_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/build_image_features.html#build_image_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.build_image_features.build_image_pipeline" title="Lien vers cette définition"></a></dt>
+<dd><p>Construit un pipeline de features visuelles combinant plusieurs familles
+de descripteurs : couleur, texture et forme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pipeline de feature engineering image.</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>sklearn.pipeline.Pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-features.build_multimodal_features">
+<span id="features-build-multimodal-features-module"></span><h2>features.build_multimodal_features module<a class="headerlink" href="#module-features.build_multimodal_features" title="Lien vers cette rubrique"></a></h2>
+</section>
+<section id="module-features.build_text_features">
+<span id="features-build-text-features-module"></span><h2>features.build_text_features module<a class="headerlink" href="#module-features.build_text_features" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.build_text_features.build_text_pipeline">
+<span class="sig-prename descclassname"><span class="pre">features.build_text_features.</span></span><span class="sig-name descname"><span class="pre">build_text_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/build_text_features.html#build_text_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.build_text_features.build_text_pipeline" title="Lien vers cette définition"></a></dt>
+<dd><p>Construit le pipeline complet de feature engineering texte.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pipeline texte.</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>sklearn.pipeline.Pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-features">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-features" title="Lien vers cette rubrique"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="features.build_text_pipeline">
+<span class="sig-prename descclassname"><span class="pre">features.</span></span><span class="sig-name descname"><span class="pre">build_text_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/build_text_features.html#build_text_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.build_text_pipeline" title="Lien vers cette définition"></a></dt>
+<dd><p>Construit le pipeline complet de feature engineering texte.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pipeline texte.</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>sklearn.pipeline.Pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="features.build_image_pipeline">
+<span class="sig-prename descclassname"><span class="pre">features.</span></span><span class="sig-name descname"><span class="pre">build_image_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/features/build_image_features.html#build_image_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.build_image_pipeline" title="Lien vers cette définition"></a></dt>
+<dd><p>Construit un pipeline de features visuelles combinant plusieurs familles
+de descripteurs : couleur, texture et forme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pipeline de feature engineering image.</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>sklearn.pipeline.Pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="data.html" class="btn btn-neutral float-left" title="data package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="features.image.html" class="btn btn-neutral float-right" title="features.image package" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

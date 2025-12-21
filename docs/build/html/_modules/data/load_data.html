@@ -1,0 +1,196 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data.load_data &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">data.load_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de data.load_data</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+<span class="n">MODULE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MODULE_DIR</span><span class="p">,</span> <span class="s2">&quot;../../data/raw/&quot;</span><span class="p">)</span>
+<span class="n">IMG_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MODULE_DIR</span><span class="p">,</span> <span class="s2">&quot;../../data/images/image_train/&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="split_data">
+<a class="viewcode-back" href="../../api/data.html#data.load_data.split_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retourne les données splitées entre le jeu de test utilisé pour ce projet</span>
+<span class="sd">    et le jeu d&#39;entraintement / validation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="o">+</span><span class="s1">&#39;X_train_update.csv&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="o">+</span><span class="s1">&#39;Y_train_CVw08PX.csv&#39;</span><span class="p">)[</span><span class="s1">&#39;prdtypecode&#39;</span><span class="p">]</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span></div>
+
+
+<div class="viewcode-block" id="get_path">
+<a class="viewcode-back" href="../../api/data.html#data.load_data.get_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_path</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retourne les chemins des images depuis ce module</span>
+<span class="sd">    </span>
+<span class="sd">    :param df: dataframe comprenant productid et imageid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_names</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;image_&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;imageid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_product_&quot;</span> <span class="o">+</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;productid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">IMG_DIR</span> <span class="o">+</span> <span class="n">file_names</span></div>
+
+
+<div class="viewcode-block" id="split_path">
+<a class="viewcode-back" href="../../api/data.html#data.load_data.split_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_path</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retourne les chemins des images splités entre le jeu de test utilisé pour ce projet</span>
+<span class="sd">    et le jeu d&#39;entraintement / validation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">()</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span> <span class="o">=</span> <span class="n">get_path</span><span class="p">(</span><span class="n">X_train</span><span class="p">),</span> <span class="n">get_path</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span></div>
+
+
+<div class="viewcode-block" id="split_txt">
+<a class="viewcode-back" href="../../api/data.html#data.load_data.split_txt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_txt</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retourne les données textuelles splitées entre le jeu de test utilisé pour ce projet</span>
+<span class="sd">    et le jeu d&#39;entraintement / validation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">()</span>
+    <span class="n">X_train</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[[</span><span class="s1">&#39;designation&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">]]</span>
+    <span class="n">X_test</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[[</span><span class="s1">&#39;designation&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span></div>
+
+
+<div class="viewcode-block" id="images_read">
+<a class="viewcode-back" href="../../api/data.html#data.load_data.images_read">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">images_read</span><span class="p">(</span><span class="n">impath</span><span class="p">,</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span> <span class="n">grayscale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_load</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Docstring for images_read</span>
+<span class="sd">    :param impath: chemin des images</span>
+<span class="sd">    :param dsize: dimension des images souhaitée</span>
+<span class="sd">    :param grayscale: pour charger l&#39;image en niveau de gris</span>
+<span class="sd">    :param max_load: représente le nombre d&#39;octet maximum chargé en mémoire 10**9 =&gt; 1 Go</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">impath</span><span class="p">)</span>
+    <span class="c1"># taille maximal en octet</span>
+    <span class="n">total_size</span> <span class="o">=</span> <span class="n">n</span><span class="o">*</span><span class="n">dsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">dsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">grayscale</span> <span class="k">else</span> <span class="n">n</span><span class="o">*</span><span class="n">dsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">dsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_load</span><span class="o">/</span><span class="n">total_size</span><span class="p">))</span> <span class="k">if</span> <span class="n">total_size</span> <span class="o">&gt;</span> <span class="n">max_load</span> <span class="k">else</span> <span class="n">n</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># si c&#39;est une Series il faut reindexé par 0, ... ,n pour pouvoir utiliser les indices de la même manière qu&#39;une liste</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">impath</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="n">impath</span> <span class="o">=</span> <span class="n">impath</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">stop</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">impath</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">as</span> <span class="n">img</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">grayscale</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">dsize</span><span class="p">)</span>
+            <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">images</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

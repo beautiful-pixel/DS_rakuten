@@ -1,0 +1,1017 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rakuten_text.experiments &mdash; Documentation DS Rakuten 0.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=af8511e3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DS Rakuten
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DS Rakuten</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">rakuten_text.experiments</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de rakuten_text.experiments</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Ce module fournit des fonctions pour exécuter des expériences systématiques</span>
+<span class="sd">comparant CountVectorizer vs TF-IDF, avec et sans features manuelles,</span>
+<span class="sd">ainsi que des grid searches pour les hyperparamètres.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnTransformer</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_text_features</span><span class="p">,</span> <span class="n">get_feature_names</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.vectorization</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">build_count_vectorizer</span><span class="p">,</span>
+    <span class="n">build_tfidf_vectorizer</span><span class="p">,</span>
+    <span class="n">build_split_vectorizer_pipeline</span><span class="p">,</span>
+    <span class="n">build_merged_vectorizer_pipeline</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_full_pipeline</span><span class="p">,</span> <span class="n">train_and_evaluate</span><span class="p">,</span> <span class="n">get_model</span>
+
+
+<span class="c1"># </span>
+<div class="viewcode-block" id="run_single_experiment">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.run_single_experiment">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_single_experiment</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">X_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">vectorizer_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;split&#39;</span><span class="p">,</span> <span class="s1">&#39;merged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;split&#39;</span><span class="p">,</span>
+    <span class="n">text_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title_clean&#39;</span><span class="p">,</span> <span class="s1">&#39;desc_clean&#39;</span><span class="p">],</span>
+    <span class="n">feature_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;logreg&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expérience: </span><span class="si">{</span><span class="n">vectorizer_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">model_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Strategy: </span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Max features: </span><span class="si">{</span><span class="n">max_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  N-gram range: </span><span class="si">{</span><span class="n">ngram_range</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Features manuelles: </span><span class="si">{</span><span class="s1">&#39;Oui&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">feature_columns</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Non&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Construire le pipeline de vectorisation</span>
+    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s1">&#39;split&#39;</span><span class="p">:</span>
+        <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">build_split_vectorizer_pipeline</span><span class="p">(</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="n">vectorizer_type</span><span class="p">,</span>
+            <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">,</span>
+            <span class="n">max_features_title</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">max_features_desc</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># merged</span>
+        <span class="c1"># Assumer que la colonne merged existe</span>
+        <span class="n">merged_col</span> <span class="o">=</span> <span class="n">text_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;text_merged&#39;</span>
+        <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">build_merged_vectorizer_pipeline</span><span class="p">(</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="n">vectorizer_type</span><span class="p">,</span>
+            <span class="n">text_column</span><span class="o">=</span><span class="n">merged_col</span><span class="p">,</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">,</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Construire et entraîner le pipeline complet</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">build_full_pipeline</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">train_and_evaluate</span><span class="p">(</span>
+        <span class="n">pipeline</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Ajouter les métadonnées de configuration</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;vectorizer_type&#39;</span><span class="p">:</span> <span class="n">vectorizer_type</span><span class="p">,</span>
+        <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="n">strategy</span><span class="p">,</span>
+        <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">max_features</span><span class="p">,</span>
+        <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="n">ngram_range</span><span class="p">,</span>
+        <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
+        <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="n">feature_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;n_feature_cols&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span> <span class="k">if</span> <span class="n">feature_columns</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<span class="c1"># Grid Search Hyperparamètres</span>
+
+<div class="viewcode-block" id="run_hyperparameter_grid">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.run_hyperparameter_grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_hyperparameter_grid</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">X_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">vectorizer_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+    <span class="n">max_features_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">],</span>
+    <span class="n">ngram_range_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;logreg&#39;</span><span class="p">,</span>
+    <span class="n">text_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title_clean&#39;</span><span class="p">,</span> <span class="s1">&#39;desc_clean&#39;</span><span class="p">],</span>
+    <span class="n">feature_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">title_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_features_list</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ngram_range_list</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GRID SEARCH: </span><span class="si">{</span><span class="n">vectorizer_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> Hyperparameters&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total expériences: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  max_features: </span><span class="si">{</span><span class="n">max_features_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ngram_range: </span><span class="si">{</span><span class="n">ngram_range_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  title_weight: </span><span class="si">{</span><span class="n">title_weight</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  model: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">exp_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">max_feats</span> <span class="ow">in</span> <span class="n">max_features_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngram_range_list</span><span class="p">:</span>
+            <span class="n">exp_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">exp_count</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">] max_features=</span><span class="si">{</span><span class="n">max_feats</span><span class="si">}</span><span class="s2">, ngram_range=</span><span class="si">{</span><span class="n">ngram</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_single_experiment</span><span class="p">(</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
+                <span class="n">vectorizer_type</span><span class="o">=</span><span class="n">vectorizer_type</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">,</span>
+                <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+                <span class="n">feature_columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">,</span>
+                <span class="n">max_features</span><span class="o">=</span><span class="n">max_feats</span><span class="p">,</span>
+                <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram</span><span class="p">,</span>
+                <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+                <span class="n">title_weight</span><span class="o">=</span><span class="n">title_weight</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Simplifier pour DataFrame</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="n">vectorizer_type</span><span class="p">,</span>
+                <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">max_feats</span><span class="p">,</span>
+                <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngram</span><span class="p">),</span>
+                <span class="s1">&#39;title_weight&#39;</span><span class="p">:</span> <span class="n">title_weight</span><span class="p">,</span>
+                <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
+                <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="n">feature_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;predict_time&#39;</span><span class="p">]</span>
+            <span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  → F1: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Acc: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">df_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MEILLEURE CONFIGURATION:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Max features: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  N-gram range: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  F1-Score: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Accuracy: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_results</span></div>
+
+
+
+<span class="c1"># Comparaison de Stratégies</span>
+
+<div class="viewcode-block" id="run_strategy_comparison">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.run_strategy_comparison">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_strategy_comparison</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">X_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">text_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title_clean&#39;</span><span class="p">,</span> <span class="s1">&#39;desc_clean&#39;</span><span class="p">],</span>
+    <span class="n">feature_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;logreg&#39;</span><span class="p">],</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;COMPARAISON COMPLÈTE DES STRATÉGIES DE VECTORISATION&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modèles à tester: </span><span class="si">{</span><span class="n">models</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max features: </span><span class="si">{</span><span class="n">max_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;N-gram range: </span><span class="si">{</span><span class="n">ngram_range</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">all_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Stratégie 1: Indicateurs seuls (si fournis)</span>
+    <span class="k">if</span> <span class="n">feature_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">📊 STRATÉGIE 1: Indicateurs seuls&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Modèle: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Créer un pipeline simple avec StandardScaler + Model</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+            <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+            <span class="n">clf</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">scaler</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="n">clf</span><span class="p">)</span>
+            <span class="p">])</span>
+
+            <span class="c1"># Sélectionner uniquement les feature columns</span>
+            <span class="n">X_train_feat</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">feature_columns</span><span class="p">]</span>
+            <span class="n">X_val_feat</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">[</span><span class="n">feature_columns</span><span class="p">]</span>
+
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_feat</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+            <span class="n">train_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val_feat</span><span class="p">)</span>
+            <span class="n">predict_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">accuracy_score</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;weighted&#39;</span><span class="p">)</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+            <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;Indicateurs seuls&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+                <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">f1</span><span class="p">,</span>
+                <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span>
+                <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">train_time</span><span class="p">,</span>
+                <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">predict_time</span>
+            <span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    F1: </span><span class="si">{</span><span class="n">f1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Acc: </span><span class="si">{</span><span class="n">acc</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Stratégie 2: CountVectorizer seul</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">📊 STRATÉGIE 2: CountVectorizer seul&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Modèle: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run_single_experiment</span><span class="p">(</span>
+            <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+            <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">,</span>
+            <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Pas de features</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;CountVectorizer seul&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;predict_time&#39;</span><span class="p">]</span>
+        <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    F1: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Acc: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Stratégie 3: TF-IDF seul</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">📊 STRATÉGIE 3: TF-IDF seul&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Modèle: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run_single_experiment</span><span class="p">(</span>
+            <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+            <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">,</span>
+            <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;TF-IDF seul&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;predict_time&#39;</span><span class="p">]</span>
+        <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    F1: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Acc: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Stratégie 4: Indicateurs + CountVectorizer</span>
+    <span class="k">if</span> <span class="n">feature_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">📊 STRATÉGIE 4: Indicateurs + CountVectorizer&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Modèle: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_single_experiment</span><span class="p">(</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
+                <span class="n">vectorizer_type</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">,</span>
+                <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+                <span class="n">feature_columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">,</span>
+                <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+                <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+                <span class="n">model_name</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+            <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;Indicateurs + CountVectorizer&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+                <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;predict_time&#39;</span><span class="p">]</span>
+            <span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    F1: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Acc: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Stratégie 5: Indicateurs + TF-IDF</span>
+    <span class="k">if</span> <span class="n">feature_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">📊 STRATÉGIE 5: Indicateurs + TF-IDF&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Modèle: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_single_experiment</span><span class="p">(</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
+                <span class="n">vectorizer_type</span><span class="o">=</span><span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">,</span>
+                <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+                <span class="n">feature_columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">,</span>
+                <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+                <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+                <span class="n">model_name</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+            <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;Indicateurs + TF-IDF&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+                <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;predict_time&#39;</span><span class="p">]</span>
+            <span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    F1: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Acc: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Créer DataFrame et trier par F1</span>
+    <span class="n">df_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">all_results</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RÉSUMÉ DES RÉSULTATS (triés par F1-Score)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">df_results</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">best</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🏆 MEILLEURE STRATÉGIE: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;strategy&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Modèle: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   F1-Score: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Accuracy: </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_results</span></div>
+
+
+
+<span class="c1"># Analyse et Visualisation</span>
+
+<div class="viewcode-block" id="analyze_results">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.analyze_results">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_results</span><span class="p">(</span>
+    <span class="n">df_results</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">baseline_f1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ANALYSE DES RÉSULTATS&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+
+    <span class="c1"># Statistiques générales</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Nombre d&#39;expériences: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_results</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;F1-Score moyen: </span><span class="si">{</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;F1-Score médian: </span><span class="si">{</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;F1-Score min: </span><span class="si">{</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;F1-Score max: </span><span class="si">{</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Écart-type: </span><span class="si">{</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Comparaison avec baseline</span>
+    <span class="k">if</span> <span class="n">baseline_f1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Baseline F1: </span><span class="si">{</span><span class="n">baseline_f1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">better</span> <span class="o">=</span> <span class="n">df_results</span><span class="p">[</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">baseline_f1</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expériences supérieures à baseline: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">better</span><span class="p">)</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_results</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">better</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">best_improvement</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">baseline_f1</span><span class="p">)</span> <span class="o">/</span> <span class="n">baseline_f1</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meilleure amélioration: +</span><span class="si">{</span><span class="n">best_improvement</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Analyse par stratégie (si disponible)</span>
+    <span class="k">if</span> <span class="s1">&#39;strategy&#39;</span> <span class="ow">in</span> <span class="n">df_results</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PERFORMANCE PAR STRATÉGIE:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="n">strategy_stats</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;strategy&#39;</span><span class="p">)[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">])</span>
+        <span class="n">strategy_stats</span> <span class="o">=</span> <span class="n">strategy_stats</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">strategy_stats</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+    <span class="c1"># Analyse par modèle (si disponible)</span>
+    <span class="k">if</span> <span class="s1">&#39;model&#39;</span> <span class="ow">in</span> <span class="n">df_results</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PERFORMANCE PAR MODÈLE:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="n">model_stats</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">])</span>
+        <span class="n">model_stats</span> <span class="o">=</span> <span class="n">model_stats</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">model_stats</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+    <span class="c1"># Visualisation</span>
+    <span class="k">if</span> <span class="n">show_plot</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+            <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+            <span class="c1"># Graphique 1: Distribution des F1-scores</span>
+            <span class="n">ax1</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                       <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Moyenne: </span><span class="si">{</span><span class="n">df_results</span><span class="p">[</span><span class="s2">&quot;f1_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">baseline_f1</span><span class="p">:</span>
+                <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">baseline_f1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                           <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Baseline: </span><span class="si">{</span><span class="n">baseline_f1</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;F1-Score&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Fréquence&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Distribution des F1-Scores&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+            <span class="c1"># Graphique 2: Comparaison par stratégie ou vectorizer</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;strategy&#39;</span> <span class="ow">in</span> <span class="n">df_results</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;strategy&#39;</span><span class="p">)[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;barh&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;steelblue&#39;</span><span class="p">)</span>
+                <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;F1-Score moyen&#39;</span><span class="p">)</span>
+                <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Performance par Stratégie&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;vectorizer&#39;</span> <span class="ow">in</span> <span class="n">df_results</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;vectorizer&#39;</span><span class="p">)[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;barh&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;steelblue&#39;</span><span class="p">)</span>
+                <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;F1-Score moyen&#39;</span><span class="p">)</span>
+                <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Performance par Vectorizer&#39;</span><span class="p">)</span>
+
+            <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">⚠️  matplotlib non disponible, visualisation skip&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_title_weighting_experiment">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.run_title_weighting_experiment">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_title_weighting_experiment</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">X_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">y_val</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">text_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title_clean&#39;</span><span class="p">,</span> <span class="s1">&#39;desc_clean&#39;</span><span class="p">],</span>
+    <span class="n">feature_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">title_weights</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span>
+    <span class="n">vectorizer_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tfidf&#39;</span><span class="p">,</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">ngram_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;logreg&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TEST DE PONDÉRATION DU TITRE&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Poids à tester: </span><span class="si">{</span><span class="n">title_weights</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vectorizer: </span><span class="si">{</span><span class="n">vectorizer_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max features: </span><span class="si">{</span><span class="n">max_features</span><span class="si">}</span><span class="s2"> (par colonne)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;N-gram range: </span><span class="si">{</span><span class="n">ngram_range</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modèle: </span><span class="si">{</span><span class="n">model_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">title_weights</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">title_weights</span><span class="p">)</span><span class="si">}</span><span class="s2">] Test avec title_weight = </span><span class="si">{</span><span class="n">weight</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="c1"># Construire le pipeline avec pondération</span>
+        <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">build_split_vectorizer_pipeline</span><span class="p">(</span>
+            <span class="n">vectorizer_type</span><span class="o">=</span><span class="n">vectorizer_type</span><span class="p">,</span>
+            <span class="n">text_columns</span><span class="o">=</span><span class="n">text_columns</span><span class="p">,</span>
+            <span class="n">feature_columns</span><span class="o">=</span><span class="n">feature_columns</span><span class="p">,</span>
+            <span class="n">max_features_title</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">max_features_desc</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">ngram_range</span><span class="o">=</span><span class="n">ngram_range</span><span class="p">,</span>
+            <span class="n">title_weight</span><span class="o">=</span><span class="n">weight</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Entraîner et évaluer</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">build_full_pipeline</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">train_and_evaluate</span><span class="p">(</span>
+            <span class="n">pipeline</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;title_weight&#39;</span><span class="p">:</span> <span class="n">weight</span><span class="p">,</span>
+            <span class="s1">&#39;vectorizer&#39;</span><span class="p">:</span> <span class="n">vectorizer_type</span><span class="p">,</span>
+            <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">max_features</span><span class="p">,</span>
+            <span class="s1">&#39;ngram_range&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngram_range</span><span class="p">),</span>
+            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
+            <span class="s1">&#39;use_features&#39;</span><span class="p">:</span> <span class="n">feature_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;train_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;predict_time&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;predict_time&#39;</span><span class="p">]</span>
+        <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  → F1-Score: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  → Accuracy: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  → Train time: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;train_time&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+
+    <span class="n">df_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RÉSULTATS DE LA PONDÉRATION DU TITRE&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">df_results</span><span class="p">[[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;train_time&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+        <span class="n">best</span> <span class="o">=</span> <span class="n">df_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="n">df_results</span><span class="p">[</span><span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">baseline</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">baseline_f1</span> <span class="o">=</span> <span class="n">baseline</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+            <span class="n">improvement</span> <span class="o">=</span> <span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">baseline_f1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ANALYSE&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Baseline (weight=1.0): F1 = </span><span class="si">{</span><span class="n">baseline_f1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meilleur (weight=</span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">): F1 = </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Amélioration: </span><span class="si">{</span><span class="n">improvement</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">80</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_results</span></div>
+
+
+
+<div class="viewcode-block" id="save_experiment_results">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.save_experiment_results">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_experiment_results</span><span class="p">(</span>
+    <span class="n">df_results</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;results/experiment_results.csv&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+    <span class="c1"># Créer le répertoire si nécessaire</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Sauvegarder les résultats</span>
+    <span class="n">df_results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Résultats sauvegardés: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Sauvegarder les métadonnées si fournies</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+        <span class="n">meta_path</span> <span class="o">=</span> <span class="n">output_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;_metadata.json&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">meta_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Métadonnées sauvegardées: </span><span class="si">{</span><span class="n">meta_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="track_all_scores">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.track_all_scores">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">track_all_scores</span><span class="p">(</span>
+    <span class="n">results_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+    <span class="n">score_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;f1_score&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+    <span class="n">all_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">exp_name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">results_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Extraire les informations pertinentes</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="n">exp_name</span><span class="p">,</span>
+                <span class="s1">&#39;f1_score&#39;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">score_column</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="p">}</span>
+
+            <span class="c1"># Ajouter les paramètres de configuration</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;vectorizer&#39;</span><span class="p">,</span> <span class="s1">&#39;max_features&#39;</span><span class="p">,</span> <span class="s1">&#39;ngram_range&#39;</span><span class="p">,</span> <span class="s1">&#39;title_weight&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;use_features&#39;</span><span class="p">,</span> <span class="s1">&#39;strategy&#39;</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+
+            <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># Créer DataFrame consolidé</span>
+    <span class="n">df_all</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">all_results</span><span class="p">)</span>
+    <span class="n">df_all</span> <span class="o">=</span> <span class="n">df_all</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;📊 SUIVI GLOBAL DES SCORES F1&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Total expériences: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_all</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top 5 scores:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+        <span class="c1"># Afficher top 5</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df_all</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">exp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="s1">&#39;max_features&#39;</span> <span class="ow">in</span> <span class="n">row</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">]):</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max_features=</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;title_weight&#39;</span> <span class="ow">in</span> <span class="n">row</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">]):</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;title_weight=</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;use_features&#39;</span> <span class="ow">in</span> <span class="n">row</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;use_features&#39;</span><span class="p">]):</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;features=</span><span class="si">{</span><span class="s1">&#39;Oui&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;use_features&#39;</span><span class="p">]</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Non&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">params_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="k">if</span> <span class="n">params</span> <span class="k">else</span> <span class="s1">&#39;N/A&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">. [</span><span class="si">{</span><span class="n">exp</span><span class="si">}</span><span class="s2">] F1=</span><span class="si">{</span><span class="n">f1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">params_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_all</span></div>
+
+
+
+<div class="viewcode-block" id="verify_best_score">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.verify_best_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_best_score</span><span class="p">(</span>
+    <span class="n">all_scores_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">final_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    
+    <span class="k">if</span> <span class="n">all_scores_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ Aucun score à comparer&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">best_row</span> <span class="o">=</span> <span class="n">all_scores_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">best_score</span> <span class="o">=</span> <span class="n">best_row</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+    <span class="n">best_exp</span> <span class="o">=</span> <span class="n">best_row</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Essayer de trouver le score de la config finale</span>
+    <span class="n">final_score</span> <span class="o">=</span> <span class="n">final_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;f1_score&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">final_score</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ Score F1 non trouvé dans la configuration finale&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Comparer</span>
+    <span class="n">is_optimal</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">final_score</span> <span class="o">-</span> <span class="n">best_score</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔍 VÉRIFICATION DE LA CONFIGURATION FINALE&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Meilleur score global: F1 = </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (de </span><span class="si">{</span><span class="n">best_exp</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Score config finale:   F1 = </span><span class="si">{</span><span class="n">final_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_optimal</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ VALIDATION RÉUSSIE: La configuration finale est optimale!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">best_score</span> <span class="o">-</span> <span class="n">final_score</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">❌ ATTENTION: Score sous-optimal!&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Différence: </span><span class="si">{</span><span class="n">diff</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Meilleur score trouvé dans: </span><span class="si">{</span><span class="n">best_exp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">💡 Suggestion: Vérifier si le meilleur score a été correctement intégré&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">is_optimal</span></div>
+
+
+
+<div class="viewcode-block" id="generate_vectorization_report">
+<a class="viewcode-back" href="../../api/rakuten_text.html#rakuten_text.experiments.generate_vectorization_report">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_vectorization_report</span><span class="p">(</span>
+    <span class="n">df_vec</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">results_weighting</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">results_strategies</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">grid_results</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">result_tfidf</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">result_merged</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">baseline_f1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">exported_config_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;results/configs/best_vectorization_config.json&#39;</span><span class="p">,</span>
+    <span class="n">save_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">report_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;results/vectorization_report.txt&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+    <span class="c1"># TRACKING GLOBAL</span>
+    <span class="n">all_scores</span> <span class="o">=</span> <span class="n">track_all_scores</span><span class="p">({</span>
+        <span class="s1">&#39;exp1_count_vs_tfidf&#39;</span><span class="p">:</span> <span class="n">df_vec</span><span class="p">,</span>
+        <span class="s1">&#39;exp2b_title_weighting&#39;</span><span class="p">:</span> <span class="n">results_weighting</span><span class="p">,</span>
+        <span class="s1">&#39;exp3_manual_features&#39;</span><span class="p">:</span> <span class="n">results_strategies</span><span class="p">,</span>
+        <span class="s1">&#39;exp4_grid_search&#39;</span><span class="p">:</span> <span class="n">grid_results</span>
+    <span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Sauvegarder tracking</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">all_scores</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;results/all_scores_tracking.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># VÉRIFICATION OPTIMALITÉ</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">exported_config_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">exported_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">is_optimal</span> <span class="o">=</span> <span class="n">verify_best_score</span><span class="p">(</span><span class="n">all_scores</span><span class="p">,</span> <span class="n">exported_config</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># EXTRACTION DES DONNÉES</span>
+    <span class="n">best_overall</span> <span class="o">=</span> <span class="n">all_scores</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">best_from_exp1</span> <span class="o">=</span> <span class="n">df_vec</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">best_from_exp2b</span> <span class="o">=</span> <span class="n">results_weighting</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">best_from_exp3</span> <span class="o">=</span> <span class="n">results_strategies</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">best_from_exp4</span> <span class="o">=</span> <span class="n">grid_results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Calculs</span>
+    <span class="n">tfidf_score</span> <span class="o">=</span> <span class="n">best_from_exp1</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+    <span class="n">count_score</span> <span class="o">=</span> <span class="n">df_vec</span><span class="p">[</span><span class="n">df_vec</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Count Split&#39;</span><span class="p">][</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">improvement_1</span> <span class="o">=</span> <span class="p">((</span><span class="n">tfidf_score</span> <span class="o">-</span> <span class="n">count_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">count_score</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="n">split_score</span> <span class="o">=</span> <span class="n">result_tfidf</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+    <span class="n">merged_score</span> <span class="o">=</span> <span class="n">result_merged</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+    <span class="n">improvement_2</span> <span class="o">=</span> <span class="p">((</span><span class="n">split_score</span> <span class="o">-</span> <span class="n">merged_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">merged_score</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="n">baseline_weight</span> <span class="o">=</span> <span class="n">results_weighting</span><span class="p">[</span><span class="n">results_weighting</span><span class="p">[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">][</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">optimal_weight</span> <span class="o">=</span> <span class="n">best_from_exp2b</span><span class="p">[</span><span class="s1">&#39;title_weight&#39;</span><span class="p">]</span>
+    <span class="n">optimal_weight_score</span> <span class="o">=</span> <span class="n">best_from_exp2b</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+    <span class="n">improvement_3</span> <span class="o">=</span> <span class="p">((</span><span class="n">optimal_weight_score</span> <span class="o">-</span> <span class="n">baseline_weight</span><span class="p">)</span> <span class="o">/</span> <span class="n">baseline_weight</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="n">without_features</span> <span class="o">=</span> <span class="n">results_strategies</span><span class="p">[</span><span class="n">results_strategies</span><span class="p">[</span><span class="s1">&#39;use_features&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">][</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">with_features</span> <span class="o">=</span> <span class="n">best_from_exp3</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span>
+    <span class="n">improvement_4</span> <span class="o">=</span> <span class="p">((</span><span class="n">with_features</span> <span class="o">-</span> <span class="n">without_features</span><span class="p">)</span> <span class="o">/</span> <span class="n">without_features</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="n">total_improvement</span> <span class="o">=</span> <span class="p">((</span><span class="n">best_overall</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">baseline_f1</span><span class="p">)</span> <span class="o">/</span> <span class="n">baseline_f1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="c1"># GÉNÉRATION DU RAPPORT</span>
+    <span class="n">report_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;📊 RAPPORT DE VECTORISATION - PHASE 2&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Généré le: </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total expériences: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_scores</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;RÉSUMÉ DES DÉCOUVERTES&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">1️⃣  Count vs TF-IDF&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → TF-IDF (F1=</span><span class="si">{</span><span class="n">tfidf_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">) surpasse Count (F1=</span><span class="si">{</span><span class="n">count_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Amélioration: +</span><span class="si">{</span><span class="n">improvement_1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2️⃣  Split vs Merged&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Split (F1=</span><span class="si">{</span><span class="n">split_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">) surpasse Merged (F1=</span><span class="si">{</span><span class="n">merged_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Amélioration: +</span><span class="si">{</span><span class="n">improvement_2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3️⃣  Pondération du Titre&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Poids optimal: </span><span class="si">{</span><span class="n">optimal_weight</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → F1 = </span><span class="si">{</span><span class="n">optimal_weight_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (baseline 1.0x: </span><span class="si">{</span><span class="n">baseline_weight</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Amélioration: +</span><span class="si">{</span><span class="n">improvement_3</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">4️⃣  Features Manuelles&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Sans features: F1 = </span><span class="si">{</span><span class="n">without_features</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Avec features: F1 = </span><span class="si">{</span><span class="n">with_features</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Amélioration: +</span><span class="si">{</span><span class="n">improvement_4</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">5️⃣  Hyperparamètres Optimaux&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Vectorizer: </span><span class="si">{</span><span class="n">best_from_exp4</span><span class="p">[</span><span class="s1">&#39;vectorizer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Max features: </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">best_from_exp4</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">])</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → N-gram range: </span><span class="si">{</span><span class="n">best_from_exp4</span><span class="p">[</span><span class="s1">&#39;ngram_range&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Title weight: </span><span class="si">{</span><span class="n">best_from_exp4</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title_weight&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → Features manuelles: </span><span class="si">{</span><span class="s1">&#39;Oui&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">best_from_exp4</span><span class="p">[</span><span class="s1">&#39;use_features&#39;</span><span class="p">]</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Non&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   → F1 Final: </span><span class="si">{</span><span class="n">best_from_exp4</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;🏆 PERFORMANCE FINALE&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Baseline (raw data, NB01):              F1 = </span><span class="si">{</span><span class="n">baseline_f1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meilleur score (configuration finale):  F1 = </span><span class="si">{</span><span class="n">best_overall</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Amélioration totale:                    +</span><span class="si">{</span><span class="n">total_improvement</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Statut: </span><span class="si">{</span><span class="s1">&#39;✅ Configuration optimale validée&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">is_optimal</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;⚠️  À vérifier&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;🔍 VÉRIFICATION&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config exportée: </span><span class="si">{</span><span class="n">exported_config_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tracking sauvegardé: results/all_scores_tracking.csv&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Score config finale: F1 = </span><span class="si">{</span><span class="n">exported_config</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meilleur score global: F1 = </span><span class="si">{</span><span class="n">best_overall</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_optimal</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">best_overall</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">exported_config</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;f1_score&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">⚠️  ATTENTION: Différence de </span><span class="si">{</span><span class="n">diff</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+        <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Meilleur score trouvé dans: </span><span class="si">{</span><span class="n">best_overall</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;📋 PROCHAINES ÉTAPES&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;→ Notebook 03: Sélection du meilleur modèle&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;→ Phase 3: Intégration des features images&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;→ Phase 4: Fusion multimodale&quot;</span><span class="p">)</span>
+    <span class="n">report_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+
+    <span class="n">report_text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_lines</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">save_report</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">report_text</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Rapport sauvegardé: </span><span class="si">{</span><span class="n">report_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">report_text</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;is_optimal&#39;</span><span class="p">:</span> <span class="n">is_optimal</span><span class="p">,</span>
+        <span class="s1">&#39;best_score&#39;</span><span class="p">:</span> <span class="n">best_overall</span><span class="p">[</span><span class="s1">&#39;f1_score&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;baseline_score&#39;</span><span class="p">:</span> <span class="n">baseline_f1</span><span class="p">,</span>
+        <span class="s1">&#39;total_improvement_pct&#39;</span><span class="p">:</span> <span class="n">total_improvement</span><span class="p">,</span>
+        <span class="s1">&#39;all_scores&#39;</span><span class="p">:</span> <span class="n">all_scores</span><span class="p">,</span>
+        <span class="s1">&#39;report_text&#39;</span><span class="p">:</span> <span class="n">report_text</span><span class="p">,</span>
+        <span class="s1">&#39;findings&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;count_vs_tfidf&#39;</span><span class="p">:</span> <span class="n">improvement_1</span><span class="p">,</span>
+            <span class="s1">&#39;split_vs_merged&#39;</span><span class="p">:</span> <span class="n">improvement_2</span><span class="p">,</span>
+            <span class="s1">&#39;title_weighting&#39;</span><span class="p">:</span> <span class="n">improvement_3</span><span class="p">,</span>
+            <span class="s1">&#39;manual_features&#39;</span><span class="p">:</span> <span class="n">improvement_4</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Gaby Xiaosong Marta Céline.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
