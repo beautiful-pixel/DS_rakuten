@@ -15,7 +15,7 @@ from .categories import (
 )
 
 # Récupération des données
-from .load_data import(
+from .data import(
     get_image_path,
     load_data,
     images_read,
@@ -23,6 +23,5 @@ from .load_data import(
 
 from .splits import(
     generate_splits,
-    load_splits,
 )
 

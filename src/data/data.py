@@ -2,12 +2,12 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 from pathlib import Path
-from .splits import load_splits
+from .splits import generate_splits
 
 
 MODULE_DIR = Path(__file__).resolve().parent
 DATA_DIR = MODULE_DIR / "../../data/raw"
-IMG_DIR = MODULE_DIR / "../../data/images/image_train"
+IMG_DIR = MODULE_DIR / "../../data/raw/images/image_train"
 
 
 def get_image_path(df: pd.DataFrame) -> pd.Series:
@@ -31,7 +31,7 @@ def get_image_path(df: pd.DataFrame) -> pd.Series:
 
     return file_names.apply(lambda x: IMG_DIR / x)
 
-def load_data(splitted: bool = True):
+def load_data(splitted: bool = False):
     """
     Charge les données tabulaires du projet.
 
@@ -42,7 +42,7 @@ def load_data(splitted: bool = True):
     Args:
         splitted (bool, optional): Si True, retourne les données
             découpées selon les splits. Sinon, retourne l'ensemble
-            des données. Par défaut True.
+            des données. Par défaut False.
 
     Returns:
         dict: Dictionnaire contenant :
@@ -60,7 +60,7 @@ def load_data(splitted: bool = True):
     if not splitted:
         return {"X": X, "y": y}
 
-    splits = load_splits()
+    splits = generate_splits()
 
     data = {
         "X_train": X.iloc[splits["train_idx"]],
