@@ -16,8 +16,13 @@ from .categories import (
 
 # Récupération des données
 from .load_data import(
-    split_data,
-    split_path,
-    split_txt,
+    get_image_path,
+    load_data,
     images_read,
 )
+
+from .splits import(
+    generate_splits,
+    load_splits,
+)
+

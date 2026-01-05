@@ -1,10 +1,16 @@
 import torch
+import torch.nn as nn
 from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-
+import os
 from .metrics import compute_classification_metrics
 
+
+# autocast pour AMP autocast plus rapide que FP32
+
+# trainer adapté aux models Hugginig Face
+# le forward du modèle doit accépter le paramètre labels et sortir logits et loss
 
 class Trainer:
     """
@@ -21,63 +27,80 @@ class Trainer:
         self,
         model,
         optimizer,
-        criterion=None,
         device=None,
-        use_amp=True,
+        max_grad_norm = 1.0,
         log_dir="runs/experiment",
-        checkpoint_path=None,
-        early_stopping=None
+        checkpoint_dir=None,
+        scheduler=None,
+        scheduler_type="epoch",  # "step" ou "epoch"
     ):
         self.model = model
         self.optimizer = optimizer
-        self.criterion = criterion
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.use_amp = use_amp
-        self.scaler = GradScaler(enabled=use_amp)
+        self.use_amp = True if device == "cuda" else False
+        self.scaler = GradScaler(enabled=self.use_amp)
+        self.max_grad_norm = max_grad_norm
+        if log_dir is not None:
+            os.makedirs(log_dir, exist_ok=True)
         self.writer = SummaryWriter(log_dir=log_dir)
-
-        self.checkpoint_path = checkpoint_path
-        self.early_stopping = early_stopping
+        if checkpoint_dir is not None:
+            os.makedirs(checkpoint_dir, exist_ok=True)
+        self.checkpoint_dir = checkpoint_dir
+        self.scheduler = scheduler
+        self.scheduler_type = scheduler_type
         self.best_val_score = None
 
         self.model.to(self.device)
 
     def _step(self, batch, train=True):
         batch = {k: v.to(self.device) for k, v in batch.items()}
-
-        with autocast(enabled=self.use_amp):
+        with autocast(self.device, enabled=self.use_amp):
             outputs = self.model(**batch)
-            loss = outputs.loss if hasattr(outputs, "loss") else self.criterion(
-                outputs, batch["labels"]
-            )
+            loss = outputs.loss
 
         if train:
             self.optimizer.zero_grad()
             self.scaler.scale(loss).backward()
+            if self.max_grad_norm:
+                self.scaler.unscale_(self.optimizer)
+                torch.nn.utils.clip_grad_norm_(
+                    self.model.parameters(), self.max_grad_norm)
             self.scaler.step(self.optimizer)
             self.scaler.update()
+            if self.scheduler and self.scheduler_type=="step":
+                self.scheduler.step()
 
-        logits = outputs.logits
-        preds = torch.argmax(logits, dim=1)
+        preds = torch.argmax(outputs.logits, dim=1)
+        labels = batch['labels']
 
-        return loss.item(), preds.cpu(), batch["labels"].cpu()
+        return loss.item(), preds.cpu(), labels.cpu()
 
     def train_epoch(self, dataloader, epoch):
         self.model.train()
         losses, y_true, y_pred = [], [], []
 
-        for batch in tqdm(dataloader, desc="Training"):
+        progress_bar = tqdm(
+            dataloader, desc="Epoch {:1d}".format(epoch), leave=True, disable=False
+        )
+        running_loss = 0
+        for i, batch in enumerate(progress_bar):
             loss, preds, labels = self._step(batch, train=True)
             losses.append(loss)
+            running_loss += loss
+
             y_true.extend(labels.tolist())
             y_pred.extend(preds.tolist())
+            progress_bar.set_postfix(
+                {"training_loss": "{:.3f}".format(running_loss/(i+1))}
+            )
 
         metrics = compute_classification_metrics(y_true, y_pred)
-        self.writer.add_scalar("train/loss", sum(losses) / len(losses), epoch)
+        train_loss = running_loss / len(losses)
+        self.writer.add_scalar("train/loss", train_loss, epoch)
         self.writer.add_scalar("train/accuracy", metrics["accuracy"], epoch)
-        self.writer.add_scalar("train/f1", metrics["f1_macro"], epoch)
+        self.writer.add_scalar("train/f1", metrics["f1_weighted"], epoch)
 
-        return metrics
+        return metrics, train_loss
 
     @torch.no_grad()
     def eval_epoch(self, dataloader, epoch):
@@ -95,13 +118,19 @@ class Trainer:
 
         self.writer.add_scalar("val/loss", val_loss, epoch)
         self.writer.add_scalar("val/accuracy", metrics["accuracy"], epoch)
-        self.writer.add_scalar("val/f1", metrics["f1_macro"], epoch)
+        self.writer.add_scalar("val/f1", metrics["f1_weighted"], epoch)
+
+        if self.scheduler and self.scheduler_type=="epoch":
+            self.scheduler.step(val_loss)
 
         # Checkpoint
-        if self.checkpoint_path:
-            score = metrics["f1_macro"]
+        if self.checkpoint_dir:
+            model_path = os.path.join(self.checkpoint_dir, "model.pt")
+            optimizer_path = os.path.join(self.checkpoint_dir, "optimizer.pt")
+            score = metrics["f1_weighted"]
             if self.best_val_score is None or score > self.best_val_score:
                 self.best_val_score = score
-                torch.save(self.model.state_dict(), self.checkpoint_path)
+                torch.save(self.model.state_dict(), model_path)
+                torch.save(self.optimizer.state_dict(), optimizer_path)
 
-        return metrics
+        return metrics, val_loss

@@ -3,38 +3,35 @@ from transformers import PreTrainedTokenizer
 from ..base.dataset import BaseDataset
 
 
-class TextDataset(BaseDataset):
-    """
-    Dataset texte pour modèles Transformers.
+# Si petite RAM ne pas garder l'encoding entier mémoire mais compute à chaque fois
+# => opération dans d''encodage dans __getitem__
+class TransformersDataset(BaseDataset):
 
-    Args:
-        texts (list[str]): Textes d'entrée.
-        labels (list[int] | None): Labels.
-        tokenizer (PreTrainedTokenizer): Tokenizer HF.
-        max_length (int): Longueur max.
-    """
-
-    def __init__(self, texts, labels, tokenizer: PreTrainedTokenizer, max_length=256):
-        self.texts = texts
-        self.labels = labels
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-
-    def __len__(self):
-        return len(self.texts)
-
-    def __getitem__(self, idx):
-        encoding = self.tokenizer(
-            self.texts[idx],
+    def __init__(self, tokenizer: PreTrainedTokenizer, X, y, extra_features=None):
+        self.encodings = tokenizer(
+            list(X),
             truncation=True,
             padding="max_length",
-            max_length=self.max_length,
-            return_tensors="pt"
+            max_length=256,
+            return_tensors="pt"   # retourne directement un pytorch tensor
+        )
+        self.labels = torch.tensor(y, dtype=torch.long)
+        self.extra_features = (
+            torch.tensor(extra_features, dtype=torch.float)
+            if extra_features is not None
+            else None
         )
 
-        item = {k: v.squeeze(0) for k, v in encoding.items()}
 
-        if self.labels is not None:
-            item["labels"] = torch.tensor(self.labels[idx], dtype=torch.long)
-
+    def __getitem__(self, idx):
+        # on parcourt les clés du dictionnaire self.encoding
+        # et on récupère les input_ids, token_type_ids et attention_mask de l'index
+        item = {k: v[idx] for k, v in self.encodings.items()}
+        # car le model attent le paramètre labels pour l'entrainement
+        item["labels"] = self.labels[idx]
+        if self.extra_features is not None:
+            item["extra_features"] = self.extra_features[idx]
         return item
+
+    def __len__(self):
+        return len(self.labels)

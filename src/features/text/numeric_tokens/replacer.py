@@ -112,18 +112,12 @@ def replace_numeric(match, measure_type, unit_pos=None, int_pos=None) -> str:
         values = list(match.groups())
         if unit_pos is not None:
             unit = values.pop(unit_pos)
-            print(values)
             unit = normalize_unit(unit)
             values = [convert_to_base_unit(to_float(v), unit) for v in values if v is not None]
-            print(values)
         else:
             values = [to_float(v) for v in values if v is not None]
         if int_pos is not None:
             labels = [get_label(v, measure_type) for v in values]
-            # labels = [
-            #     get_label(values[int_pos], measure_type),
-            #     get_label(values[int_pos+1], measure_type)
-            # ]
         else:
             value = multiply_values(values)
             labels = [get_label(value, measure_type)]
@@ -137,9 +131,9 @@ REG_DIST = r"(mm|millim[eèé]tres?|cm|centim[eèé]tres?|m|m[eèé]tres?)"
 REG_VOL = r"([mcd]?m3|[mcd]?l|millilitres?|centilitres?|litres?)"
 REG_WEIGHT = r"(g|grammes?|kg|kilogrammes?|kilo|tonnes?)"
 
-pattern_volume_m = rf"\b(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)\s*{REG_DIST}\b"
+pattern_volume_m = rf"\b(\d+[.,]?\d*)\s*[xX*]\s*(\d+[.,]?\d*)\s*[xX*]\s*(\d+[.,]?\d*)\s*{REG_DIST}\b"
 pattern_volume = rf"\b(\d+[.,]?\d*)\s*{REG_VOL}\b"
-pattern_surface_m = rf"\b(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)\s*{REG_DIST}\b"
+pattern_surface_m = rf"\b(\d+[.,]?\d*)\s*[xX*]\s*(\d+[.,]?\d*)\s*{REG_DIST}\b"
 pattern_surface = r"\b(\d+[.,]?\d*)\s*([mcd]?m2)\b"
 pattern_length = rf"\b(?:(\d+[.,]?\d*)\s*-\s*)?(\d+[.,]?\d*)\s*{REG_DIST}\b"
 pattern_weight = rf"\b(\d+[.,]?\d*)\s*{REG_WEIGHT}\b"
@@ -154,9 +148,11 @@ pattern_capacity = r"\b(\d+[.,]?\d*)\s*(m?ah)\b"
 pattern_tension = r"\b(\d+[.,]?\d*)\s*(v|volts?)\b"
 pattern_card = r"\b(\d+)\s*(cartes?)\b"
 pattern_piece = r"\b(\d+)\s*(pi[eè]ces?|pcs)\b"
-pattern_number = r"\b(\d+)\b"
+pattern_integer = r"\b(\d+)\b"
+pattern_float = r"\b(\d+[.,]?\d*)\b"
 
 PATTERNS = [
+    # pattern prix ???
     ("volume", pattern_volume_m, {"unit_pos": -1}),
     ("volume", pattern_volume, {"unit_pos": -1}),
     ("surface", pattern_surface_m, {"unit_pos": -1}),
@@ -174,7 +170,8 @@ PATTERNS = [
     ("tension", pattern_tension, {"unit_pos": -1}),
     ("card", pattern_card, {"unit_pos": -1}),
     ("piece", pattern_piece, {"unit_pos": -1}),
-    ("number", pattern_number, {}),
+    ("integer", pattern_integer, {}),
+    ("float", pattern_float, {}),
 ]
 
 
@@ -188,6 +185,8 @@ def replace_numeric_expressions(txt: str) -> str:
     Returns:
         str: Texte avec tokens numériques.
     """
+    txt = re.sub(r"²", r"2", txt)
+    txt = re.sub(r"³", r"3", txt)
     for measure, pattern, params in PATTERNS:
         txt = re.sub(
             pattern,
@@ -230,7 +229,7 @@ def get_numeric_tokens(measure_types=None):
 
     tokens = []
     if measure_types is None:
-        tokens = get_numeric_tokens()
+        tokens = get_all_numeric_tokens()
     else:
         for measure in measure_types:
             if measure in LABELS_DICT:

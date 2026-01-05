@@ -1,79 +1,117 @@
-import os
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from PIL import Image
+from pathlib import Path
+from .splits import load_splits
 
-MODULE_DIR = os.path.dirname(__file__)
-DATA_DIR = os.path.join(MODULE_DIR, "../../data/raw/")
-IMG_DIR = os.path.join(MODULE_DIR, "../../data/images/image_train/")
 
-def split_data():
-    """
-    retourne les données splitées entre le jeu de test utilisé pour ce projet
-    et le jeu d'entraintement / validation
-    """
-    X = pd.read_csv(DATA_DIR+'X_train_update.csv')
-    y = pd.read_csv(DATA_DIR+'Y_train_CVw08PX.csv')['prdtypecode']
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.15, random_state=42, stratify=y
-    )
-    return X_train, X_test, y_train, y_test
+MODULE_DIR = Path(__file__).resolve().parent
+DATA_DIR = MODULE_DIR / "../../data/raw"
+IMG_DIR = MODULE_DIR / "../../data/images/image_train"
 
-def get_path(df):
+
+def get_image_path(df: pd.DataFrame) -> pd.Series:
     """
-    retourne les chemins des images depuis ce module
-    
-    :param df: dataframe comprenant productid et imageid
+    Construit les chemins vers les images à partir des identifiants produits.
+
+    Les noms de fichiers suivent la convention :
+    ``image_{imageid}_product_{productid}.jpg``.
+
+    Args:
+        df (pd.DataFrame): DataFrame contenant au minimum les colonnes
+            ``imageid`` et ``productid``.
+
+    Returns:
+        pd.Series: Série de chemins vers les fichiers images.
     """
     file_names = (
-        "image_" + df['imageid'].astype('str') + "_product_" +
-        df['productid'].astype('str') + ".jpg"
+        "image_" + df["imageid"].astype(str) +
+        "_product_" + df["productid"].astype(str) + ".jpg"
     )
-    return IMG_DIR + file_names
 
-def split_path():
-    """
-    retourne les chemins des images splités entre le jeu de test utilisé pour ce projet
-    et le jeu d'entraintement / validation
-    """
-    X_train, X_test, y_train, y_test = split_data()
-    X_train, X_test = get_path(X_train), get_path(X_test)
-    return X_train, X_test, y_train, y_test
+    return file_names.apply(lambda x: IMG_DIR / x)
 
-def split_txt():
+def load_data(splitted: bool = True):
     """
-    retourne les données textuelles splitées entre le jeu de test utilisé pour ce projet
-    et le jeu d'entraintement / validation
-    """
-    X_train, X_test, y_train, y_test = split_data()
-    X_train = X_train[['designation', 'description']]
-    X_test = X_test[['designation', 'description']]
-    return X_train, X_test, y_train, y_test
+    Charge les données tabulaires du projet.
 
-def images_read(impath, dsize=(500,500), grayscale=False, max_load=10**9):
+    Les données peuvent être retournées soit sous forme complète,
+    soit découpées selon les splits train / validation / test
+    définis dans le module `splits`.
+
+    Args:
+        splitted (bool, optional): Si True, retourne les données
+            découpées selon les splits. Sinon, retourne l'ensemble
+            des données. Par défaut True.
+
+    Returns:
+        dict: Dictionnaire contenant :
+            - X_train, y_train
+            - X_val, y_val
+            - X_test, y_test
+        ou, si `splitted=False` :
+            - X
+            - y
     """
-    Docstring for images_read
-    :param impath: chemin des images
-    :param dsize: dimension des images souhaitée
-    :param grayscale: pour charger l'image en niveau de gris
-    :param max_load: représente le nombre d'octet maximum chargé en mémoire 10**9 => 1 Go
+    X = pd.read_csv(DATA_DIR / "X_train_update.csv")
+    X['image_path'] = get_image_path(X)
+    y = pd.read_csv(DATA_DIR / "Y_train_CVw08PX.csv")["prdtypecode"]
+
+    if not splitted:
+        return {"X": X, "y": y}
+
+    splits = load_splits()
+
+    data = {
+        "X_train": X.iloc[splits["train_idx"]],
+        "y_train": y.iloc[splits["train_idx"]],
+        "X_val": X.iloc[splits["val_idx"]],
+        "y_val": y.iloc[splits["val_idx"]],
+        "X_test": X.iloc[splits["test_idx"]],
+        "y_test": y.iloc[splits["test_idx"]],
+    }
+
+    return data
+
+
+def images_read(impath, dsize=(500, 500), grayscale=False, max_load=10**9):
+    """
+    Charge et redimensionne un ensemble d’images depuis leurs chemins.
+
+    Les images sont chargées jusqu'à atteindre une limite approximative
+    de mémoire afin d'éviter une surcharge RAM.
+
+    Args:
+        impath (list | pd.Series): Liste ou série de chemins vers les images.
+        dsize (tuple[int, int], optional): Taille cible des images (H, W).
+            Par défaut (500, 500).
+        grayscale (bool, optional): Si True, charge les images en niveaux de gris.
+            Sinon en RGB. Par défaut False.
+        max_load (int, optional): Limite maximale approximative de mémoire
+            utilisée (en unités proportionnelles aux pixels). Par défaut 1e9.
+
+    Returns:
+        np.ndarray: Tableau numpy contenant les images chargées
+        de forme (N, H, W[, C]).
     """
     n = len(impath)
-    # taille maximal en octet
-    total_size = n*dsize[0]*dsize[1] if grayscale else n*dsize[0]*dsize[1]*3
-    stop = int(n * (max_load/total_size)) if total_size > max_load else n
+
+    total_size = (
+        n * dsize[0] * dsize[1]
+        if grayscale else
+        n * dsize[0] * dsize[1] * 3
+    )
+
+    stop = int(n * (max_load / total_size)) if total_size > max_load else n
     images = []
-    # si c'est une Series il faut reindexé par 0, ... ,n pour pouvoir utiliser les indices de la même manière qu'une liste
-    if type(impath) == pd.Series:
+
+    if isinstance(impath, pd.Series):
         impath = impath.reset_index(drop=True)
 
     for i in range(stop):
         with Image.open(impath[i]) as img:
-            if grayscale:
-                img = img.convert('L')
-            else:
-                img = img.convert('RGB')
+            img = img.convert("L" if grayscale else "RGB")
             img = img.resize(dsize)
             images.append(np.array(img))
+
     return np.array(images)

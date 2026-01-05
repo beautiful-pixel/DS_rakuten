@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.optim import AdamW
 
 from .dataset import TextDataset
-from ..base.trainer import Trainer
+from ..base.trainer_not_HG_compatible import Trainer
 from ..base.callbacks import EarlyStopping
 
 
