@@ -26,8 +26,27 @@ from .preprocessing import (
     BOILERPLATE_PHRASES
 )
 
+from .preprocessing_V2 import (
+    final_text_cleaner,
+    clean_text,
+    get_available_options,
+    print_available_options,
+    NLTK_STOPWORDS,
+    PUNCTUATION,
+    BOILERPLATE_PHRASES
+)
+
 # Phase 1: Benchmark
 from .benchmark import (
+    load_dataset,
+    define_experiments,
+    run_benchmark,
+    analyze_results,
+    save_results,
+)
+
+# Phase 1: Benchmark
+from .benchmark_V2 import (
     load_dataset,
     define_experiments,
     run_benchmark,

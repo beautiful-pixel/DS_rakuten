@@ -1,5 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
+import pandas as pd
 from .replacer import replace_numeric_expressions, get_numeric_tokens
+
 
 COL_TOKENS = ["[TITRE]", "[DESC]"]
 
@@ -13,7 +15,9 @@ class NumericTokensTransformer(BaseEstimator, TransformerMixin):
     (dimensions, poids, dates, quantités, etc.) par des tokens discrets.
     """
 
-    def __init__(self, designation_col='designation', description_col='description'):
+    def __init__(
+            self, designation_col='designation', description_col='description',
+            merge=True, output_col='text'):
         """
         Initialise le transformateur de tokenisation numérique.
 
@@ -25,6 +29,9 @@ class NumericTokensTransformer(BaseEstimator, TransformerMixin):
         """
         self.designation_col = designation_col
         self.description_col = description_col
+        self.merge = merge
+        # output_col utile seulement si merge = True
+        self.output_col = output_col
 
     def fit(self, X, y=None):
         """
@@ -50,14 +57,17 @@ class NumericTokensTransformer(BaseEstimator, TransformerMixin):
             X (pd.DataFrame): DataFrame contenant les colonnes textuelles.
 
         Returns:
-            pd.Series: Série contenant le texte transformé avec tokens numériques.
+            pd.DataFrame: DataFrame contenant le texte transformé avec tokens numériques.
         """
-        return (
-            COL_TOKENS[0] + " " +
-            X["designation"].fillna("").apply(replace_numeric_expressions) + " " +
-            COL_TOKENS[1] + " " +
-            X["description"].fillna("").apply(replace_numeric_expressions)
-        )
+        title = X["designation"].fillna("").apply(replace_numeric_expressions)
+        desc = X["description"].fillna("").apply(replace_numeric_expressions)
+        data = {}
+        if self.merge:
+            data[self.output_col] = COL_TOKENS[0] + " " + title + " " + COL_TOKENS[1] + " " + desc
+        else:
+            data["designation"] = title
+            data["description"] = desc
+        return pd.DataFrame(data)
     
     def get_tokens(self):
         """
@@ -66,4 +76,4 @@ class NumericTokensTransformer(BaseEstimator, TransformerMixin):
         Returns:
             list[str]: Liste des tokens numériques possibles.
         """
-        return get_numeric_tokens()
+        return COL_TOKENS + get_numeric_tokens()

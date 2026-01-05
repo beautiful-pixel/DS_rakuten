@@ -47,10 +47,14 @@ LABELS_DICT = {
         [0, 3, np.float32('inf')],
         ['peu de pièces', 'beaucoup de pièces']
     ),
-    'number' : (
+    'integer' : (
         [0, 1, 2, 5, 20, 100, np.float32('inf')],
         ['zéro', 'un', 'petit nombre', 'nombre moyen', 'grand nombre', 'très grand nombre']
     ),
+    'float' : (
+        [0, 1, 10, 100, np.float32('inf')],
+        ['petite quantité', 'quantité moyenne', 'grande quantité', 'très grande quantité']
+    )
 }
 
 # =========================

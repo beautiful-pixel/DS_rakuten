@@ -12,7 +12,7 @@ class TextLengthTransformer(BaseEstimator, TransformerMixin):
 
     _ALLOWED_UNITS = {"char", "word"}
 
-    def __init__(self, length_unit="char", cols=[['designation', 'description']], name_prefix=None):
+    def __init__(self, length_unit="char", cols=['designation', 'description'], name_prefix=None):
         if length_unit not in self._ALLOWED_UNITS:
             raise ValueError(
                 f"length_unit must be one of {self._ALLOWED_UNITS}, "
@@ -20,6 +20,7 @@ class TextLengthTransformer(BaseEstimator, TransformerMixin):
             )
         self.length_unit = length_unit
         self.cols = cols
+        self.name_prefix = name_prefix
         self.prefix = f"{name_prefix}_" if name_prefix else ""
 
     def fit(self, X, y=None):

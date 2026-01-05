@@ -25,6 +25,7 @@ class TextCleaner(BaseEstimator, TransformerMixin):
                 des colonnes générées. Par défaut None.
         """
         self.cols = cols
+        self.name_prefix = name_prefix
         self.prefix = f"{name_prefix}_" if name_prefix else ""
 
     def fit(self, X, y=None):
