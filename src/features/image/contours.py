@@ -46,7 +46,10 @@ def get_main_contours(
     main_contours = []
     for im in images:
         blur = cv2.GaussianBlur(im, (5, 5), 0)
-        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+        if im.ndim == 3:
+            gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = blur
         t, _ = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         edge = cv2.Canny(blur, t * 0.5, t)
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))

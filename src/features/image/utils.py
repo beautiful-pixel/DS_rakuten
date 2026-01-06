@@ -82,8 +82,8 @@ def are_parallel(line1, line2, tol=0.03):
     (x1, y1), (x2, y2) = line1
     (x3, y3), (x4, y4) = line2
 
-    u = np.array([x2 - x1, y2 - y1])
-    v = np.array([x4 - x3, y4 - y3])
+    u = np.array([x2 - x1, y2 - y1], dtype=np.float32)
+    v = np.array([x4 - x3, y4 - y3], dtype=np.float32)
 
     u /= np.linalg.norm(u)
     v /= np.linalg.norm(v)

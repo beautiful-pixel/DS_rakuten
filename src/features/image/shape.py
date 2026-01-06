@@ -24,6 +24,7 @@ class ParallelogramCounter(BaseEstimator, TransformerMixin):
         self.bins = bins
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
