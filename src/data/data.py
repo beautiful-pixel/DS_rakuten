@@ -64,10 +64,10 @@ def load_data(splitted: bool = False):
 
     data = {
         "X_train": X.iloc[splits["train_idx"]],
-        "y_train": y.iloc[splits["train_idx"]],
         "X_val": X.iloc[splits["val_idx"]],
-        "y_val": y.iloc[splits["val_idx"]],
         "X_test": X.iloc[splits["test_idx"]],
+        "y_train": y.iloc[splits["train_idx"]],
+        "y_val": y.iloc[splits["val_idx"]],
         "y_test": y.iloc[splits["test_idx"]],
     }
 

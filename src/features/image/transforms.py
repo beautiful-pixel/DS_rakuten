@@ -18,6 +18,7 @@ class Flattener(BaseEstimator, TransformerMixin):
         self.inverse_transform = inverse_transform
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
@@ -40,6 +41,7 @@ class Resizer(BaseEstimator, TransformerMixin):
         self.grayscale = grayscale
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
@@ -198,3 +200,70 @@ class CropTransformer(BaseEstimator, TransformerMixin):
         # puis au zones noires
         X = bg_crop(X, 15, sup=False, padding=self.padding)
         return X
+
+
+class ProportionTransformer(BaseEstimator, TransformerMixin):
+    """
+    Calcule des proportions de catégories par échantillon.
+
+    Pour chaque ligne de la matrice d'entrée, ce transformateur calcule
+    la proportion d'éléments appartenant à chaque catégorie spécifiée.
+    Les proportions sont normalisées par le nombre total d'éléments
+    appartenant aux catégories considérées.
+    """
+
+    def __init__(self, categories=None):
+        """
+        Initialise le transformateur.
+
+        Args:
+            categories (array-like, optional): Liste des catégories à compter.
+                Si None, les catégories sont déduites automatiquement à partir
+                des données lors de l'appel à `fit`.
+        """
+        self.categories = categories
+
+    def fit(self, X, y=None):
+        """
+        Ajuste le transformateur en identifiant les catégories si nécessaire.
+
+        Args:
+            X (array-like): Données d'entrée.
+            y (Any, optional): Variable cible ignorée.
+
+        Returns:
+            ProportionTransformer: Instance du transformateur.
+        """
+        self.fitted_ = True
+        if self.categories is None:
+            self.categories = np.unique(X)
+        return self
+
+    def transform(self, X):
+        """
+        Calcule les proportions par catégorie pour chaque échantillon.
+
+        Args:
+            X (array-like): Tableau de forme (n_samples, n_elements)
+                contenant des valeurs catégorielles ou encodées.
+
+        Returns:
+            np.ndarray: Tableau de forme (n_samples, n_categories)
+            contenant les proportions par catégorie.
+        """
+        X = np.asarray(X)
+
+        counts = np.array([
+            (X == cat).sum(axis=1) for cat in self.categories
+        ]).T
+
+        totals = counts.sum(axis=1, keepdims=True)
+
+        proportions = np.divide(
+            counts,
+            totals,
+            out=np.zeros_like(counts, dtype=float),
+            where=totals > 0
+        )
+
+        return proportions

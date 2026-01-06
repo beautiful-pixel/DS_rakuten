@@ -18,7 +18,7 @@ def get_SIFT_descriptors(X):
     descriptors = []
 
     for im in X:
-        gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY) if im.ndim == 3 else im
         _, des = sift.detectAndCompute(gray, None)
         descriptors.append(des)
 
@@ -43,6 +43,7 @@ class CornerCounter(BaseEstimator, TransformerMixin):
         self.apply_dilate = apply_dilate
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
@@ -81,6 +82,7 @@ class BoVWTransformer(BaseEstimator, TransformerMixin):
         if len(descriptors) == 0:
             raise ValueError("Aucun descripteur SIFT trouvé.")
         self.kmeans.fit(np.vstack(descriptors))
+        self.fitted_ = True
         return self
 
     def transform(self, X):

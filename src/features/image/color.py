@@ -61,6 +61,7 @@ class ColorEncoder(BaseEstimator, TransformerMixin):
         self.ranges = ranges
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
@@ -92,6 +93,7 @@ class MeanRGBTransformer(BaseEstimator, TransformerMixin):
         self.impute_value = impute_value
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
@@ -133,6 +135,7 @@ class HistRGBTransformer(BaseEstimator, TransformerMixin):
         self.ranges = ranges
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):
