@@ -1,0 +1,13 @@
+{
+  "timestamp": "20260105_114525",
+  "model_name": "swin_base_patch4_window7_224",
+  "best_epoch": 10,
+  "val_acc": 74.72984206151288,
+  "val_f1": 0.7428620491473924,
+  "test_acc": 73.16690218244622,
+  "test_f1": 0.7264093496900504,
+  "num_classes": 27,
+  "train_samples": 61351,
+  "val_samples": 10827,
+  "test_samples": 12738
+}

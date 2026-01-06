@@ -3,10 +3,17 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from PIL import Image
+from pathlib import Path
 
 MODULE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(MODULE_DIR, "../data/raw/")
 IMG_DIR = os.path.join(MODULE_DIR, "../data/raw/images/image_train/")
+
+# Constantes pour les splits unifiés du projet
+SEED = 42
+TEST_SIZE = 0.15  # 15% pour test
+VAL_SIZE = 0.15   # 15% du reste pour validation
+SPLITS_DIR = Path(MODULE_DIR) / ".." / "data" / "splits"
 
 def split_data():
     """
@@ -99,3 +106,88 @@ def images_read(impath, dsize=(500,500), grayscale=False, max_load=10**9):
             img = img.resize(dsize)
             images.append(np.array(img))
     return np.array(images)
+
+
+def generate_splits(save=False):
+    """
+    Génère des splits train / validation / test fixes et stratifiés.
+
+    Les proportions et la graine aléatoire sont volontairement figées
+    afin de garantir des splits strictement identiques pour l'ensemble
+    des modèles, modalités et expériences du projet.
+
+    Args:
+        save (bool): Si True, sauvegarde les indices dans data/splits/.
+
+    Returns:
+        dict: Dictionnaire contenant :
+            - train_idx
+            - val_idx
+            - test_idx
+    """
+    y = pd.read_csv(DATA_DIR+'Y_train_CVw08PX.csv')['prdtypecode'].to_numpy()
+    indices = np.arange(len(y))
+    full_train_idx, test_idx = train_test_split(
+        indices, test_size=TEST_SIZE, random_state=SEED, stratify=y
+    )
+    train_idx, val_idx = train_test_split(
+        full_train_idx, test_size=VAL_SIZE, random_state=SEED, stratify=y[full_train_idx]
+    )
+    splits = {
+        "train_idx" : train_idx,
+        "val_idx" : val_idx,
+        "test_idx" : test_idx,
+    }
+    if save:
+        SPLITS_DIR.mkdir(parents=True, exist_ok=True)
+        for name, idx in splits.items():
+            np.savetxt(SPLITS_DIR / f"{name}.txt", idx, fmt="%d")
+    return splits
+
+
+def load_unified_splits():
+    """
+    Charge les indices de split unifiés du projet.
+
+    Returns:
+        dict: Contient train_idx, val_idx, test_idx
+    """
+    if not SPLITS_DIR.exists():
+        raise FileNotFoundError(
+            f"Le répertoire {SPLITS_DIR} n'existe pas. "
+            f"Veuillez d'abord générer les splits avec generate_splits(save=True)"
+        )
+
+    splits = {
+        "train_idx": np.loadtxt(SPLITS_DIR / "train_idx.txt", dtype=int),
+        "val_idx": np.loadtxt(SPLITS_DIR / "val_idx.txt", dtype=int),
+        "test_idx": np.loadtxt(SPLITS_DIR / "test_idx.txt", dtype=int)
+    }
+
+    return splits
+
+
+def get_split_data_unified():
+    """
+    Retourne les données splitées selon les indices unifiés du projet.
+
+    Returns:
+        tuple: (X_train, X_val, X_test, y_train, y_val, y_test)
+    """
+    # Charger les données complètes
+    X = pd.read_csv(DATA_DIR + 'X_train_update.csv', index_col=0)
+    y = pd.read_csv(DATA_DIR + 'Y_train_CVw08PX.csv', index_col=0)['prdtypecode']
+
+    # Charger les indices unifiés
+    splits = load_unified_splits()
+
+    # Appliquer les splits
+    X_train = X.iloc[splits["train_idx"]].reset_index(drop=True)
+    X_val = X.iloc[splits["val_idx"]].reset_index(drop=True)
+    X_test = X.iloc[splits["test_idx"]].reset_index(drop=True)
+
+    y_train = y.iloc[splits["train_idx"]].reset_index(drop=True)
+    y_val = y.iloc[splits["val_idx"]].reset_index(drop=True)
+    y_test = y.iloc[splits["test_idx"]].reset_index(drop=True)
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
