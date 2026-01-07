@@ -169,3 +169,12 @@ data/
 models/
 checkpoints/
 
+# Ignore all artifacts by default
+artifacts/**
+
+# Keep canonical class truth files
+!artifacts/canonical_classes.json
+!artifacts/canonical_classes.npy
+
+# Still ignore exports even if artifacts whitelisted patterns change later
+artifacts/exports/**
