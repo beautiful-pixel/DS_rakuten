@@ -165,3 +165,7 @@ cython_debug/
 # Data folder
 data/
 !src/data/
+
+models/
+checkpoints/
+
