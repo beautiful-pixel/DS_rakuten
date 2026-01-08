@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 from pathlib import Path
-from .splits import generate_splits
+# from .splits import generate_splits
+from .split_manager import load_splits, split_signature
 
 
 MODULE_DIR = Path(__file__).resolve().parent
@@ -31,36 +32,65 @@ def get_image_path(df: pd.DataFrame) -> pd.Series:
 
     return file_names.apply(lambda x: IMG_DIR / x)
 
+# def load_data(splitted: bool = False):
+#     """
+#     Charge les données tabulaires du projet.
+
+#     Les données peuvent être retournées soit sous forme complète,
+#     soit découpées selon les splits train / validation / test
+#     définis dans le module `splits`.
+
+#     Args:
+#         splitted (bool, optional): Si True, retourne les données
+#             découpées selon les splits. Sinon, retourne l'ensemble
+#             des données. Par défaut False.
+
+#     Returns:
+#         dict: Dictionnaire contenant :
+#             - X_train, y_train
+#             - X_val, y_val
+#             - X_test, y_test
+#         ou, si `splitted=False` :
+#             - X
+#             - y
+#     """
+#     X = pd.read_csv(DATA_DIR / "X_train_update.csv")
+#     X['image_path'] = get_image_path(X)
+#     y = pd.read_csv(DATA_DIR / "Y_train_CVw08PX.csv")["prdtypecode"]
+
+#     if not splitted:
+#         return {"X": X, "y": y}
+
+#     splits = generate_splits()
+
+#     data = {
+#         "X_train": X.iloc[splits["train_idx"]],
+#         "X_val": X.iloc[splits["val_idx"]],
+#         "X_test": X.iloc[splits["test_idx"]],
+#         "y_train": y.iloc[splits["train_idx"]],
+#         "y_val": y.iloc[splits["val_idx"]],
+#         "y_test": y.iloc[splits["test_idx"]],
+#     }
+
+#     return data
+
 def load_data(splitted: bool = False):
     """
     Charge les données tabulaires du projet.
 
-    Les données peuvent être retournées soit sous forme complète,
-    soit découpées selon les splits train / validation / test
-    définis dans le module `splits`.
-
-    Args:
-        splitted (bool, optional): Si True, retourne les données
-            découpées selon les splits. Sinon, retourne l'ensemble
-            des données. Par défaut False.
-
-    Returns:
-        dict: Dictionnaire contenant :
-            - X_train, y_train
-            - X_val, y_val
-            - X_test, y_test
-        ou, si `splitted=False` :
-            - X
-            - y
+    If splitted=True, the split indices are loaded from split_manager (canonical truth),
+    NOT regenerated on the fly. This guarantees strict split consistency across models.
     """
     X = pd.read_csv(DATA_DIR / "X_train_update.csv")
-    X['image_path'] = get_image_path(X)
+    X["image_path"] = get_image_path(X)
     y = pd.read_csv(DATA_DIR / "Y_train_CVw08PX.csv")["prdtypecode"]
 
     if not splitted:
         return {"X": X, "y": y}
 
-    splits = generate_splits()
+    # Phase 1 canonical splits (single source of truth)
+    splits = load_splits(verbose=False)
+    sig = split_signature(splits)
 
     data = {
         "X_train": X.iloc[splits["train_idx"]],
@@ -69,9 +99,14 @@ def load_data(splitted: bool = False):
         "y_train": y.iloc[splits["train_idx"]],
         "y_val": y.iloc[splits["val_idx"]],
         "y_test": y.iloc[splits["test_idx"]],
+        "train_idx": splits["train_idx"],
+        "val_idx": splits["val_idx"],
+        "test_idx": splits["test_idx"],
+        "split_signature": sig,
     }
 
     return data
+
 
 
 def images_read(impath, dsize=(500, 500), grayscale=False, max_load=10**9):
