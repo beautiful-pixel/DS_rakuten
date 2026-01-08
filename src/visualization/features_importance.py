@@ -7,9 +7,9 @@ from data import CATEGORY_SHORT_NAMES
 def plot_features_importance(
     model_coef,
     feature_blocks,
-    encoder=None,
+    classes,
     cmap="Blues",
-    by_block=True
+    by_block=True,
 ):
     """
     Visualise l'importance des features d'un modèle linéaire par blocs de features.
@@ -48,11 +48,7 @@ def plot_features_importance(
             La fonction affiche directement les figures matplotlib
             et ne retourne aucun objet.
     """
-    class_labels = range(model_coef.shape[0])
-
-    if encoder:
-        class_labels = encoder.inverse_transform(class_labels)
-        class_labels = [CATEGORY_SHORT_NAMES[c] for c in class_labels]
+    class_labels = [CATEGORY_SHORT_NAMES[c] for c in classes]
 
     abs_coef = np.abs(model_coef)
     max_abs_coef = abs_coef.max()
@@ -63,10 +59,11 @@ def plot_features_importance(
     ]).T
 
     plt.figure(figsize=(14, 6))
+    vmax = max_abs_coef if by_block else None
     sns.heatmap(
         mean_abs_coef_by_block,
         vmin=0,
-        vmax=max_abs_coef,
+        vmax=vmax,
         cmap=cmap
     )
     plt.title("Importance moyenne des features par bloc")

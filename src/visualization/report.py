@@ -99,7 +99,7 @@ def plot_classification_report(
         vmin=0,
         vmax=1
     )
-    plt.title("Matrice de confusion normalisée par ligne", fontsize=10)
+    plt.title("Matrice de confusion normalisée par ligne")
     plt.xlabel("")
     plt.ylabel("")
     plt.tight_layout()

@@ -1,3 +1,6 @@
+
+# TokenFrequencyTransformer a supprimer et utiliser les countvectorizer
+
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 
@@ -78,30 +81,3 @@ class TokenFrequencyTransformer(BaseEstimator, TransformerMixin):
         return counts
     
 
-class FeatureWeighter(BaseEstimator, TransformerMixin):
-    """
-    Transformer personnalisé pour pondérer les features par un facteur multiplicatif.
-
-    Utilisé pour augmenter l'importance relative de certaines features
-    (ex: multiplier les features du titre par 2x ou 3x).
-
-    Hérite de BaseEstimator et TransformerMixin pour être compatible avec
-    sklearn et picklable pour le multiprocessing.
-    """
-
-    def __init__(self, weight: float = 1.0):
-        """
-        Paramètres
-        ----------
-        weight : float, default=1.0
-            Facteur multiplicatif à appliquer aux features
-        """
-        self.weight = weight
-
-    def fit(self, X, y=None):
-        """Fit method (no-op)."""
-        return self
-
-    def transform(self, X):
-        """Multiplie les features par le poids."""
-        return X * self.weight
