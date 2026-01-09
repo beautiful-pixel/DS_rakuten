@@ -1,6 +1,7 @@
 from torch import nn
 from transformers import AutoModel
 from torch.functional import F
+from transformers.modeling_outputs import SequenceClassifierOutput
 
 class TextClassifier(nn.Module):
     def __init__(self, model_name: str, num_labels: int, dropout: float = 0.15, mlp_dim: int = 512, pooling: str = "mean"):
@@ -33,4 +34,9 @@ class TextClassifier(nn.Module):
         loss = None
         if labels is not None:
             loss = F.cross_entropy(logits, labels)
-        return {"loss": loss, "logits": logits}
+
+        return SequenceClassifierOutput(
+            loss=loss,
+            logits=logits,
+        )
+    

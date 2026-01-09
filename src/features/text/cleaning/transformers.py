@@ -3,10 +3,6 @@ import pandas as pd
 from .cleaning import clean_text
 
 
-from sklearn.base import BaseEstimator, TransformerMixin
-import pandas as pd
-
-
 class FillNaTextTransformer(BaseEstimator, TransformerMixin):
     """
     Remplace les valeurs manquantes dans des colonnes textuelles.
@@ -34,6 +30,7 @@ class FillNaTextTransformer(BaseEstimator, TransformerMixin):
         Returns:
             FillNaTextTransformer: Instance du transformateur.
         """
+        self.fitted_ = True
         return self
 
     def transform(self, X):
@@ -59,7 +56,13 @@ class TextCleaner(BaseEstimator, TransformerMixin):
     (encodage, HTML, Unicode) sur les colonnes textuelles spécifiées.
     """
 
-    def __init__(self, cols=['designation', 'description'], name_prefix=None):
+    def __init__(
+            self, 
+            cols=['designation', 'description'], 
+            name_prefix=None, 
+            lowercase=False,
+            remove_html_tags=True
+            ):
         """
         Initialise le transformateur de nettoyage du texte.
 
@@ -72,6 +75,8 @@ class TextCleaner(BaseEstimator, TransformerMixin):
         self.cols = cols
         self.name_prefix = name_prefix
         self.prefix = f"{name_prefix}_" if name_prefix else ""
+        self.lowercase = lowercase
+        self.remove_html_tags = remove_html_tags
 
     def fit(self, X, y=None):
         """
@@ -98,7 +103,8 @@ class TextCleaner(BaseEstimator, TransformerMixin):
         """
         params = {
             'fix_encoding':True, 'unescape_html':True,
-            'normalize_unicode':True, 'remove_html_tags':True
+            'normalize_unicode':True, 'remove_html_tags':self.remove_html_tags,
+            'lowercase':self.lowercase,
             }
         cleaned_text = {
             self.prefix + c : X[c].fillna("").apply(lambda x : clean_text(x, **params))
@@ -106,4 +112,6 @@ class TextCleaner(BaseEstimator, TransformerMixin):
             }
         return pd.DataFrame(cleaned_text)
 
+    def get_feature_names_out(self, input_features=None):
+        return input_features
 

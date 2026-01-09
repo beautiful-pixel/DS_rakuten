@@ -18,18 +18,22 @@ LABELS_DICT = {
     'length' : (
         [0, 10, 40, 350, np.float32('inf')],
         ['petite longueur', 'longueur moyenne', 'grande longueur', 'très grande longueur']
-),
+    ),
     'weight' : (
         [0, 1.5, 20, np.float32('inf')],
         ['poids leger', 'poids moyen', 'poids lourd']
+    ),
+    'price' : (
+        [0, 20, 100, np.float32('inf')],
+        ['prix bas', 'prix moyen', 'prix eleve']
     ),
     'age' : (
         [0, 3, 15, np.float32('inf')],
         ['age bébé', 'age enfant', 'age adulte']
     ),
     'memory' : (
-        [0, 10, np.float32('inf')],
-        ['petite mémoire', 'grande mémoire']
+        [0, 8, 64, np.float32('inf')],
+        ['petite mémoire', 'mémoire moyenne', 'grande mémoire']
     ),
     'date' : (
         [1800, 1960, 2007, 2021, np.float32('inf')],
@@ -56,6 +60,59 @@ LABELS_DICT = {
         ['petite quantité', 'quantité moyenne', 'grande quantité', 'très grande quantité']
     )
 }
+
+
+# LABELS_DICT = {
+#     'volume' : (
+#         # volume moyen de 5 litres à 1.5 m**3
+#         [0, 5e3, 1.5e6, np.float32('inf')],
+#         ['petit volume', 'volume moyen', 'grand volume']
+#     ),
+#     'surface' : (
+#         [0, 1600, 2e4, np.float32('inf')],
+#         ['petite surface', 'surface moyenne', 'grande surface']
+#     ),
+#     'length' : (
+#         [0, 10, 40, 350, np.float32('inf')],
+#         ['petite longueur', 'longueur moyenne', 'grande longueur', 'très grande longueur']
+# ),
+#     'weight' : (
+#         [0, 1.5, 20, np.float32('inf')],
+#         ['poids leger', 'poids moyen', 'poids lourd']
+#     ),
+#     'age' : (
+#         [0, 3, 15, np.float32('inf')],
+#         ['age bébé', 'age enfant', 'age adulte']
+#     ),
+#     'memory' : (
+#         [0, 10, np.float32('inf')],
+#         ['petite mémoire', 'grande mémoire']
+#     ),
+#     'date' : (
+#         [1800, 1960, 2007, 2021, np.float32('inf')],
+#         ['date ancienne', 'date contemporaine', 'date récente', 'date future']
+#     ),
+#     'numero' : (
+#         [0, 20, np.float32('inf')],
+#         ['petit numero', 'grand numero']
+#     ),
+#     'card' : (
+#         [0, 5, np.float32('inf')],
+#         ['peu de cartes', 'beaucoup de cartes']
+#     ),
+#     'piece' : (
+#         [0, 3, np.float32('inf')],
+#         ['peu de pièces', 'beaucoup de pièces']
+#     ),
+#     'integer' : (
+#         [0, 1, 2, 5, 20, 100, np.float32('inf')],
+#         ['zéro', 'un', 'petit nombre', 'nombre moyen', 'grand nombre', 'très grand nombre']
+#     ),
+#     'float' : (
+#         [0, 1, 10, 100, np.float32('inf')],
+#         ['petite quantité', 'quantité moyenne', 'grande quantité', 'très grande quantité']
+#     )
+# }
 
 # =========================
 # Normalisation des unités

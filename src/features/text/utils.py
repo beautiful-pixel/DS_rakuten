@@ -15,9 +15,10 @@ class MergeTextTransformer(BaseEstimator, TransformerMixin):
             Par défaut "description".
     """
 
-    def __init__(self, title_col="designation", desc_col="description"):
+    def __init__(self, title_col="designation", desc_col="description", sep=None):
         self.title_col = title_col
         self.desc_col = desc_col
+        self.sep = sep
 
     def fit(self, X, y=None):
         """
@@ -48,10 +49,17 @@ class MergeTextTransformer(BaseEstimator, TransformerMixin):
         """
         title = X[self.title_col].fillna("")
         desc = X[self.desc_col].fillna("")
-        return (title + " " + desc).values
+        full_sep = " " + self.sep + " " if self.sep else " "
+        return (title + full_sep + desc).values
 
     def get_feature_names_out(self, input_features=None):
-        return input_features
+        return ["text"]
+    
+    def get_extra_tokens(self):
+        if self.sep:
+            return [self.sep]
+        else:
+            return []
 
 class FeatureWeighter(BaseEstimator, TransformerMixin):
     """

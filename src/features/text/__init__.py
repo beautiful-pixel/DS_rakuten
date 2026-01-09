@@ -5,6 +5,7 @@ from .frequency import TokenFrequencyTransformer
 from .length import TextLengthTransformer
 from .language import LanguageDetector
 from .utils import FeatureWeighter, MergeTextTransformer
+from .heuristics import KeywordFeatureTransformer, UnitFeatureTransformer
 
 __all__ = [
     "TextCleaner",
@@ -14,5 +15,7 @@ __all__ = [
     "TextLengthTransformer",
     "LanguageDetector",
     "FeatureWeighter",
-    "MergeTextTransformer"
+    "MergeTextTransformer",
+    "KeywordFeatureTransformer",
+    "UnitFeatureTransformer"
 ]
