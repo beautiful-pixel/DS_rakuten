@@ -48,6 +48,8 @@ from src.export.model_exporter import export_predictions, load_predictions
 
 from src.data.image_dataset import RakutenImageDataset
 
+import wandb
+
 
 @dataclass
 class SwinConfig:
@@ -575,6 +577,14 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
             mixup_fn=mixup_fn,
         )
 
+        wandb.log({
+            "epoch": epoch,
+            "train_loss": train_loss,
+            "train_acc": train_acc,
+            "train_f1": train_f1,
+            "lr": float(optimizer.param_groups[0]["lr"]),
+        })
+
         val_loss, val_acc, val_f1 = _eval_one_epoch(
             model=model,
             loader=val_loader,
@@ -582,6 +592,10 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
             device=device,
             use_amp=use_amp,
         )
+
+        wandb.log({
+            "val_f1": val_f1
+        })
 
         scheduler.step()
 
