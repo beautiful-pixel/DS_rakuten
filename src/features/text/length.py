@@ -1,54 +1,89 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
+import numpy as np
+
+
+from sklearn.base import BaseEstimator, TransformerMixin
+import pandas as pd
+import numpy as np
 
 
 class TextLengthTransformer(BaseEstimator, TransformerMixin):
-    """
-    Transformateur scikit-learn calculant la longueur de champs textuels.
+    """Calcule des features de longueur à partir de champs textuels.
 
-    La longueur peut être mesurée en nombre de caractères ou en nombre
-    de mots selon le paramètre `length_unit`.
+    Ce transformateur extrait des caractéristiques simples correspondant à la
+    longueur des textes, mesurée soit en nombre de caractères, soit en nombre de
+    mots. Il est compatible avec les pipelines et unions de features
+    scikit-learn.
+
+    Args:
+        length_unit (str, optional):
+            Unité utilisée pour mesurer la longueur du texte. Valeurs possibles :
+            ``"char"`` (caractères) ou ``"word"`` (mots). Par défaut ``"char"``.
+        cols (tuple[str], optional):
+            Noms des colonnes textuelles à analyser. Par défaut
+            ``("designation", "description")``.
+        name_prefix (str, optional):
+            Préfixe optionnel ajouté au nom des features générées (ex.
+            ``"char_len"`` ou ``"word_len"``). Par défaut ``None``.
     """
 
     _ALLOWED_UNITS = {"char", "word"}
 
-    def __init__(self, length_unit="char", cols=['designation', 'description'], name_prefix=None):
+    def __init__(
+        self,
+        length_unit="char",
+        cols=("designation", "description"),
+        name_prefix=None,
+    ):
         if length_unit not in self._ALLOWED_UNITS:
             raise ValueError(
-                f"length_unit must be one of {self._ALLOWED_UNITS}, "
-                f"got '{length_unit}'."
+                f"length_unit doit être dans {self._ALLOWED_UNITS}, "
+                f"reçu '{length_unit}'."
             )
         self.length_unit = length_unit
         self.cols = cols
         self.name_prefix = name_prefix
-        self.prefix = f"{name_prefix}_" if name_prefix else ""
 
     def fit(self, X, y=None):
-        """
-        Ajuste le transformateur (aucun apprentissage nécessaire).
+        """Initialise les noms des features.
 
         Args:
-            X (pd.DataFrame): Données d'entrée.
+            X (pandas.DataFrame): Données d'entrée.
             y (Any, optional): Variable cible ignorée.
 
         Returns:
-            TextLengthTransformer: Instance du transformateur.
+            TextLengthTransformer: Instance ajustée.
         """
+        prefix = f"{self.name_prefix}_" if self.name_prefix else ""
+        self.feature_names_ = [prefix + col for col in self.cols]
         return self
 
     def transform(self, X):
-        """
-        Calcule les longueurs des champs textuels.
+        """Calcule les longueurs des champs textuels.
 
         Args:
-            X (pd.DataFrame): DataFrame contenant les textes.
+            X (pandas.DataFrame): DataFrame contenant les textes.
 
         Returns:
-            pd.DataFrame: DataFrame des longueurs calculées.
+            pandas.DataFrame:
+                DataFrame des longueurs calculées, avec le même index que X.
         """
-        X = X.fillna("")
-        if self.length_unit == 'word':
-            length = {self.prefix + c : X[c].str.split().str.len() for c in self.cols}
-        elif self.length_unit == 'char':
-            length = {self.prefix + c : X[c].str.len() for c in self.cols}
-        return pd.DataFrame(length)
+        X = X.copy().fillna("")
+
+        if self.length_unit == "word":
+            data = {
+                name: X[col].str.split().str.len()
+                for name, col in zip(self.feature_names_, self.cols)
+            }
+        else:  # char
+            data = {
+                name: X[col].str.len()
+                for name, col in zip(self.feature_names_, self.cols)
+            }
+
+        return pd.DataFrame(data, index=X.index)
+
+    def get_feature_names_out(self, input_features=None):
+        """Retourne les noms des features générées."""
+        return np.array(self.feature_names_)

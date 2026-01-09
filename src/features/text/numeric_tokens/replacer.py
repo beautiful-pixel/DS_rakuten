@@ -137,6 +137,7 @@ pattern_surface_m = rf"\b(\d+[.,]?\d*)\s*[xX*]\s*(\d+[.,]?\d*)\s*{REG_DIST}\b"
 pattern_surface = r"\b(\d+[.,]?\d*)\s*([mcd]?m2)\b"
 pattern_length = rf"\b(?:(\d+[.,]?\d*)\s*-\s*)?(\d+[.,]?\d*)\s*{REG_DIST}\b"
 pattern_weight = rf"\b(\d+[.,]?\d*)\s*{REG_WEIGHT}\b"
+pattern_price = r"\b(\d+[.,]?\d*)\s*(€|eur|euros?)\b"
 pattern_age = r"\b(?:(\d+)\s*-\s*)?(\d+)\s*(mois|ans?)\b"
 pattern_memory = r"\b(\d+)\s*([gmt][ob])\b"
 pattern_date = r"\b(?:\d{2}/\d{2}/|\d{2}/)?((?:18|19|20)\d{2})\b"
@@ -159,6 +160,7 @@ PATTERNS = [
     ("surface", pattern_surface, {"unit_pos": -1}),
     ("length", pattern_length, {"unit_pos": -1, "int_pos": 0}),
     ("weight", pattern_weight, {"unit_pos": -1}),
+    ("price", pattern_price, {"unit_pos": -1}),
     ("age", pattern_age, {"unit_pos": -1, "int_pos": 0}),
     ("memory", pattern_memory, {"unit_pos": -1}),
     ("date", pattern_date, {}),
@@ -174,27 +176,65 @@ PATTERNS = [
     ("float", pattern_float, {}),
 ]
 
+NUMERIC_GROUPS = {
+    "light": {
+        "volume", "surface", "length", "weight",
+        "memory", "age", "card", "piece",
+        "power", "energy", "capacity", "temperature", "tension"
+    },
+    "full": {
+        "volume", "surface", "length", "weight",
+        "memory", "age", "card", "piece",
+        "power", "energy", "capacity", "temperature", "tension",
+        "date", "numero", "integer", "float", "price"
+    },
+    "phys": {
+        "length",
+        "surface",
+        "volume",
+        "weight",
+    },
+}
 
-def replace_numeric_expressions(txt: str) -> str:
+
+def replace_numeric_expressions(
+    txt: str,
+    mode: str = "light",
+    enabled_measures: set[str] | None = None,
+) -> str:
     """
-    Remplace toutes les expressions numériques du texte par des tokens sémantiques.
+    Remplace les expressions numériques par des tokens sémantiques,
+    selon une stratégie paramétrable.
 
     Args:
         txt (str): Texte brut.
+        mode (str): Stratégie de normalisation numérique
+            ("light" ou "full" ou "phys").
 
     Returns:
         str: Texte avec tokens numériques.
     """
-    txt = re.sub(r"²", r"2", txt)
-    txt = re.sub(r"³", r"3", txt)
+    if enabled_measures is None:
+        enabled_measures = NUMERIC_GROUPS[mode]
+        
+    txt = re.sub(r"²", "2", txt)
+    txt = re.sub(r"³", "3", txt)
+
+    enabled_measures = NUMERIC_GROUPS[mode]
+
     for measure, pattern, params in PATTERNS:
+        if measure not in enabled_measures:
+            continue
+
         txt = re.sub(
             pattern,
             lambda m: replace_numeric(m, measure, **params),
             txt,
             flags=re.IGNORECASE
         )
+
     return txt
+
 
 USED_MEASURES = {m for m, _, _ in PATTERNS}
 

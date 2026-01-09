@@ -165,6 +165,7 @@ cython_debug/
 # Data folder
 data/
 !src/data/
+<<<<<<< HEAD
 
 models/
 checkpoints/
@@ -178,3 +179,5 @@ artifacts/**
 
 # Still ignore exports even if artifacts whitelisted patterns change later
 artifacts/exports/**
+=======
+>>>>>>> origin/dev
