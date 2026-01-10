@@ -47,6 +47,7 @@ from src.data.label_mapping import (
 from src.export.model_exporter import export_predictions, load_predictions
 
 from src.data.image_dataset import RakutenImageDataset
+import wandb
 
 
 @dataclass
@@ -466,6 +467,13 @@ def run_convnext_canonical(cfg: ConvNeXtConfig) -> Dict[str, Any]:
     Canonical ConvNeXt training + Phase 3 export + B4-verifiable contract.
     Includes Mixup/CutMix, AdamW, CosineAnnealingLR, and optional EMA.
     """
+    wandb.init(
+        project="rakuten_image",
+        name=f"convnext",
+        config=cfg,
+        reinit=True,
+    )
+
     device = cfg.device or ("cuda" if torch.cuda.is_available() else "cpu")
     out_dir = Path(cfg.out_dir).expanduser().resolve()
     ckpt_dir = Path(cfg.ckpt_dir).expanduser().resolve()
@@ -520,6 +528,8 @@ def run_convnext_canonical(cfg: ConvNeXtConfig) -> Dict[str, Any]:
         num_classes=len(CANONICAL_CLASSES),
         cfg=cfg,
     ).to(device)
+
+    wandb.watch(model, log="all", log_freq=100)
 
     # 6) EMA (Exponential Moving Average)
     model_ema = None
@@ -607,6 +617,17 @@ def run_convnext_canonical(cfg: ConvNeXtConfig) -> Dict[str, Any]:
             device=device,
             use_amp=use_amp,
         )
+
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "train_acc": train_acc,
+            "train_f1": train_f1,
+            "val_loss": val_loss,
+            "val_acc": val_acc,
+            "val_f1": val_f1,
+            "lr": float(optimizer.param_groups[0]["lr"])
+        })
 
         # Evaluate EMA model if enabled
         ema_val_acc, ema_val_f1 = 0.0, 0.0
@@ -723,6 +744,8 @@ def run_convnext_canonical(cfg: ConvNeXtConfig) -> Dict[str, Any]:
         verify_classes_fp=CANONICAL_CLASSES_FP,
         require_y_true=True,
     )
+
+    wandb.finish()
 
     return {
         "export_result": export_result,

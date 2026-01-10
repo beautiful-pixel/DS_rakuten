@@ -47,6 +47,7 @@ from src.data.label_mapping import (
 from src.export.model_exporter import export_predictions, load_predictions
 
 from src.data.image_dataset import RakutenImageDataset
+import wandb
 
 
 @dataclass

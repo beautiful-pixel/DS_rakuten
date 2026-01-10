@@ -61,7 +61,7 @@ class SwinConfig:
 
     # Training
     img_size: int = 224
-    batch_size: int = 32
+    batch_size: int = 128
     num_workers: int = 4
     num_epochs: int = 30
     lr: float = 5e-5
@@ -457,6 +457,13 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
     Canonical Swin training + Phase 3 export + B4-verifiable contract.
     Includes Mixup/CutMix, AdamW, CosineAnnealingLR.
     """
+    wandb.init(
+        project="rakuten_image",
+        name=f"swin",
+        config=cfg,
+        reinit=True,
+    )
+
     device = cfg.device or ("cuda" if torch.cuda.is_available() else "cpu")
     out_dir = Path(cfg.out_dir).expanduser().resolve()
     ckpt_dir = Path(cfg.ckpt_dir).expanduser().resolve()
@@ -511,6 +518,8 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
         num_classes=len(CANONICAL_CLASSES),
         cfg=cfg,
     ).to(device)
+
+    wandb.watch(model, log="all", log_freq=100)
 
     # 6) Mixup/CutMix
     try:
@@ -577,14 +586,6 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
             mixup_fn=mixup_fn,
         )
 
-        wandb.log({
-            "epoch": epoch,
-            "train_loss": train_loss,
-            "train_acc": train_acc,
-            "train_f1": train_f1,
-            "lr": float(optimizer.param_groups[0]["lr"]),
-        })
-
         val_loss, val_acc, val_f1 = _eval_one_epoch(
             model=model,
             loader=val_loader,
@@ -594,7 +595,12 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
         )
 
         wandb.log({
-            "val_f1": val_f1
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "val_acc": val_acc,
+            "val_f1": val_f1,
+            "lr": float(optimizer.param_groups[0]["lr"]),
         })
 
         scheduler.step()
@@ -692,6 +698,8 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
         verify_classes_fp=CANONICAL_CLASSES_FP,
         require_y_true=True,
     )
+
+    wandb.finish()
 
     return {
         "export_result": export_result,

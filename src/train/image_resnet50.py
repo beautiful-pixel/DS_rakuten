@@ -25,9 +25,8 @@ from src.data.label_mapping import (
     reorder_probs_to_canonical,
 )
 from src.export.model_exporter import export_predictions, load_predictions
-
 from src.data.image_dataset import RakutenImageDataset
-
+import wandb
 
 @dataclass
 class ResNet50Config:
@@ -311,6 +310,13 @@ def run_resnet50_colab(cfg: ResNet50Config) -> Dict[str, Any]:
     """
     Colab-friendly canonical ResNet50 training + Phase 3 export + B4-verifiable contract.
     """
+
+    wandb.init(
+        project="rakuten_image",
+        name=cfg.model_name,
+        config=cfg,
+        reinit=True
+    )
     device = cfg.device or ("cuda" if torch.cuda.is_available() else "cpu")
     out_dir = Path(cfg.out_dir).expanduser().resolve()
     ckpt_dir = Path(cfg.ckpt_dir).expanduser().resolve()
@@ -350,6 +356,8 @@ def run_resnet50_colab(cfg: ResNet50Config) -> Dict[str, Any]:
         num_classes=len(CANONICAL_CLASSES),
         dropout_rate=cfg.dropout_rate,
     ).to(device)
+
+    wandb.watch(model, log="all", log_freq=10)
 
     # 6) Optimization (Adam + ReduceLROnPlateau on val_f1)
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr)
@@ -395,6 +403,17 @@ def run_resnet50_colab(cfg: ResNet50Config) -> Dict[str, Any]:
             criterion=criterion,
             device=device,
         )
+
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "train_acc": train_acc,
+            "train_f1": train_f1,
+            "val_loss": val_loss,
+            "val_acc": val_acc,
+            "val_f1": val_f1,
+            "lr": float(optimizer.param_groups[0]["lr"])
+        })
 
         scheduler.step(val_f1)
 
@@ -463,7 +482,7 @@ def run_resnet50_colab(cfg: ResNet50Config) -> Dict[str, Any]:
     probs_aligned = reorder_probs_to_canonical(probs, CANONICAL_CLASSES, CANONICAL_CLASSES)
 
     # y_true in original code space for the exported split
-    y_true = y.iloc[seen_idx].values
+    y_true = y_encoded[seen_idx].astype(int)
 
     export_result = export_predictions(
         out_dir=out_dir,
@@ -498,6 +517,8 @@ def run_resnet50_colab(cfg: ResNet50Config) -> Dict[str, Any]:
         verify_classes_fp=CANONICAL_CLASSES_FP,
         require_y_true=True,
     )
+
+    wandb.finish()
 
     return {
         "export_result": export_result,
