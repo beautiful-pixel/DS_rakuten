@@ -14,7 +14,6 @@ def plot_f1_comparison_with_delta(
     new_name="Nouveau modèle",
     ref_name="Modèle de référence",
     encoder=None,
-    decimals=2,
 ):
     """
     Compare deux modèles de classification par catégorie à l’aide des F1-scores.
