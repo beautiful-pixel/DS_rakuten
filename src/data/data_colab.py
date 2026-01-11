@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import pandas as pd
 
@@ -21,7 +21,7 @@ def _build_image_path(df: pd.DataFrame, img_root: Path) -> pd.Series:
 
 def load_data_colab(
     raw_dir: Path,
-    img_root: Path,
+    img_root: Optional[Path] = None,
     splitted: bool = False,
     verbose: bool = False,
 ) -> Dict[str, Any]:
@@ -32,11 +32,20 @@ def load_data_colab(
     - Explicitly uses provided raw_dir (CSV) and img_root (images)
     - Keeps canonical split logic via split_manager
 
+    Args:
+        raw_dir: Path to directory containing CSV files
+        img_root: Path to image directory (optional, None for text-only models)
+        splitted: Whether to return split data
+        verbose: Print debug information
+
     This function is intentionally separate from load_data()
     to avoid breaking local / server workflows.
     """
     raw_dir = Path(raw_dir).expanduser().resolve()
-    img_root = Path(img_root).expanduser().resolve()
+
+    # Handle optional img_root for text-only models
+    if img_root is not None:
+        img_root = Path(img_root).expanduser().resolve()
 
     x_path = raw_dir / "X_train_update.csv"
     y_path = raw_dir / "Y_train_CVw08PX.csv"
@@ -53,7 +62,10 @@ def load_data_colab(
         raise FileNotFoundError(f"Missing Y_train_CVw08PX.csv at {y_path}")
 
     X = pd.read_csv(x_path)
-    X["image_path"] = _build_image_path(X, img_root)
+
+    # Only build image paths if img_root is provided (for image models)
+    if img_root is not None:
+        X["image_path"] = _build_image_path(X, img_root)
 
     y = pd.read_csv(y_path)["prdtypecode"]
 
