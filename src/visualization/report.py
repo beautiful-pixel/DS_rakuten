@@ -108,31 +108,30 @@ def plot_classification_report(
     # =====================
     # Pires classes (F1)
     # =====================
-    if k_worst_f1 is None:
-        k_worst_f1 = len(report_df)
-
-    display(
-        report_df.iloc[-k_worst_f1:].round(3)
-    )
+    if k_worst_f1 is not None:
+        display(
+            report_df.iloc[-k_worst_f1:].round(3)
+        )
 
     # =====================
     # Pires confusions
     # =====================
-    cm_array = confusion_matrix_norm.to_numpy()
-    np.fill_diagonal(cm_array, 0)
+    if k_worst_errors is not None:
+        cm_array = confusion_matrix_norm.to_numpy()
+        np.fill_diagonal(cm_array, 0)
 
-    top_indices = np.argsort(cm_array, axis=None)[-k_worst_errors:][::-1]
-    true_idx, pred_idx = np.unravel_index(top_indices, cm_array.shape)
+        top_indices = np.argsort(cm_array, axis=None)[-k_worst_errors:][::-1]
+        true_idx, pred_idx = np.unravel_index(top_indices, cm_array.shape)
 
-    error_rates = [
-        round(cm_array[i, j] * 100, 1)
-        for i, j in zip(true_idx, pred_idx)
-    ]
+        error_rates = [
+            round(cm_array[i, j] * 100, 1)
+            for i, j in zip(true_idx, pred_idx)
+        ]
 
-    worst_confusions_df = pd.DataFrame({
-        "Classe réelle": confusion_matrix_norm.index[true_idx],
-        "Classe prédite": confusion_matrix_norm.columns[pred_idx],
-        "% des prédictions de la classe réelle": error_rates,
-    })
+        worst_confusions_df = pd.DataFrame({
+            "Classe réelle": confusion_matrix_norm.index[true_idx],
+            "Classe prédite": confusion_matrix_norm.columns[pred_idx],
+            "% des prédictions de la classe réelle": error_rates,
+        })
 
-    display(worst_confusions_df)
+        display(worst_confusions_df)
