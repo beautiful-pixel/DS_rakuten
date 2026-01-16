@@ -1,5 +1,24 @@
 import torch
 from tqdm import tqdm
+import numpy as np
+
+def predict_logits(model, dataloader, device):
+    model.eval()
+    y_true = []
+    y_logits = []
+
+    with torch.no_grad():
+        for batch in tqdm(dataloader, desc="Prediction"):
+            batch = {k: v.to(device) for k, v in batch.items()}
+            outputs = model(**batch)
+
+            logits = outputs["logits"]
+            y_logits.append(logits.cpu())
+            y_true.extend(batch["labels"].cpu().tolist())
+
+    y_logits = torch.cat(y_logits, dim=0)
+    return np.array(y_true), y_logits.numpy()
+
 
 
 def predict_proba(model, dataloader, device):

@@ -4,7 +4,7 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
 
-from data import CATEGORY_SHORT_NAMES
+from data import CATEGORY_SHORT_NAMES, decode_labels
 
 
 def plot_f1_comparison_with_delta(
@@ -13,7 +13,7 @@ def plot_f1_comparison_with_delta(
     y_pred_ref,
     new_name="Nouveau modèle",
     ref_name="Modèle de référence",
-    encoder=None,
+    encoded=True,
 ):
     """
     Compare deux modèles de classification par catégorie à l’aide des F1-scores.
@@ -28,10 +28,10 @@ def plot_f1_comparison_with_delta(
     """
 
     # Décodage éventuel
-    if encoder is not None:
-        y_true = encoder.inverse_transform(y_true)
-        y_pred_new = encoder.inverse_transform(y_pred_new)
-        y_pred_ref = encoder.inverse_transform(y_pred_ref)
+    if encoded:
+        y_true = decode_labels(y_true)
+        y_pred_new = decode_labels(y_pred_new)
+        y_pred_ref = decode_labels(y_pred_ref)
 
     # Mapping vers noms courts
     y_true = [CATEGORY_SHORT_NAMES[c] for c in y_true]

@@ -134,3 +134,45 @@ def calibrated_probas(
         Probabilités calibrées associées à chaque classe.
     """
     return softmax_np(logits / T)
+
+# src/utils/calibrations.py
+
+import numpy as np
+
+
+def normalize_probas(P: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+    """
+    Normalize probability distributions so that each row sums to 1.
+
+    This function is used after blending or stacking operations to ensure
+    numerical stability and valid probability distributions.
+
+    Args:
+        P (np.ndarray): Array of shape (n_samples, n_classes) containing
+            unnormalized or approximately normalized probabilities.
+        eps (float): Small constant to avoid numerical issues.
+
+    Returns:
+        np.ndarray: Normalized probability array with rows summing to 1.
+    """
+    P = np.clip(P, eps, 1.0)
+    return P / P.sum(axis=1, keepdims=True)
+
+
+def weights_from_logloss(log_losses: dict) -> dict:
+    """
+    Compute blending weights inversely proportional to log-loss values.
+
+    Lower log-loss values result in higher weights. The resulting weights
+    are normalized to sum to 1.
+
+    Args:
+        log_losses (dict): Dictionary mapping model names to their log-loss
+            values computed on a validation set.
+
+    Returns:
+        dict: Dictionary mapping model names to normalized blending weights.
+    """
+    inv = {k: 1.0 / v for k, v in log_losses.items()}
+    total = sum(inv.values())
+    return {k: v / total for k, v in inv.items()}

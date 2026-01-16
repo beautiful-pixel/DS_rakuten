@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 from pathlib import Path
 from .splits import generate_splits
+from .label_mapping import encode_labels
 
 
 MODULE_DIR = Path(__file__).resolve().parent
@@ -31,7 +32,7 @@ def get_image_path(df: pd.DataFrame) -> pd.Series:
 
     return file_names.apply(lambda x: IMG_DIR / x)
 
-def load_data(splitted: bool = False):
+def load_data(splitted: bool = False, encoded=False):
     """
     Charge les données tabulaires du projet.
 
@@ -55,7 +56,9 @@ def load_data(splitted: bool = False):
     """
     X = pd.read_csv(DATA_DIR / "X_train_update.csv")
     X['image_path'] = get_image_path(X)
-    y = pd.read_csv(DATA_DIR / "Y_train_CVw08PX.csv")["prdtypecode"]
+    y = pd.read_csv(DATA_DIR / "Y_train_CVw08PX.csv")["prdtypecode"].values
+    if encoded:
+        y = encode_labels(y)
 
     if not splitted:
         return {"X": X, "y": y}
@@ -66,9 +69,9 @@ def load_data(splitted: bool = False):
         "X_train": X.iloc[splits["train_idx"]],
         "X_val": X.iloc[splits["val_idx"]],
         "X_test": X.iloc[splits["test_idx"]],
-        "y_train": y.iloc[splits["train_idx"]],
-        "y_val": y.iloc[splits["val_idx"]],
-        "y_test": y.iloc[splits["test_idx"]],
+        "y_train": y[splits["train_idx"]],
+        "y_val": y[splits["val_idx"]],
+        "y_test": y[splits["test_idx"]],
     }
 
     return data
