@@ -60,8 +60,8 @@ class TextFusionPipeline:
     def __init__(self, device="cpu"):
 
         # --- Paramètres fusion & calibration ---
-        with open("../models/fusion/text/pipeline_text_params.json", "r") as f:
-            self.params = json.load(f)
+        with open("../models/final/fusion_params.json", "r") as f:
+            self.params = json.load(f)['text']
 
         # --- TF-IDF calibré ---
         self.tfidf = joblib.load(
@@ -79,14 +79,14 @@ class TextFusionPipeline:
         self.camembert = TransformerTextPipeline(
             model=cam_model,
             tokenizer=cam_tokenizer,
-            temperature=self.params["calibration"]["T_camembert"],
+            temperature=self.params['temperatures']["camembert"],
             device=device,
             preprocess=NumericTokensTransformer(strategy='light'),
         )
 
         # XLMR
         xlmr_model, xlmr_tokenizer = load_text_transformer(
-            model_dir="../models/text/xlmr_base",
+            model_dir="../models/final/xlmr",
             model_name="xlm-roberta-base",
             num_labels=27,
             device=device,
@@ -95,7 +95,7 @@ class TextFusionPipeline:
         self.xlmr = TransformerTextPipeline(
             model=xlmr_model,
             tokenizer=xlmr_tokenizer,
-            temperature=self.params["calibration"]["T_xlmr"],
+            temperature=self.params['temperatures']["xlmr"],
             device=device,
             preprocess=MergeTextTransformer(sep="[SEP]"),
         )
@@ -118,51 +118,3 @@ class TextFusionPipeline:
         )
 
         return P / P.sum(axis=1, keepdims=True)
-
-
-
-# class TextInferencePipeline:
-#     def __init__(
-#         self,
-#         cam_model,
-#         xlmr_model,
-#         tfidf_model,
-#         tokenizer,
-#         T_cam,
-#         T_xlmr,
-#         weights,
-#         device="cuda",
-#     ):
-#         self.cam = cam_model
-#         self.xlmr = xlmr_model
-#         self.tfidf = tfidf_model
-#         self.tokenizer = tokenizer
-#         self.T_cam = T_cam
-#         self.T_xlmr = T_xlmr
-#         self.w = weights
-#         self.device = device
-
-#     def _softmax(self, logits, T):
-#         x = logits / T
-#         e = np.exp(x - x.max(axis=1, keepdims=True))
-#         return e / e.sum(axis=1, keepdims=True)
-
-#     def predict_proba(self, texts: list[str]) -> np.ndarray:
-#         # --- TF-IDF ---
-#         P_tfidf = self.tfidf.predict_proba(texts)
-
-#         # --- CamemBERT ---
-#         logits_cam = infer_transformer(self.cam, texts, self.tokenizer, self.device)
-#         P_cam = self._softmax(logits_cam, self.T_cam)
-
-#         # --- XLM-R ---
-#         logits_xlmr = infer_transformer(self.xlmr, texts, self.tokenizer, self.device)
-#         P_xlmr = self._softmax(logits_xlmr, self.T_xlmr)
-
-#         # --- Blending texte ---
-#         P_text = (
-#             self.w["camembert"] * P_cam
-#             + self.w["xlmr"] * P_xlmr
-#             + self.w["tfidf"] * P_tfidf
-#         )
-#         return P_text / P_text.sum(axis=1, keepdims=True)

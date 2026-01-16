@@ -58,32 +58,32 @@ class ImageFusionPipeline:
 
 
         # --- Paramètres fusion & calibration ---
-        with open("../models/fusion/image/pipeline_image_params.json", "r") as f:
-            self.params = json.load(f)
+        with open("../models/final/fusion_params.json", "r") as f:
+            self.params = json.load(f)['image']
 
         # --- ConvNeXt ---
         convnext_model = load_convnext_model(
-            checkpoint_path="../models/image/convnext/model.pth",
+            checkpoint_path="../models/final/convnext/model.pth",
             device=device,
         )
 
         self.convnext = ImageModelPipeline(
             model=convnext_model,
             transform=build_convnext_transform(img_size=384),
-            temperature=self.params["calibration"]["T_convnext"],
+            temperature=self.params['temperatures']['convnext'],
             device=device,
         )
 
         # --- Swin ---
         swin_model = load_swin_model(
-            checkpoint_path="../models/image/swin/model.pth",
+            checkpoint_path="../models/final/swin/model.pth",
             device=device,
         )
 
         self.swin = ImageModelPipeline(
             model=swin_model,
             transform=build_swin_transform(img_size=224),
-            temperature=self.params["calibration"]["T_swin"],
+            temperature=self.params['temperatures']['swin'],
             device=device,
         )
 
