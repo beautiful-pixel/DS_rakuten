@@ -25,21 +25,24 @@ def export_predictions(
     split_name: str,
     idx: np.ndarray,
     split_signature: str,
-    probs: np.ndarray,
+    probs: Optional[np.ndarray] = None,
+    logits: Optional[np.ndarray] = None,
     classes: Optional[np.ndarray] = None,
     y_true: Optional[np.ndarray] = None,
     extra_meta: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Export model predictions with full validation metadata.
+    Supports both probability exports (legacy) and raw logits exports (recommended for fusion).
 
     Args:
         out_dir: Output directory
-        model_name: Model identifier (e.g., "swin_v2", "convnext")
+        model_name: Model identifier (e.g., "swin_v2_logits", "convnext_logits")
         split_name: Split identifier (e.g., "val", "test")
         idx: Sample indices (original row numbers)
         split_signature: Split signature for alignment verification
-        probs: Prediction probabilities of shape (N, 27)
+        probs: Prediction probabilities of shape (N, 27) - optional, for legacy compatibility
+        logits: Raw model logits of shape (N, 27) - recommended for model fusion
         classes: Classes array (defaults to CANONICAL_CLASSES, must match)
         y_true: Ground truth labels (optional)
         extra_meta: Additional metadata (optional)
@@ -49,7 +52,17 @@ def export_predictions(
 
     Raises:
         AssertionError: If validation fails (single-line error)
+
+    Notes:
+        - At least one of probs or logits must be provided
+        - If logits is provided, output_type will be set to "logits"
+        - If only probs is provided, output_type will be set to "probs"
+        - The .npz file will contain separate fields for probs and logits (whichever is provided)
     """
+    # Validate at least one of probs or logits is provided
+    if probs is None and logits is None:
+        raise AssertionError("At least one of probs or logits must be provided")
+
     # Use canonical classes if not provided
     if classes is None:
         classes = CANONICAL_CLASSES
@@ -65,7 +78,10 @@ def export_predictions(
     # Force dtypes
     idx = np.asarray(idx, dtype=np.int64)
     classes = np.asarray(classes, dtype=np.int64)
-    probs = np.asarray(probs, dtype=np.float32)
+    if probs is not None:
+        probs = np.asarray(probs, dtype=np.float32)
+    if logits is not None:
+        logits = np.asarray(logits, dtype=np.float32)
     if y_true is not None:
         y_true = np.asarray(y_true, dtype=np.int64)
 
@@ -73,8 +89,11 @@ def export_predictions(
     if idx.ndim != 1:
         raise AssertionError(f"idx.ndim must be 1, got {idx.ndim}")
 
-    if probs.ndim != 2:
+    if probs is not None and probs.ndim != 2:
         raise AssertionError(f"probs.ndim must be 2, got {probs.ndim}")
+
+    if logits is not None and logits.ndim != 2:
+        raise AssertionError(f"logits.ndim must be 2, got {logits.ndim}")
 
     if y_true is not None and y_true.ndim != 1:
         raise AssertionError(f"y_true.ndim must be 1, got {y_true.ndim}")
@@ -87,13 +106,25 @@ def export_predictions(
     if fp_classes != CANONICAL_CLASSES_FP:
         raise AssertionError(f"classes_fp={fp_classes} != CANONICAL_CLASSES_FP={CANONICAL_CLASSES_FP}")
 
-    # Validate shapes
+    # Determine primary output array (logits preferred) for shape validation
+    primary_output = logits if logits is not None else probs
     n_samples = len(idx)
-    if probs.shape[0] != n_samples:
+
+    # Validate shapes
+    if primary_output.shape[0] != n_samples:
+        raise AssertionError(f"primary_output.shape[0]={probs.shape[0] if probs is not None else logits.shape[0]} != len(idx)={n_samples}")
+
+    if probs is not None and probs.shape[0] != n_samples:
         raise AssertionError(f"probs.shape[0]={probs.shape[0]} != len(idx)={n_samples}")
 
-    if probs.shape[1] != 27:
+    if probs is not None and probs.shape[1] != 27:
         raise AssertionError(f"probs.shape[1]={probs.shape[1]} != 27 (expected num_classes)")
+
+    if logits is not None and logits.shape[0] != n_samples:
+        raise AssertionError(f"logits.shape[0]={logits.shape[0]} != len(idx)={n_samples}")
+
+    if logits is not None and logits.shape[1] != 27:
+        raise AssertionError(f"logits.shape[1]={logits.shape[1]} != 27 (expected num_classes)")
 
     if y_true is not None and len(y_true) != n_samples:
         raise AssertionError(f"len(y_true)={len(y_true)} != len(idx)={n_samples}")
@@ -102,12 +133,18 @@ def export_predictions(
     npz_path = model_dir / f"{split_name}.npz"
     json_path = model_dir / f"{split_name}_meta.json"
 
-    # Save .npz (data arrays)
+    # Determine output type (logits preferred)
+    output_type = "logits" if logits is not None else "probs"
+
+    # Save .npz (data arrays) - store logits and probs in separate fields
     npz_data = {
         "idx": idx,
-        "probs": probs,
         "classes": classes,
     }
+    if logits is not None:
+        npz_data["logits"] = logits
+    if probs is not None:
+        npz_data["probs"] = probs
     if y_true is not None:
         npz_data["y_true"] = y_true
 
@@ -122,10 +159,19 @@ def export_predictions(
         "num_classes": len(classes),
         "num_samples": n_samples,
         "has_y_true": y_true is not None,
-        "probs_shape": list(probs.shape),
-        "probs_dtype": str(probs.dtype),
+        "has_logits": logits is not None,
+        "has_probs": probs is not None,
+        "output_type": output_type,
         "created_at": datetime.now().isoformat(),
     }
+
+    # Add shape info for available arrays
+    if logits is not None:
+        meta["logits_shape"] = list(logits.shape)
+        meta["logits_dtype"] = str(logits.dtype)
+    if probs is not None:
+        meta["probs_shape"] = list(probs.shape)
+        meta["probs_dtype"] = str(probs.dtype)
 
     # Merge extra metadata
     if extra_meta:
@@ -158,6 +204,7 @@ def load_predictions(
 ) -> Dict[str, Any]:
     """
     Load model predictions with validation.
+    Supports both legacy probability-only exports and new logits exports.
 
     Args:
         npz_path: Path to .npz file
@@ -166,11 +213,18 @@ def load_predictions(
         require_y_true: If True, raise if y_true not present
 
     Returns:
-        Dictionary with keys: idx, probs, classes, y_true (if present), metadata
+        Dictionary with keys: idx, classes, y_true (if present), metadata
+        Optional keys: logits (if present), probs (if present)
+        Convenience key: scores (alias to logits if present, else probs)
 
     Raises:
         FileNotFoundError: If files not found (single-line)
         AssertionError: If validation fails (single-line)
+
+    Notes:
+        - Backward compatible: automatically reads probs if logits not present
+        - Use result["scores"] for generic access to primary output
+        - Check metadata["output_type"] to determine which field is primary
     """
     npz_path = Path(npz_path)
 
@@ -182,9 +236,24 @@ def load_predictions(
 
     result = {
         "idx": data["idx"],
-        "probs": data["probs"],
         "classes": data["classes"],
     }
+
+    # Load logits if present (preferred)
+    if "logits" in data:
+        result["logits"] = data["logits"]
+
+    # Load probs if present (legacy compatibility)
+    if "probs" in data:
+        result["probs"] = data["probs"]
+
+    # Provide scores alias (logits preferred, fallback to probs)
+    if "logits" in result:
+        result["scores"] = result["logits"]
+    elif "probs" in result:
+        result["scores"] = result["probs"]
+    else:
+        raise AssertionError(f"Neither logits nor probs found in {npz_path}")
 
     if "y_true" in data:
         result["y_true"] = data["y_true"]
