@@ -75,6 +75,28 @@ class ColorEncoder(BaseEstimator, TransformerMixin):
             encoded = np.eye(len(self.labels))[encoded].reshape(len(encoded), -1)
 
         return encoded
+    
+    def get_centroids(self, rgb=False):
+        """
+        retourne la liste des centroids des intervalles
+        """
+        centroids = []
+        for r in self.ranges:
+            h_min, h_max = r[0][0], r[0][1]
+            s_min, s_max =  r[1][0], r[1][1]
+            v_min, v_max = r[2][0], r[2][1]
+            if h_min > h_max:
+                h_min -= 180
+            h = int(h_min + (h_max-h_min)/2)
+            s = int(s_min + (s_max-s_min)/2)
+            v = int(v_min + (v_max-v_min)/2)
+            centroids.append([h,s,v])
+        # on ajoute une dimension pour que la matrice puisse représenter une image couleur
+        # et être convertie en rgb si nécessaire
+        centroids = np.array(centroids, dtype='uint8').reshape(1,-1,3)
+        if rgb:
+            centroids = cv2.cvtColor(centroids, cv2.COLOR_HSV2RGB)
+        return centroids
 
 
 class MeanRGBTransformer(BaseEstimator, TransformerMixin):

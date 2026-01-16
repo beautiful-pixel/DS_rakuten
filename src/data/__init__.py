@@ -25,3 +25,4 @@ from .splits import(
     generate_splits,
 )
 
+from .label_mapping import encode_labels, decode_labels

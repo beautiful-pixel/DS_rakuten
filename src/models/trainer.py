@@ -1,22 +1,8 @@
-import torch
-import torch.nn as nn
-from torch.amp import autocast, GradScaler
-from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
-import os
-from .metrics import compute_classification_metrics
-
-
 import os
 import torch
 from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-
-try:
-    import wandb
-except ImportError:
-    wandb = None
 
 from .metrics import compute_classification_metrics
 
@@ -24,20 +10,19 @@ from .metrics import compute_classification_metrics
 class Trainer:
     """
     Trainer PyTorch générique pour modèles de classification
-    (compatible avec l'API Hugging Face).
+    compatibles avec l’API Hugging Face.
 
-    Cette classe fournit une boucle d'entraînement complète incluant :
+    Cette classe fournit une boucle d’entraînement complète incluant :
     - Support CPU / GPU
     - Entraînement en précision mixte (AMP)
     - Gradient clipping
     - Calcul de métriques de classification
     - Logging TensorBoard
-    - Logging optionnel avec Weights & Biases (W&B)
     - Gestion des learning rate schedulers (par step ou par epoch)
-    - Sauvegarde des meilleurs checkpoints sur le score de validation
+    - Sauvegarde de checkpoints configurables (meilleur F1, meilleure loss ou les deux)
 
     Le modèle passé au Trainer doit respecter les conventions Hugging Face :
-    - le `forward` accepte l'argument `labels`
+    - le `forward` accepte l’argument `labels`
     - la sortie contient les attributs `loss` et `logits`
     """
 
@@ -47,10 +32,12 @@ class Trainer:
         optimizer,
         device=None,
         max_grad_norm=1.0,
+        scheduler=None,
+        scheduler_type="epoch",
         log_dir="runs/experiment",
         checkpoint_dir=None,
-        scheduler=None,
-        scheduler_type="epoch"
+        checkpoint_metric="f1",
+        save_optimizer=False,
     ):
         """
         Initialise le Trainer.
@@ -59,22 +46,30 @@ class Trainer:
             model (torch.nn.Module):
                 Modèle PyTorch compatible Hugging Face.
             optimizer (torch.optim.Optimizer):
-                Optimiseur utilisé pour l'entraînement.
+                Optimiseur utilisé pour l’entraînement.
             device (str, optional):
                 Device de calcul (`"cuda"` ou `"cpu"`).
                 Si None, sélection automatique.
             max_grad_norm (float, optional):
                 Valeur maximale pour le gradient clipping.
+            scheduler (torch.optim.lr_scheduler._LRScheduler or None, optional):
+                Scheduler de learning rate.
+            scheduler_type (str, optional):
+                Fréquence d’appel du scheduler :
+                - `"step"` : à chaque batch
+                - `"epoch"` : à la fin de chaque epoch
             log_dir (str, optional):
                 Répertoire des logs TensorBoard.
             checkpoint_dir (str or None, optional):
                 Répertoire de sauvegarde des checkpoints.
-            scheduler (torch.optim.lr_scheduler._LRScheduler or None, optional):
-                Scheduler de learning rate.
-            scheduler_type (str, optional):
-                Fréquence d'appel du scheduler :
-                - `"step"` : à chaque batch
-                - `"epoch"` : à la fin de chaque epoch
+            checkpoint_metric (str, optional):
+                Critère de sauvegarde des checkpoints :
+                - `"f1"`   : sauvegarde sur le meilleur F1 de validation
+                - `"loss"` : sauvegarde sur la plus faible loss de validation
+                - `"both"` : sauvegarde les deux checkpoints
+            save_optimizer (bool, optional):
+                Si True, sauvegarde également l’état de l’optimizer.
+                Par défaut False (recommandé pour l’inférence et le stacking).
         """
         self.model = model
         self.optimizer = optimizer
@@ -84,6 +79,16 @@ class Trainer:
         self.scaler = GradScaler(enabled=self.use_amp)
         self.max_grad_norm = max_grad_norm
 
+        self.scheduler = scheduler
+        self.scheduler_type = scheduler_type
+
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_metric = checkpoint_metric
+        self.save_optimizer = save_optimizer
+
+        self.best_val_f1 = None
+        self.best_val_loss = None
+
         if log_dir is not None:
             os.makedirs(log_dir, exist_ok=True)
             self.writer = SummaryWriter(log_dir=log_dir)
@@ -92,17 +97,12 @@ class Trainer:
 
         if checkpoint_dir is not None:
             os.makedirs(checkpoint_dir, exist_ok=True)
-        self.checkpoint_dir = checkpoint_dir
-
-        self.scheduler = scheduler
-        self.scheduler_type = scheduler_type
-        self.best_val_score = None
 
         self.model.to(self.device)
 
     def _step(self, batch, train=True):
         """
-        Effectue un step d'entraînement ou d'évaluation sur un batch.
+        Effectue un step d’entraînement ou d’évaluation sur un batch.
 
         Args:
             batch (dict[str, torch.Tensor]):
@@ -112,9 +112,9 @@ class Trainer:
 
         Returns:
             tuple:
-                - loss (float): Valeur de la loss.
-                - preds (torch.Tensor): Prédictions du modèle.
-                - labels (torch.Tensor): Labels réels.
+                - loss (float)
+                - preds (torch.Tensor)
+                - labels (torch.Tensor)
         """
         batch = {k: v.to(self.device) for k, v in batch.items()}
 
@@ -149,35 +149,33 @@ class Trainer:
 
         Args:
             dataloader (torch.utils.data.DataLoader):
-                Dataloader d'entraînement.
+                Dataloader d’entraînement.
             epoch (int):
-                Index de l'epoch.
+                Index de l’epoch.
 
         Returns:
             tuple:
-                - metrics (dict): Métriques de classification.
-                - train_loss (float): Loss moyenne.
+                - metrics (dict)
+                - train_loss (float)
         """
         self.model.train()
         losses, y_true, y_pred = [], [], []
 
         progress_bar = tqdm(dataloader, desc=f"Epoch {epoch}", leave=True)
 
-        running_loss = 0.0
         for i, batch in enumerate(progress_bar):
             loss, preds, labels = self._step(batch, train=True)
             losses.append(loss)
-            running_loss += loss
 
             y_true.extend(labels.tolist())
             y_pred.extend(preds.tolist())
 
             progress_bar.set_postfix(
-                {"train_loss": f"{running_loss / (i + 1):.4f}"}
+                {"train_loss": f"{sum(losses) / len(losses):.4f}"}
             )
 
         metrics = compute_classification_metrics(y_true, y_pred)
-        train_loss = running_loss / len(losses)
+        train_loss = sum(losses) / len(losses)
 
         if self.writer:
             self.writer.add_scalar("train/loss", train_loss, epoch)
@@ -195,12 +193,12 @@ class Trainer:
             dataloader (torch.utils.data.DataLoader):
                 Dataloader de validation.
             epoch (int):
-                Index de l'epoch.
+                Index de l’epoch.
 
         Returns:
             tuple:
-                - metrics (dict): Métriques de classification.
-                - val_loss (float): Loss moyenne.
+                - metrics (dict)
+                - val_loss (float)
         """
         self.model.eval()
         losses, y_true, y_pred = [], [], []
@@ -222,17 +220,36 @@ class Trainer:
         if self.scheduler and self.scheduler_type == "epoch":
             self.scheduler.step(val_loss)
 
+        # ----- Checkpointing -----
         if self.checkpoint_dir:
-            score = metrics["f1_weighted"]
-            if self.best_val_score is None or score > self.best_val_score:
-                self.best_val_score = score
-                torch.save(
-                    self.model.state_dict(),
-                    os.path.join(self.checkpoint_dir, "model.pt"),
-                )
-                torch.save(
-                    self.optimizer.state_dict(),
-                    os.path.join(self.checkpoint_dir, "optimizer.pt"),
-                )
+
+            # Best F1
+            if self.checkpoint_metric in ("f1", "both"):
+                score = metrics["f1_weighted"]
+                if self.best_val_f1 is None or score > self.best_val_f1:
+                    self.best_val_f1 = score
+                    torch.save(
+                        self.model.state_dict(),
+                        os.path.join(self.checkpoint_dir, "model_best_f1.pt"),
+                    )
+                    if self.save_optimizer:
+                        torch.save(
+                            self.optimizer.state_dict(),
+                            os.path.join(self.checkpoint_dir, "optimizer_best_f1.pt"),
+                        )
+
+            # Best loss
+            if self.checkpoint_metric in ("loss", "both"):
+                if self.best_val_loss is None or val_loss < self.best_val_loss:
+                    self.best_val_loss = val_loss
+                    torch.save(
+                        self.model.state_dict(),
+                        os.path.join(self.checkpoint_dir, "model_best_loss.pt"),
+                    )
+                    if self.save_optimizer:
+                        torch.save(
+                            self.optimizer.state_dict(),
+                            os.path.join(self.checkpoint_dir, "optimizer_best_loss.pt"),
+                        )
 
         return metrics, val_loss

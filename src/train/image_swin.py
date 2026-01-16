@@ -53,105 +53,6 @@ import wandb
 
 @dataclass
 class SwinConfig:
-    """
-    Configuration for Swin Transformer canonical training pipeline with Phase 3 export.
-
-    This config encapsulates all hyperparameters, paths, and settings needed for
-    training Swin Transformer models on Rakuten product classification using canonical
-    splits and classes, then exporting predictions in the unified .npz + metadata format.
-
-    Attributes:
-        raw_dir: Path to raw CSV directory containing X_train.csv, X_test.csv, etc.
-            Used by data loader to build full DataFrame with labels and image IDs.
-        img_dir: Path to image directory (e.g., data/images/image_train or
-            /content/images for Colab). Must contain .jpg files matching imageid column.
-        out_dir: Export output directory for model predictions. Exports are saved as
-            {out_dir}/{model_name}/{split_name}.npz with accompanying metadata JSON.
-        ckpt_dir: Checkpoint directory for saving model weights during training.
-            Best model (by validation F1) is saved as best_model.pth.
-
-        img_size: Input image resolution in pixels (square). 224 is the standard
-            resolution for Swin-Base models pretrained at this resolution. Can be
-            increased to 384 for potentially better performance at cost of memory/speed.
-        batch_size: Training batch size. 128 works well for img_size=224 on GPUs with
-            16GB+ memory. Reduce to 64 or 32 if encountering OOM errors.
-        num_workers: Number of DataLoader worker processes for parallel data loading.
-            Set to 0 for debugging. Recommended: 4-8 for local, 8-12 for Colab.
-        num_epochs: Total number of training epochs. 30 recommended for convergence
-            with regularization. Monitor validation curve to detect overfitting.
-        lr: Peak learning rate for AdamW optimizer. 5e-5 is a conservative default
-            for fine-tuning pretrained Swin models with cosine annealing schedule.
-        weight_decay: L2 weight decay (AdamW). 0.05 is standard for vision transformers
-            and Swin architectures.
-        use_amp: Enable Automatic Mixed Precision (torch.cuda.amp) for faster training
-            and reduced memory usage. Highly recommended for modern GPUs (Ampere+).
-
-        label_smoothing: Label smoothing factor for CrossEntropyLoss. 0.1 reduces
-            overconfidence and improves calibration. Set to 0.0 to disable.
-        dropout_rate: Dropout rate for first classification head layer. 0.5 provides
-            strong regularization for Swin models. Reduce if underfitting occurs.
-        head_dropout2: Dropout rate for second classification head layer. 0.3 provides
-            moderate additional regularization. Can be tuned based on validation results.
-        drop_path_rate: Stochastic depth rate applied across Swin blocks. 0.3 is a
-            moderate setting balancing regularization and model capacity. Unlike ConvNeXt,
-            Swin uses BOTH dropout and drop_path for regularization.
-
-        mixup_alpha: Mixup augmentation alpha parameter (Beta distribution). 0.8
-            recommended for strong augmentation. Set to 0.0 to disable mixup.
-        cutmix_alpha: CutMix augmentation alpha parameter. 1.0 recommended. Set to 0.0
-            to disable cutmix. Works in conjunction with mixup (randomly selected).
-        mixup_prob: Probability of applying mixup/cutmix augmentation to each batch.
-            1.0 means always apply. Reduce if augmentation is too aggressive.
-        mixup_switch_prob: Probability of choosing mixup vs cutmix when augmentation
-            is applied. 0.5 means equal probability. Adjust based on empirical results.
-
-        cosine_eta_min: Minimum learning rate for cosine annealing scheduler. 1e-6
-            ensures learning rate doesn't decay to zero, maintaining small updates.
-
-        swin_model_name: timm model identifier for Swin Transformer architecture. Use
-            "swin_base_patch4_window7_224" for standard Swin-Base pretrained on ImageNet-1k
-            at 224x224 resolution (recommended default). See timm docs for variants like
-            swin_tiny, swin_small, swin_large, or 384-resolution versions.
-        swin_pretrained: Load pretrained ImageNet weights from timm. Highly recommended
-            (True) unless training from scratch for research purposes.
-
-        force_colab_loader: Force use of load_data_colab(raw_dir) instead of local
-            load_data() function. Set to True in Colab to handle Google Drive paths.
-            Set to False for local development with relative paths.
-
-        device: Training device ("cuda", "cpu", or None for auto-detection). If None,
-            automatically selects "cuda" if available, else "cpu".
-        model_name: Model identifier for export directory naming. Predictions are
-            saved to {out_dir}/{model_name}/. Use descriptive names like
-            "swin_base_224_v2_logits" to distinguish different experiments.
-
-        export_split: Which split to export predictions for after training. "val"
-            (validation set) is recommended for model fusion. "test" for final
-            submission. Only one split is exported per training run.
-
-    Examples:
-        >>> cfg = SwinConfig(
-        ...     raw_dir="data/raw",
-        ...     img_dir="data/images/image_train",
-        ...     out_dir="artifacts/exports",
-        ...     ckpt_dir="checkpoints/swin",
-        ...     model_name="swin_base_dropout_logits",
-        ...     num_epochs=30,
-        ...     dropout_rate=0.5,
-        ...     drop_path_rate=0.3,
-        ... )
-        >>> result = run_swin_canonical(cfg)
-
-    Note:
-        Swin Transformer uses BOTH dropout (head layers) and drop_path (transformer blocks)
-        for regularization, unlike ConvNeXt which primarily relies on drop_path. Default
-        config (dropout_rate=0.5, head_dropout2=0.3, drop_path_rate=0.3) provides balanced
-        regularization suitable for Rakuten dataset.
-
-    See Also:
-        :func:`run_swin_canonical`: Main training function that uses this config
-        :class:`RakutenSwin`: Model architecture that uses these hyperparameters
-    """
     # Data / IO
     raw_dir: str                      # Path to raw CSV directory
     img_dir: str                      # Path to image directory
@@ -199,127 +100,24 @@ class SwinConfig:
 
 class IndexedDataset(Dataset):
     """
-    Dataset wrapper that selects specific indices while preserving original indices.
-
-    This wrapper enables creating subsets (train/val/test splits) of a base dataset
-    while maintaining the original DataFrame row indices. Critical for Phase 3 export
-    validation where predictions must be aligned with canonical splits by original
-    index rather than sequential position.
-
-    Attributes:
-        base: The underlying full dataset (typically RakutenImageDataset with all samples)
-        indices: NumPy array of original DataFrame indices to select from base dataset
-
-    Args:
-        base_dataset: Full PyTorch Dataset that supports integer indexing. Must return
-            (image, label) tuples when indexed.
-        indices: Array or list of integer indices specifying which samples from
-            base_dataset to include in this subset. Indices refer to positions in the
-            original DataFrame before any splitting.
-
-    Returns:
-        When accessed via __getitem__, returns (image, label, original_idx) tuple where
-        original_idx is the sample's position in the full DataFrame.
-
-    Examples:
-        >>> full_dataset = RakutenImageDataset(full_df, img_dir, transform)
-        >>> train_indices = np.array([0, 2, 5, 8])  # Select specific samples
-        >>> train_dataset = IndexedDataset(full_dataset, train_indices)
-        >>> img, label, orig_idx = train_dataset[0]  # orig_idx will be 0
-        >>> img, label, orig_idx = train_dataset[1]  # orig_idx will be 2
-
-    Note:
-        The returned original_idx (third element of tuple) is essential for Phase 3
-        export validation. It allows verification that predictions align with canonical
-        splits using split signatures, preventing subtle data leakage bugs.
+    Wrap a full dataset with specific indices to preserve and verify alignment.
+    base_dataset must support indexing by full_df row numbers.
     """
     def __init__(self, base_dataset: Dataset, indices: np.ndarray):
         self.base = base_dataset
         self.indices = np.asarray(indices).astype(int)
 
     def __len__(self) -> int:
-        """Return the number of samples in this indexed subset."""
         return len(self.indices)
 
     def __getitem__(self, i: int):
-        """
-        Get item by subset position, returning (image, label, original_index).
-
-        Args:
-            i: Position in this subset (0 to len(self)-1)
-
-        Returns:
-            Tuple of (image, label, original_idx) where original_idx is the sample's
-            position in the original full DataFrame (before splitting)
-        """
         real_idx = int(self.indices[i])
         img, label = self.base[real_idx]
         return img, label, real_idx
 
 
 class RakutenSwin(nn.Module):
-    """
-    Swin Transformer model for Rakuten product classification with custom regularized head.
-
-    Wraps a timm Swin Transformer backbone (pretrained on ImageNet) with a custom two-layer
-    classification head featuring LayerNorm, dropout, and GELU activation. Supports
-    stochastic depth (drop_path) in the backbone for regularization.
-
-    The model architecture:
-    1. Swin Transformer backbone (from timm) with global average pooling
-    2. LayerNorm + Dropout
-    3. Linear(feature_dim -> 512) + GELU
-    4. Dropout
-    5. Linear(512 -> num_classes)
-
-    Attributes:
-        backbone: timm Swin model without classification head (num_classes=0)
-        head: Custom classification head (Sequential with LayerNorm, Linear, GELU, Dropout)
-        num_classes: Number of output classes (27 for canonical Rakuten)
-        model_name: timm model identifier (e.g., "swin_base_patch4_window7_224")
-
-    Args:
-        model_name: timm model identifier for Swin variant. Common options:
-            - "swin_base_patch4_window7_224" (88M params, ImageNet-1k, 224 resolution)
-            - "swin_base_patch4_window12_384" (384 resolution variant)
-            - "swin_tiny_patch4_window7_224", "swin_small_patch4_window7_224" (smaller)
-            - "swin_large_patch4_window7_224" (larger variant)
-        num_classes: Number of output classes for classification. Default 27 for
-            canonical Rakuten product taxonomy.
-        pretrained: Load ImageNet pretrained weights from timm. Highly recommended
-            (True) for transfer learning. Set False only for training from scratch.
-        drop_path_rate: Stochastic depth rate applied across Swin blocks. 0.3 is a
-            balanced default. Unlike ConvNeXt, Swin uses BOTH drop_path and dropout.
-        dropout_rate: Dropout rate for first head layer (after LayerNorm). 0.5 provides
-            strong regularization for Swin. This is actively used (not set to 0.0).
-        head_dropout2: Dropout rate for second head layer (after first Linear+GELU).
-            0.3 provides moderate additional regularization.
-
-    Examples:
-        >>> # Standard configuration for Swin
-        >>> model = RakutenSwin(
-        ...     model_name="swin_base_patch4_window7_224",
-        ...     num_classes=27,
-        ...     pretrained=True,
-        ...     drop_path_rate=0.3,
-        ...     dropout_rate=0.5,
-        ...     head_dropout2=0.3,
-        ... )
-        >>> images = torch.randn(4, 3, 224, 224)
-        >>> logits = model(images)  # Shape: (4, 27)
-
-    Note:
-        Unlike ConvNeXt which relies primarily on drop_path, Swin Transformer uses
-        BOTH dropout (in head layers) and drop_path (in transformer blocks) for
-        regularization. Both dropout_rate and drop_path_rate are typically non-zero.
-
-    Raises:
-        ImportError: If timm library is not installed (required for Swin models)
-
-    See Also:
-        :class:`SwinConfig`: Configuration dataclass with hyperparameters
-        :func:`_build_swin`: Helper function to construct this model from config
-    """
+    """Swin Transformer for Rakuten classification with custom head and stochastic depth."""
 
     def __init__(
         self,
@@ -367,44 +165,12 @@ class RakutenSwin(nn.Module):
         self.model_name = model_name
 
     def forward(self, x):
-        """
-        Forward pass through Swin Transformer backbone and classification head.
-
-        Args:
-            x: Input image tensor of shape (B, 3, H, W) where B is batch size,
-                H and W are height and width (typically 224x224 for Swin-Base)
-
-        Returns:
-            Logits tensor of shape (B, num_classes) with raw class scores (pre-softmax)
-        """
         features = self.backbone(x)
         return self.head(features)
 
 
 def _build_transforms(img_size: int) -> Tuple[transforms.Compose, transforms.Compose]:
-    """
-    Build training and validation image transforms for Swin Transformer models.
-
-    Creates torchvision transform pipelines optimized for Swin's standard resolution
-    inputs (typically 224x224). Training transforms include augmentation (Resize,
-    HorizontalFlip, RandAugment) while validation uses simple Resize for deterministic
-    evaluation.
-
-    Args:
-        img_size: Target image size in pixels (square). Recommended: 224 for Swin-Base
-            models pretrained at 224x224 resolution.
-
-    Returns:
-        Tuple of (train_transform, val_transform) where each is a torchvision.transforms.Compose:
-            - train_transform: Augmentation pipeline for training with Resize,
-              RandomHorizontalFlip, RandAugment, ToTensor, and ImageNet normalization
-            - val_transform: Deterministic pipeline for validation/test with Resize,
-              ToTensor, and ImageNet normalization
-
-    Note:
-        Unlike ConvNeXt which uses CenterCrop, Swin uses direct Resize for both
-        training and validation, following the Swin Transformer paper's protocol.
-    """
+    """Build train and validation transforms for Swin."""
     train_transform = transforms.Compose([
         transforms.Resize((img_size, img_size)),
         transforms.RandomHorizontalFlip(p=0.5),
@@ -529,35 +295,7 @@ def _train_one_epoch(
     scaler: Optional[torch.amp.GradScaler],
     mixup_fn: Optional[Any],
 ) -> Tuple[float, float, float]:
-    """
-    Train the Swin Transformer model for one epoch with mixup/cutmix augmentation.
-
-    Performs a full training pass over the dataset with gradient accumulation,
-    mixed precision training, and data augmentation (mixup/cutmix).
-
-    Args:
-        model: Swin Transformer model to train (nn.Module in training mode)
-        loader: Training DataLoader providing (images, labels) batches
-        criterion: Loss function (typically CrossEntropyLoss with label smoothing)
-        optimizer: AdamW optimizer for parameter updates
-        device: Device string ("cuda" or "cpu") for tensor placement
-        use_amp: Enable automatic mixed precision training with torch.amp
-        scaler: Gradient scaler for mixed precision (required if use_amp=True)
-        mixup_fn: Mixup/CutMix augmentation function (timm.data.Mixup instance).
-            If None, no augmentation is applied. Otherwise, applies random mixup
-            or cutmix to each batch based on configured probabilities.
-
-    Returns:
-        Tuple of (average_loss, accuracy, f1_score) for the epoch:
-            - average_loss: Mean cross-entropy loss across all batches
-            - accuracy: Classification accuracy on training set
-            - f1_score: Weighted F1 score on training set
-
-    Note:
-        Training metrics (accuracy, F1) are computed on augmented data with
-        mixup/cutmix applied, so they may be lower than validation metrics.
-        The primary training objective is loss minimization.
-    """
+    """Train one epoch with Mixup/CutMix support."""
     model.train()
     total_loss = 0.0
     all_preds = []
@@ -630,33 +368,7 @@ def _eval_one_epoch(
     device: str,
     use_amp: bool = False,
 ) -> Tuple[float, float, float]:
-    """
-    Evaluate the Swin Transformer model for one epoch on validation/test data.
-
-    Performs inference on the validation or test dataset without augmentation,
-    computing loss and classification metrics. Model is set to eval mode with
-    no gradient computation for efficiency.
-
-    Args:
-        model: Swin Transformer model to evaluate (nn.Module in eval mode)
-        loader: Validation or test DataLoader providing (images, labels) batches
-        criterion: Loss function (typically CrossEntropyLoss) for computing validation loss
-        device: Device string ("cuda" or "cpu") for tensor placement
-        use_amp: Enable automatic mixed precision for inference. Default False since
-            memory savings are less critical during evaluation, but can be enabled
-            for consistency with training or to speed up large validation sets.
-
-    Returns:
-        Tuple of (average_loss, accuracy, f1_score) for the evaluation:
-            - average_loss: Mean cross-entropy loss across all batches
-            - accuracy: Classification accuracy on the evaluation set
-            - f1_score: Weighted F1 score on the evaluation set (primary metric)
-
-    Note:
-        No data augmentation (mixup/cutmix) is applied during evaluation, so
-        metrics reflect true model performance on clean data. F1 score is the
-        primary metric used for model selection and early stopping.
-    """
+    """Evaluate one epoch without mixup."""
     model.eval()
     total_loss = 0.0
     all_preds = []
@@ -702,7 +414,7 @@ def _eval_one_epoch(
 
 
 @torch.no_grad()
-def _predict_logits_with_real_idx(
+def _predict_probs_with_real_idx(
     model: nn.Module,
     base_dataset: Dataset,
     indices: np.ndarray,
@@ -711,33 +423,8 @@ def _predict_logits_with_real_idx(
     device: str,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Predict raw logits for specified samples while preserving original DataFrame indices.
-
-    Performs inference on a subset of samples (e.g., validation or test split) specified
-    by their original DataFrame row indices. Returns raw model logits WITHOUT softmax,
-    which is essential for Phase 4 model fusion and calibration. The returned indices
-    match the input indices order exactly, enabling Phase 3 export validation.
-
-    Args:
-        model: Trained Swin Transformer model in eval mode (nn.Module)
-        base_dataset: Full RakutenImageDataset containing all samples
-        indices: NumPy array of original DataFrame row indices for samples to predict.
-            Order is preserved in output.
-        batch_size: Batch size for inference DataLoader
-        num_workers: Number of DataLoader worker processes
-        device: Device string ("cuda" or "cpu") for inference
-
-    Returns:
-        Tuple of (logits, idx) where:
-            - logits: NumPy array of shape (N, 27) with raw model outputs (pre-softmax)
-            - idx: NumPy array of shape (N,) with original DataFrame indices, matching
-              the order of input indices parameter
-
-    Note:
-        - Returns RAW LOGITS (not probabilities) for proper model fusion
-        - No softmax applied - downstream code must apply if probabilities needed
-        - Uses shuffle=False to preserve index order for export validation
-        - Critical for Phase 3 export contract with split signature verification
+    Predict probabilities for a given list of real indices, returning (probs, idx).
+    Ensures export alignment by keeping the exact indices order.
     """
     model.eval()
 
@@ -750,90 +437,29 @@ def _predict_logits_with_real_idx(
         pin_memory=device.startswith("cuda"),
     )
 
-    logits_list = []
+    probs_list = []
     idx_list = []
 
     for images, _, real_idx in tqdm(loader, desc="ExportInference", ncols=100, leave=False):
         images = images.to(device, non_blocking=True)
         logits = model(images)
-        # Export raw logits (no softmax) for model fusion
-        logits_np = logits.detach().cpu().numpy()
-        logits_list.append(logits_np)
+        probs = torch.softmax(logits, dim=-1).detach().cpu().numpy()
+        probs_list.append(probs)
         idx_list.append(real_idx.detach().cpu().numpy())
 
-    logits = np.concatenate(logits_list, axis=0) if logits_list else np.zeros((0, len(CANONICAL_CLASSES)), dtype=np.float32)
+    probs = np.concatenate(probs_list, axis=0) if probs_list else np.zeros((0, len(CANONICAL_CLASSES)), dtype=np.float32)
     idx = np.concatenate(idx_list, axis=0) if idx_list else np.zeros((0,), dtype=int)
-    return logits, idx
+    return probs, idx
 
 
 def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
     """
-    Canonical Swin Transformer training pipeline with Phase 3 export contract and validation.
-
-    Implements the complete training workflow for Swin Transformer models on Rakuten product
-    classification with canonical splits (cf53f8eb169b3531) and classes (cdfa70b13f7390e6).
-    Includes advanced training techniques: Mixup/CutMix augmentation, AdamW optimizer,
-    cosine annealing learning rate schedule, and automatic mixed precision.
-
-    After training, exports predictions in the Phase 3 unified format (.npz + metadata
-    JSON) and validates the export against canonical splits and classes for downstream
-    model fusion compatibility.
-
-    Args:
-        cfg: SwinConfig instance containing all training hyperparameters, paths,
-            and export settings. See SwinConfig docstring for detailed field descriptions.
-
-    Returns:
-        Dictionary with training results and export validation:
-            - export_result: Dict from export_predictions() containing:
-                - npz_path: Path to exported predictions (.npz file)
-                - meta_json_path: Path to metadata JSON file
-                - classes_fp: Classes fingerprint (must be cdfa70b13f7390e6)
-                - split_signature: Split signature (must be cf53f8eb169b3531)
-                - num_samples: Number of samples exported
-            - verify_metadata: Loaded metadata dict from exported files for verification
-            - logits_shape: Shape tuple of exported logits (N, 27) or None if not exported
-            - probs_shape: Shape tuple of exported probabilities (N, 27) or None if not exported
-            - best_val_f1: Best validation F1 score achieved during training (float)
-            - history: List of per-epoch metrics dicts with keys:
-                - epoch: Epoch number
-                - train_loss, train_acc, train_f1: Training metrics
-                - val_loss, val_acc, val_f1: Validation metrics
-                - lr: Learning rate at end of epoch
-
-    Raises:
-        AssertionError: If export validation fails (split signature mismatch,
-            classes fingerprint mismatch, or missing expected files)
-        FileNotFoundError: If required data files (splits, CSVs, images) not found
-        RuntimeError: If CUDA out of memory or other training failures occur
-
-    Examples:
-        >>> cfg = SwinConfig(
-        ...     raw_dir="data/raw",
-        ...     img_dir="data/images/image_train",
-        ...     out_dir="artifacts/exports",
-        ...     ckpt_dir="checkpoints/swin",
-        ...     model_name="swin_base_logits",
-        ... )
-        >>> result = run_swin_canonical(cfg)
-        >>> print(f"Best F1: {result['best_val_f1']:.4f}")
-        >>> print(f"Export: {result['export_result']['npz_path']}")
-
-    Note:
-        - Training is logged to WandB project "rakuten_image" with run name from cfg.model_name
-        - Best model is saved to {cfg.ckpt_dir}/best_model.pth based on validation F1
-        - Only the specified export_split (val or test) is exported after training
-        - Export validation ensures compatibility with model fusion pipelines (Phase 4)
-        - Unlike ConvNeXt, Swin does not use EMA by default (can be added if desired)
-
-    See Also:
-        :class:`SwinConfig`: Configuration dataclass with all hyperparameters
-        :func:`export_predictions`: Export function with detailed contract specification
-        :func:`load_predictions`: Load function for verifying exported predictions
+    Canonical Swin training + Phase 3 export + B4-verifiable contract.
+    Includes Mixup/CutMix, AdamW, CosineAnnealingLR.
     """
     wandb.init(
         project="rakuten_image",
-        name=cfg.model_name,
+        name=f"swin",
         config=cfg,
         reinit=True,
     )
@@ -1011,11 +637,11 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
     ckpt = torch.load(best_path, map_location=device, weights_only=False)
     model.load_state_dict(ckpt["model_state_dict"])
 
-    # 8) Export raw logits (alignment-safe) on cfg.export_split
+    # 8) Export predictions (alignment-safe) on cfg.export_split
     export_idx = splits["val_idx"] if cfg.export_split == "val" else splits["test_idx"]
 
-    # Export raw logits WITHOUT softmax for model fusion and calibration
-    logits, seen_idx = _predict_logits_with_real_idx(
+    # FIXED: Reuse full_dataset_val for export
+    probs, seen_idx = _predict_probs_with_real_idx(
         model=model,
         base_dataset=full_dataset_val,
         indices=export_idx,
@@ -1028,8 +654,8 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
     if not np.array_equal(seen_idx, export_idx):
         raise AssertionError("Index order mismatch during export inference")
 
-    # Explicit no-op reorder for traceability (logits have same class order as probs)
-    logits_aligned = reorder_probs_to_canonical(logits, CANONICAL_CLASSES, CANONICAL_CLASSES)
+    # Explicit no-op reorder for traceability
+    probs_aligned = reorder_probs_to_canonical(probs, CANONICAL_CLASSES, CANONICAL_CLASSES)
 
     # FIXED: y_true must be canonical indices (0..26), not original labels
     y_true = y_encoded[seen_idx].astype(int)
@@ -1040,14 +666,12 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
         split_name=cfg.export_split,
         idx=seen_idx,
         split_signature=sig,
-        logits=logits_aligned,  # Export raw logits for model fusion
-        probs=None,  # Not exporting probabilities
+        probs=probs_aligned,
         classes=CANONICAL_CLASSES,
         y_true=y_true,
         extra_meta={
             "source": "src/train/image_swin.py",
-            "model_architecture": f"timm.{cfg.swin_model_name}",  # Display only, not for instantiation
-            "timm_model_name": cfg.swin_model_name,  # For model instantiation: timm.create_model(this_value)
+            "model_architecture": f"timm.{cfg.swin_model_name}",
             "swin_pretrained": cfg.swin_pretrained,
             "img_dir": str(img_dir),
             "img_size": cfg.img_size,
@@ -1080,8 +704,7 @@ def run_swin_canonical(cfg: SwinConfig) -> Dict[str, Any]:
     return {
         "export_result": export_result,
         "verify_metadata": loaded["metadata"],
-        "logits_shape": loaded.get("logits").shape if "logits" in loaded else None,
-        "probs_shape": loaded.get("probs").shape if "probs" in loaded else None,
+        "probs_shape": loaded["probs"].shape,
         "best_val_f1": float(best_val_f1),
         "history": history,
     }
@@ -1173,8 +796,7 @@ if __name__ == "__main__":
     print("TRAINING COMPLETE")
     print("="*80)
     print(f"Best val F1: {result['best_val_f1']:.4f}")
-    print(f"Logits shape: {result.get('logits_shape', 'N/A')}")
-    print(f"Probs shape: {result.get('probs_shape', 'N/A')}")
+    print(f"Probs shape: {result['probs_shape']}")
     print("\nExport Result:")
     for k, v in result["export_result"].items():
         print(f"  {k}: {v}")
