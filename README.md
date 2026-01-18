@@ -3,6 +3,19 @@ Project Name
 
 This repo is a Starting Pack for DS projects. You can rearrange the structure to make it fits your project.
 
+## Streamlit Application
+
+A Streamlit web application is available to download the notebooks folder as a ZIP archive.
+
+To run the application:
+
+```bash
+pip install -r requirements.txt
+streamlit run src/streamlit/app.py
+```
+
+See [src/streamlit/README.md](src/streamlit/README.md) for more details.
+
 Project Organization
 ------------
 
@@ -40,6 +53,8 @@ Project Organization
     │   ├── visualization  <- Scripts to create exploratory and results oriented visualizations
     │   │   └── visualize.py
 
+
+**Note:** The `src/streamlit` folder contains a web application for downloading the notebooks folder. See [src/streamlit/README.md](src/streamlit/README.md) for details.
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
