@@ -12,14 +12,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer
 
-from .features import extract_text_features, get_feature_names
-from .vectorization import (
+from ..features.text.basic_features import extract_text_features, get_feature_names
+from ..features.text.vectorization import (
     build_count_vectorizer,
     build_tfidf_vectorizer,
     build_split_vectorizer_pipeline,
     build_merged_vectorizer_pipeline
 )
-from .models import build_full_pipeline, train_and_evaluate, get_model
+from ..models.text.classical_ml_baselines import build_full_pipeline, train_and_evaluate, get_model
 
 
 # 

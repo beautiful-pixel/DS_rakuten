@@ -6,16 +6,35 @@ from IPython.display import HTML, display
 
 def beautiful_print(txt, style: str = "primary"):
     """
-    Display a styled HTML block in a notebook.
+    Affiche un bloc HTML stylisé dans un notebook (Jupyter, Colab, etc.).
+
+    Cette fonction permet de mettre en forme du texte ou du contenu HTML
+    afin de structurer visuellement un notebook (titres, messages clés,
+    avertissements, résultats intermédiaires, etc.).
+
+    Plusieurs styles prédéfinis sont disponibles pour différencier
+    les types de messages (information, succès, avertissement).
 
     Args:
-        txt (str): Text or HTML content to display.
-        style (str): Style name. Options:
-            - "primary"      : bleu clair (information principale)
-            - "secondary"    : beige / orange clair (complément)
-            - "success"      : vert clair (validation / succès)
-            - "warning"      : rouge clair (attention / erreur)
+        txt (str):
+            Texte ou contenu HTML à afficher.
+        style (str, default="primary"):
+            Style visuel à appliquer. Valeurs possibles :
+            - "primary"   : bleu clair (information principale)
+            - "secondary" : beige / orange clair (information complémentaire)
+            - "success"   : vert clair (validation, succès)
+            - "warning"   : rouge clair (attention, erreur)
+
+    Raises:
+        ValueError:
+            Si le style demandé n'existe pas parmi les styles disponibles.
+
+    Returns:
+        None:
+            La fonction affiche directement le contenu formaté
+            et ne retourne aucune valeur.
     """
+
 
     styles = {
         "primary": {
@@ -64,14 +83,33 @@ def display_df_with_images(
     max_rows: int | None = None,
 ):
     """
-    Display a DataFrame with images rendered from a local image path column.
+    Affiche un DataFrame en intégrant le rendu d’images à partir de chemins locaux.
+
+    Cette fonction est conçue pour les notebooks d’exploration de données
+    et de vision par ordinateur. Elle convertit une colonne contenant des
+    chemins vers des fichiers image locaux en images HTML affichées
+    directement dans le tableau.
+
+    Les images sont encodées en base64 afin d’être affichées sans dépendance
+    externe au système de fichiers au moment du rendu.
 
     Args:
-        df (pd.DataFrame): DataFrame containing image paths.
-        image_col (str): Name of the column with image file paths.
-        img_width (int): Width of displayed images in pixels.
-        max_rows (int | None): Optional number of rows to display.
+        df (pd.DataFrame):
+            DataFrame contenant une colonne avec les chemins des images.
+        image_col (str, default="image_path"):
+            Nom de la colonne contenant les chemins vers les fichiers image.
+        img_width (int, default=160):
+            Largeur des images affichées, en pixels.
+        max_rows (int | None, default=None):
+            Nombre maximal de lignes à afficher.
+            Si None, toutes les lignes du DataFrame sont affichées.
+
+    Returns:
+        None:
+            La fonction affiche directement le DataFrame enrichi
+            des images et ne retourne aucun objet.
     """
+
     df_view = df.copy()
 
     if max_rows is not None:

@@ -16,16 +16,52 @@ def plot_f1_comparison_with_delta(
     encoded=True,
 ):
     """
-    Compare deux modèles de classification par catégorie à l’aide des F1-scores.
+    Compare deux modèles de classification multi-classes à l’aide
+    des F1-scores par catégorie et visualise les écarts de performance.
 
-    Le graphique affiche, pour chaque classe :
+    Cette fonction génère un graphique horizontal comparant, pour chaque classe :
     - le F1-score du modèle de référence ;
     - le F1-score du nouveau modèle ;
-    - le delta de F1-score (nouveau - référence), annoté sur le graphique.
+    - le delta de F1-score (nouveau − référence), annoté sur le graphique.
 
-    Les catégories sont triées par gain de F1 décroissant afin de mettre
-    en évidence les classes les plus impactées par le nouveau modèle.
+    Les classes sont triées selon le F1-score du modèle de référence,
+    ce qui permet d’analyser l’impact du nouveau modèle en priorité
+    sur les catégories initialement les plus difficiles.
+
+    En complément, les F1-scores pondérés globaux des deux modèles
+    sont calculés et affichés dans le titre du graphique afin de
+    fournir une vision synthétique des performances globales.
+
+    Les labels peuvent être fournis sous forme encodée (entiers)
+    ou déjà décodée. Lorsque `encoded=True`, un décodage automatique
+    est appliqué et les classes sont mappées vers des noms courts
+    pour améliorer la lisibilité du graphique.
+
+    Args:
+        y_true (array-like):
+            Labels réels des échantillons (encodés ou non).
+        y_pred_new (array-like):
+            Labels prédits par le nouveau modèle.
+        y_pred_ref (array-like):
+            Labels prédits par le modèle de référence.
+        new_name (str, default="Nouveau modèle"):
+            Nom affiché pour le nouveau modèle dans la légende
+            et le titre du graphique.
+        ref_name (str, default="Modèle de référence"):
+            Nom affiché pour le modèle de référence dans la légende
+            et le titre du graphique.
+        encoded (bool, default=True):
+            Indique si les labels sont encodés numériquement.
+            Si True, un décodage automatique est appliqué avant
+            le calcul des métriques.
+
+    Returns:
+        None:
+            Cette fonction ne retourne aucune valeur.
+            Elle affiche directement le graphique de comparaison
+            des F1-scores par catégorie.
     """
+
 
     # Décodage éventuel
     if encoded:

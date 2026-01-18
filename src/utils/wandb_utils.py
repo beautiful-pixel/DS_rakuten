@@ -37,8 +37,6 @@ def load_wandb_runs(
         selected_runs.append(run)
 
     return selected_runs
-    
-import pandas as pd
 
 
 def load_wandb_history_df(
