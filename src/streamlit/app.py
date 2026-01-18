@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 import zipfile
 import io
 from pathlib import Path
@@ -21,13 +20,12 @@ def create_zip_of_folder(folder_path):
     zip_buffer = io.BytesIO()
     
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        # Walk through the folder
-        for root, dirs, files in os.walk(folder_path):
-            for file in files:
-                file_path = os.path.join(root, file)
+        # Walk through the folder using pathlib
+        for file_path in folder_path.rglob('*'):
+            if file_path.is_file():
                 # Calculate the archive name (relative path)
-                arcname = os.path.relpath(file_path, folder_path.parent)
-                zip_file.write(file_path, arcname)
+                arcname = str(file_path.relative_to(folder_path.parent))
+                zip_file.write(str(file_path), arcname)
     
     zip_buffer.seek(0)
     return zip_buffer.getvalue()
