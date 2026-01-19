@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 import numpy as np
+from PIL import Image
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -157,7 +158,7 @@ def plot_category_distribution(df):
     """Crée un graphique de distribution des catégories."""
     cat_counts = df['category'].value_counts().sort_values()
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(8, 5))
     cat_counts.plot(kind='barh', ax=ax, color='steelblue')
     ax.set_xlabel('Nombre de produits')
     ax.set_ylabel('Catégorie')
@@ -165,6 +166,58 @@ def plot_category_distribution(df):
     plt.tight_layout()
     
     return fig
+
+
+def plot_language_distribution(df, threshold=1000):
+    """
+    Crée un bar plot horizontal de la distribution des langues détectées
+    (hors 'fr' et 'unknown'), avec regroupement des classes rares en 'autre'.
+    """
+    # Filtrage
+    mask = (df["detected_lang_raw"] != "fr") & (df["detected_lang_raw"] != "unknown")
+    ct = df.loc[mask, "detected_lang_raw"].value_counts()
+    ct = ct.sort_values()
+
+    # Regroupement des langues rares
+    other = ct[ct <= threshold]
+    ct = ct.drop(other.index)
+    ct["autre"] = other.sum()
+
+    # Création du graphique
+    fig, ax = plt.subplots(figsize=(5, 3))
+
+    ct.plot(
+        kind="barh",
+        ax=ax,
+        color="steelblue"
+    )
+
+    ax.set_xlabel("Nombre de produits")
+    ax.set_ylabel("Langue détectée")
+    ax.set_title("Distribution des langues détectées (hors français)")
+
+    # Rendu compact
+    ax.tick_params(axis="both", labelsize=8)
+    ax.title.set_fontsize(10)
+    ax.xaxis.label.set_size(9)
+    ax.yaxis.label.set_size(9)
+
+    plt.tight_layout()
+    return fig
+
+def display_foreign_text_ratio(df):
+    """
+    Affiche la proportion de textes détectés comme étrangers dans Streamlit.
+    """
+    foreign_ratio = 1 - (
+        df["detected_lang_raw"].isin(["fr", "unknown"]).sum() / len(df)
+    )
+
+    st.metric(
+        label="Proportion de textes détéctés en langue étrangère",
+        value=f"{foreign_ratio:.1%}"
+    )
+
 
 def plot_text_length_distribution(df):
     """Crée un graphique de distribution des longueurs de texte."""
@@ -1400,3 +1453,62 @@ def plot_improvement_delta(results):
     plt.tight_layout()
     
     return fig
+
+
+def plot_feature_importance_heatmap(df):
+    fig, ax = plt.subplots(figsize=(6, 3))
+
+    sns.heatmap(
+        df,
+        cmap="Blues",
+        annot=True,
+        fmt=".2f",
+        cbar=True
+    )
+
+    ax.set_title("Importance des blocs de features par catégorie", fontsize=9)
+    ax.set_xlabel("Bloc de features", fontsize=8)
+    ax.set_ylabel("Catégorie", fontsize=8)
+
+    ax.tick_params(axis="x", labelsize=7)
+    ax.tick_params(axis="y", labelsize=7)
+
+    plt.tight_layout()
+    return fig
+
+
+def plot_rgb_histogram(hist, title=None, y_max=None):
+    """
+    Affiche un histogramme RGB à partir des données passées en paramètre.
+    hist : list ou tuple de 3 arrays (R, G, B)
+    """
+    fig, ax = plt.subplots(figsize=(5, 3))
+
+    n_images = 1
+    for c, h in zip("rgb", hist):
+        ax.plot(range(256), h / n_images, color=c)
+
+    ax.set_xlabel("Niveau d'intensité", fontsize=8)
+    ax.set_ylabel("Pixels par image", fontsize=8)
+    ax.set_xlim(0, 255)
+    if y_max:
+        ax.set_ylim(0, y_max)
+
+    ax.tick_params(axis="both", labelsize=7)
+
+    if title:
+        ax.set_title(title, fontsize=9)
+
+    plt.tight_layout()
+    return fig
+
+def display_image(image, caption):
+    """
+    Affiche une image qu'elle soit en numpy ou PIL.
+    """
+    if isinstance(image, np.ndarray):
+        st.image(image, caption=caption, width=250)
+    elif isinstance(image, Image.Image):
+        st.image(image, caption=caption, width=250)
+    else:
+        st.warning("Format d'image non reconnu")

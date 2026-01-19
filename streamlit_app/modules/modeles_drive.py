@@ -10,104 +10,98 @@ import tempfile
 from pathlib import Path
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
 
+
 MODEL_URLS = {
     "lenet_canonical": {
         "name": "LeNet",
         "type": "image",
-        "npz_url": "https://drive.google.com/uc?id=1wmc8CThNPtqcBOXiiQrYRxC0VOXERcnx",
+        "npz_path": "artifacts/lenet_val.npz",
         "color": "#FF6B6B"
     },
     "resnet50_canonical": {
         "name": "ResNet50",
         "type": "image",
-        "npz_url": "https://drive.google.com/uc?id=1-vZBH4HiK3_LPveWwfIoF-cHsrUJLxeO",
+        "npz_path": "artifacts/resnet50_val.npz",
         "color": "#4ECDC4"
     },
     "vit_canonical": {
         "name": "Vision Transformer",
         "type": "image",
-        "npz_url": "https://drive.google.com/uc?id=1xTBxehKp9bSc-oTczRLIAkXMrsfthXQL",
+        "npz_path": "artifacts/vit_val.npz",
         "color": "#45B7D1"
     },
     "swin_canonical": {
         "name": "Swin Transformer",
         "type": "image",
-        "npz_url": "https://drive.google.com/uc?id=1tQ_gA2wtuP8mQZL5dqjo1pIU50IImIIa",
+        "npz_path": "artifacts/swin_val.npz",
         "color": "#96CEB4"
     },
     "convnext_canonical": {
         "name": "ConvNeXt",
         "type": "image",
-        "npz_url": "https://drive.google.com/uc?id=16lUlAoMBeLR0p-JDAXSY1cekN6TojKNy",
+        "npz_path": "artifacts/convnext_val.npz",
         "color": "#FFEAA7"
     }
 }
 
+
 @st.cache_data(show_spinner=True)
 def load_model_data_correct(model_key):
-    """Charge les données d'un modèle."""
+    """Charge les données d'un modèle depuis un fichier local .npz."""
     if model_key not in MODEL_URLS:
         return None
-    
+
     try:
-        import gdown
-        
-        npz_url = MODEL_URLS[model_key]["npz_url"]
-        
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_path = Path(tmpdir) / f"{model_key}.npz"
-            
-            # Télécharger
-            gdown.download(npz_url, str(tmp_path), quiet=True)
-            
-            if not tmp_path.exists():
-                return None
-            
-            # Charger les données
-            data = np.load(tmp_path)
-            file_keys = list(data.keys())
-            
-            # Extraire données
-            data_dict = {
-                'model_name': MODEL_URLS[model_key]['name'],
-                'model_key': model_key,
-                'color': MODEL_URLS[model_key]['color'],
-                'file_keys': file_keys
-            }
-            
-            # 1. Récupérer y_true
-            if 'y_true' in data:
-                data_dict['y_true'] = data['y_true']
-            else:
-                return None
-            
-            # 2. Récupérer les probabilités (probs ou logits)
-            if 'probs' in data:
-                probabilities = data['probs']
-            elif 'logits' in data:
-                # Convertir logits en probabilités
-                probabilities = softmax(data['logits'], axis=1)
-            else:
-                return None
-            
-            # 3. Obtenir les prédictions à partir des probabilités
-            data_dict['y_pred'] = np.argmax(probabilities, axis=1)
-            
-            # 4. Récupérer classes
-            if 'classes' in data:
-                data_dict['classes'] = data['classes']
-            else:
-                n_classes = probabilities.shape[1]
-                data_dict['classes'] = np.arange(n_classes)
-            
-            # Statistiques
-            data_dict['n_samples'] = len(data_dict['y_true'])
-            data_dict['n_classes'] = len(data_dict['classes'])
-            
-            return data_dict
-            
+        npz_path = Path(MODEL_URLS[model_key]["npz_path"])
+
+        if not npz_path.exists():
+            st.warning(f"Fichier introuvable : {npz_path}")
+            return None
+
+        # Charger le fichier .npz
+        data = np.load(npz_path)
+        file_keys = list(data.keys())
+
+        data_dict = {
+            "model_name": MODEL_URLS[model_key]["name"],
+            "model_key": model_key,
+            "color": MODEL_URLS[model_key]["color"],
+            "file_keys": file_keys,
+        }
+
+        # 1. y_true
+        if "y_true" not in data:
+            st.warning(f"'y_true' manquant dans {npz_path.name}")
+            return None
+        data_dict["y_true"] = data["y_true"]
+
+        # 2. Probabilités
+        if "probs" in data:
+            probabilities = data["probs"]
+        elif "logits" in data:
+            probabilities = softmax(data["logits"], axis=1)
+        else:
+            st.warning(f"'probs' ou 'logits' manquant dans {npz_path.name}")
+            return None
+
+        # 3. Prédictions
+        data_dict["y_pred"] = np.argmax(probabilities, axis=1)
+
+        # 4. Classes
+        if "classes" in data:
+            data_dict["classes"] = data["classes"]
+        else:
+            data_dict["classes"] = np.arange(probabilities.shape[1])
+
+        data_dict["n_samples"] = len(data_dict["y_true"])
+        data_dict["n_classes"] = len(data_dict["classes"])
+
+        return data_dict
+
     except Exception as e:
+        st.error(f"Erreur chargement modèle {model_key} : {e}")
         return None
+
 
 def softmax(x, axis=None):
     """Fonction softmax pour convertir logits en probabilités."""
@@ -296,16 +290,10 @@ def plot_confusion_matrix_advanced(y_true, y_pred, model_name):
         accuracy = np.trace(cm) / np.sum(cm)
         st.metric("Accuracy", f"{accuracy:.1%}")
 
-def analyse_modeles_drive():
+def analyse_modeles_local():
     """Fonction principale avec F1 Weighted."""
     st.header(" Analyse Comparative des Modèles")
     
-    # Vérifier gdown
-    try:
-        import gdown
-    except ImportError:
-        st.error(" 'gdown' non installé. Exécutez: `pip install gdown`")
-        return
     
     st.success(f"""
      **5 modèles chargés avec succès**

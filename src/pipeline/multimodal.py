@@ -1,5 +1,6 @@
 import numpy as np
 import joblib
+import torch
 
 import numpy as np
 import pandas as pd
@@ -11,17 +12,20 @@ from data.label_mapping import CANONICAL_CLASSES, decode_labels
 
 
 class FinalPipeline:
-    """
-    Pipeline multimodal final basé sur un meta-classifieur de stacking.
-    """
-
     def __init__(
         self,
         image_root: str,
         text_cols=["designation", "description"],
+        device: str | None = None,
     ):
-        self.text_pipeline = TextFusionPipeline()
-        self.image_pipeline = ImageFusionPipeline()
+        if device is None:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        self.device = device
+
+        self.text_pipeline = TextFusionPipeline(device=device)
+        self.image_pipeline = ImageFusionPipeline(device=device)
+
         self.meta_model = joblib.load("../models/final/meta_model.joblib")
         self.image_root = image_root
         self.text_cols = text_cols

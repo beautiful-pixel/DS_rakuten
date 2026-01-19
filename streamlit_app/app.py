@@ -14,6 +14,7 @@ from modules.dataviz import (
     add_image_path, add_image_hash, afficher_image, 
     generate_wordclouds_by_group, plot_keywords_heatmap_streamlit,
     plot_category_distribution, plot_text_length_distribution,
+    plot_language_distribution, display_foreign_text_ratio,
     plot_description_analysis, display_sample_images,   
     analyze_digit_features, analyze_unit_features, 
     analyze_combined_features, analyze_numerotation_features, 
@@ -21,7 +22,8 @@ from modules.dataviz import (
     plot_keywords_distribution_by_category, evaluate_baseline_model, 
     plot_model_comparison, plot_feature_importance, 
     evaluate_feature_enrichment, plot_feature_enrichment_comparison, 
-    plot_improvement_delta
+    plot_improvement_delta, plot_feature_importance_heatmap,
+    plot_rgb_histogram, display_image
 )
 
 from PIL import Image
@@ -31,13 +33,46 @@ import sys
 sys.path.insert(0, '../src')
 sys.path.insert(0, '..')
 
-from features.image import CropTransformer
 from data import CATEGORY_NAMES
 from pipeline.multimodal import FinalPipeline
+import pickle
+
+
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 IMAGE_DEMO_DIR = PROJECT_ROOT / "data" / "demo_uploads" / "images"
 IMAGE_DEMO_DIR.mkdir(parents=True, exist_ok=True)
+
+@st.cache_data
+def load_histogram_dict(path):
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+hist_dict = load_histogram_dict("artifacts/rgb_histograms.pkl")
+
+@st.cache_data
+def load_monochrome_example(path="artifacts/monochrome_example.pkl"):
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+example = load_monochrome_example()
+
+@st.cache_data
+def load_mean_intensity(path="artifacts/mean_intensity.pkl"):
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+mean_intensity = load_mean_intensity()
+
+
+@st.cache_data
+def load_feature_importance():
+    return pd.read_parquet(
+        "artifacts/feature_importance_blocks.parquet"
+    )
+
+df_importance = load_feature_importance()
 
 
 @st.cache_resource
@@ -73,21 +108,13 @@ st.markdown(f"""
 def load_complete_data():
     """Charge et prépare toutes les données."""
     BASE_DIR = Path(__file__).parent.parent
-    DATA_DIR = BASE_DIR / "data" / "raw"
+    DATA_DIR = BASE_DIR / "data" 
     IMAGE_TRAIN_DIR = DATA_DIR / "images" / "image_train"
     
     try:
         # Chargement des données
-        df = pd.read_csv(DATA_DIR / "X_train_update.csv").drop("Unnamed: 0", axis=1, errors='ignore')
-        y = pd.read_csv(DATA_DIR / "Y_train_CVw08PX.csv")["prdtypecode"]
-        df["prdtypecode"] = y.values
-        
-        # Ajout des catégories
-        df = add_categories_to_df(df)
-        
-        # Nettoyage du texte
-        df = clean_text_columns(df, ['description', 'designation'])
-        
+        df = pd.read_csv(DATA_DIR / "preprocessed/preprocessed.csv")
+
         # Ajout des images
         if IMAGE_TRAIN_DIR.exists():
             df = add_image_path(df, str(IMAGE_TRAIN_DIR))
@@ -100,6 +127,8 @@ def load_complete_data():
     except Exception as e:
         st.error(f"Erreur de chargement: {e}")
         return pd.DataFrame()
+    
+
 
 # =================================================================================================================  
 # INITIALISATION
@@ -846,7 +875,10 @@ elif choice == "4. Exploration des données":
         
         # Graphique de distribution
         fig = plot_category_distribution(df)
-        st.pyplot(fig)
+        col_center, col_right = st.columns([5, 1])
+
+        with col_center:
+            st.pyplot(fig)
         
         # Statistiques détaillées
         st.subheader("Statistiques par catégorie")
@@ -855,10 +887,25 @@ elif choice == "4. Exploration des données":
         cat_stats['Pourcentage'] = (cat_stats['Nombre de produits'] / len(df) * 100).round(2)
         st.dataframe(cat_stats, use_container_width=True)
         
+        # Par langue
+        st.subheader("Langues détéctées")
+
+        fig_lang = plot_language_distribution(df, threshold=1000)
+
+        col_left, col_center, col_right = st.columns([2, 4, 1])
+
+        with col_left:
+            display_foreign_text_ratio(df)
+
+
+        with col_center:
+            st.pyplot(fig_lang)
+
+
         # Distribution par groupe
-        st.subheader("Distribution par groupe")
-        group_stats = df['group'].value_counts().reset_index()
-        group_stats.columns = ['Groupe', 'Nombre de produits']
+        # st.subheader("Distribution par groupe")
+        # group_stats = df['group'].value_counts().reset_index()
+        # group_stats.columns = ['Groupe', 'Nombre de produits']
         
         # fig2, ax = plt.subplots(figsize=(10, 4))
         # ax.barh(group_stats['Groupe'], group_stats['Nombre de produits'], color='orange', alpha=0.7)
@@ -1114,40 +1161,98 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
     with tabs[1]:
         st.subheader("Features image — Couleurs")
 
+        # On suppose exactement 2 catégories dans le dictionnaire
+        categories = list(hist_dict.keys())
+
+        col1, col2 = st.columns(2)
+
+        for col, category in zip([col1, col2], ['Piscine', 'Jeux PC']):
+            with col:
+                fig = plot_rgb_histogram(
+                    hist_dict[category],
+                    title=category,
+                    y_max=350
+                )
+                st.pyplot(fig)
+
+
         st.markdown(
-            "Comparaison des histogrammes RGB pour deux catégories représentatives du catalogue."
+            "### Comparaison des histogrammes RGB pour deux catégories représentatives du catalogue."
         )
 
+        for col, category in zip([col1, col2], ['Journaux & magazines', 'Livres techniques']):
+            with col:
+                fig = plot_rgb_histogram(
+                    hist_dict[category],
+                    title=category,
+                    y_max=350
+                )
+                st.pyplot(fig)                
 
-        st.image(
-            "assets/comparaison_hist.png",
-            width=800
+        st.markdown("### Exemple d’image monochrome — Livres spécialisés")
+
+        st.markdown(
+            "Cet exemple illustre l’origine des **pics observés dans les histogrammes RGB** "
+            "au niveau de la catégorie *Livres spécialisés*."
         )
 
+        col_img, col_hist = st.columns([1, 1])
 
-        st.info(
-            "Les pics observés pour les livres spécialisés proviennent d’images très uniformes "
-            "(manuscrits, pages scannées). Cette information est capturée via des statistiques "
-            "globales sur les histogrammes de couleurs."
-        )
+        with col_img:
+            display_image(example["image"], caption="image d'un manusctrit")
+
+        with col_hist:
+            fig = plot_rgb_histogram(
+                example["hist_rgb"],
+                title="Histogramme RGB de l’image"
+            )
+            st.pyplot(fig)
+
 
         with tabs[2]:
             st.subheader("Features image — Formes et intensité")
 
             st.markdown(
-                "Comparaison des intensités moyennes pour deux catégories visuellement contrastées."
+                "Comparaison des **images moyennes** pour des catégories visuellement contrastées."
             )
 
-            st.image(
-                "assets/comparaison_intensitee_moyenne.png",
-                caption="Intensité moyenne — Décoration vs Jeux PC",
-                width=600
-            )
+            # ------------------------------------------------------------
+            # Affichage des images moyennes côte à côte
+            # ------------------------------------------------------------
 
+            categories_to_show = {   
+                'Jeux PC': 0.792,
+                'Cartes à collectionner': 0.778,
+                'Déco & Éclairage': 0.115
+            }
+
+            cols = st.columns(len(categories_to_show))
+
+            for col, category in zip(cols, categories_to_show):
+                with col:
+                    st.markdown(f"**{category}**")
+                    display_image(mean_intensity[category], caption='intensité moyenne')
+
+            st.markdown("#### Taux de formes rectangulaires détectées")
+
+            cols = st.columns(3)
+
+            for col, (category, rate) in zip(cols, categories_to_show.items()):
+                with col:
+                    st.metric(
+                        label=category,
+                        value=f"{rate:.1%}"
+                    )
+
+            # ------------------------------------------------------------
+            # Interprétation
+            # ------------------------------------------------------------
             st.info(
-                "Les jeux PC présentent des images globalement plus sombres, souvent rectangulaires "
-                "et régulières, tandis que les images de décoration sont plus hétérogènes. "
-                "Ces différences motivent l’extraction de features liées aux formes et aux contours."
+                "Les jeux PC présentent des images moyennes globalement plus sombres et structurées, "
+                "souvent associées à des formes rectangulaires régulières (jaquettes, boîtiers). "
+                "À l’inverse, les catégories décoration et luminaires montrent des structures plus "
+                "diffuses et hétérogènes. Ces différences motivent l’extraction de features liées "
+                "aux formes et aux contours."
             )
 
 
@@ -1176,7 +1281,7 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
 
             st.metric(
                 label="F1-score pondéré — Modèle image seul",
-                value="≈ 0.37"
+                value="37.3 %"
             )
 
             st.markdown(
@@ -1199,9 +1304,9 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
                 st.markdown("**Catégories les plus performantes**")
                 st.markdown(
                     """
-                    - Cartes à collectionner (> 65 %)
-                    - Textiles
-                    - Jeux PC
+                    - **Cartes à collectionner** : **73.6 %**
+                    - **Textiles** : **66.9 %**
+                    - **Jeux PC** : **59.9 %**
                     """
                 )
 
@@ -1209,11 +1314,12 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
                 st.markdown("**Catégories les plus difficiles**")
                 st.markdown(
                     """
-                    - Jeux éducatifs  
-                    - Animaux  
-                    - Jeux de rôle  
+                    - **Jeux éducatifs** : **9 %**  
+                    - **Animaux** : **8.8 %**  
+                    - **Jeux de rôle** : **8.6 %**  
                     """
                 )
+
 
             st.info(
                 "Les bonnes performances sont observées pour des catégories visuellement "
@@ -1228,29 +1334,16 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
             # ------------------------------------------------------------
             st.markdown("### Interprétation — Cartes à collectionner")
 
-            st.image(
-                "assets/feature_importance.png",
-                caption="Importance des features — Catégorie Cartes à collectionner",
-                width=600
-            )
+            col_left, col_center, col_right = st.columns([1, 4, 1])
 
-            st.info(
-                "Pour la catégorie *Cartes à collectionner*, les features liées aux "
-                "formes géométriques régulières (parallélogrammes) sont les plus "
-                "discriminantes. Ce résultat est cohérent avec l’analyse exploratoire "
-                "des images, qui montre des objets rectangulaires très homogènes."
-            )
+            with col_center:
+                df_norm = df_importance.div(
+                    df_importance.sum(axis=1),
+                    axis=0
+                )
 
-            st.markdown("---")
+            st.pyplot(plot_feature_importance_heatmap(df_norm))
 
-            # ------------------------------------------------------------
-            # Conclusion
-            # ------------------------------------------------------------
-            st.success(
-                "Ce modèle image constitue une **baseline interprétable**, efficace pour "
-                "certaines catégories homogènes, mais insuffisante seule. Ces limites "
-                "justifient le recours au deep learning, puis à la fusion multimodale."
-            )
         
     
 # ==================================================================================================================================
@@ -2126,7 +2219,6 @@ elif choice == "8. Transformer Français":
     pre_df = _pd.DataFrame([
         {"strategy":"texte brut","f1_val":0.8961},
         {"strategy":"numtok light","f1_val":0.8958},
-        {"strategy":"numtok phys","f1_val":0.8944},
         {"strategy":"cleaner","f1_val":0.8944},
         {"strategy":"cleaner + numtok light","f1_val":0.8929},
         {"strategy":"numtok full","f1_val":0.8913},
@@ -2444,30 +2536,11 @@ elif choice == "10. Sélection du modèle optimal":
     **Modèles analysés:** LeNet, ResNet50, Vision Transformer, Swin Transformer, ConvNeXt
     """)
     
-    # Vérifier gdown
-    try:
-        import gdown
-        gdown_available = True
-    except ImportError:
-        st.error("""
-         **Bibliothèque requise non installée**
-        
-        Installez `gdown` pour télécharger les données:
-        ```bash
-        pip install gdown
-        ```
-        
-        Redémarrez Streamlit après l'installation.
-        """)
-        gdown_available = False
-    
-    if not gdown_available:
-        st.stop()
     
     # Essayer d'importer et exécuter
     try:
-        from modules.modeles_drive import analyse_modeles_drive
-        analyse_modeles_drive()
+        from modules.modeles_drive import analyse_modeles_local
+        analyse_modeles_local()
         
     except ImportError:
         st.error("""

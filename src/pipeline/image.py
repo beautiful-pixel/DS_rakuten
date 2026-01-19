@@ -31,10 +31,10 @@ class ImageModelPipeline:
 
         with torch.no_grad():
             for path in image_paths:
-                img = Image.open(path).convert("RGB")
-                x = self.transform(img).unsqueeze(0).to(self.device)
-                out = self.model(x)
-                logits.append(out.cpu().numpy())
+                with Image.open(path).convert("RGB") as img:
+                    x = self.transform(img).unsqueeze(0).to(self.device)
+                    out = self.model(x)
+                    logits.append(out.cpu().numpy())
 
         return np.vstack(logits)
 
