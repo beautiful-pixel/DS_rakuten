@@ -1,11 +1,6 @@
 # features/__init__.py
-from .build_text_features import build_ml_text_pipeline, build_preprocess_dl_pipeline
-from .build_image_features import build_image_features_pipeline
-# from .build_multimodal_features import build_multimodal_pipeline
+from .image.build_image_features import build_image_features_pipeline
 
 __all__ = [
-    "build_ml_text_pipeline",
-    "build_preprocess_dl_pipeline",
     "build_image_features_pipeline",
-    # "build_multimodal_pipeline",
 ]

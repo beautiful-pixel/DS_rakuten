@@ -32,27 +32,34 @@ def get_image_path(df: pd.DataFrame) -> pd.Series:
 
     return file_names.apply(lambda x: IMG_DIR / x)
 
-def load_data(splitted: bool = False, encoded=False):
+def load_data(splitted: bool = False, encoded: bool = False):
     """
     Charge les données tabulaires du projet.
 
     Les données peuvent être retournées soit sous forme complète,
     soit découpées selon les splits train / validation / test
-    définis dans le module `splits`.
+    définis dans le module ``splits``.
 
-    Args:
-        splitted (bool, optional): Si True, retourne les données
-            découpées selon les splits. Sinon, retourne l'ensemble
-            des données. Par défaut False.
+    Parameters
+    ----------
+    splitted : bool, optional
+        Si ``True``, retourne les données découpées selon les splits
+        train / validation / test. Sinon, retourne l'ensemble des données.
+        Par défaut ``False``.
+    encoded : bool, optional
+        Si ``True``, les labels sont encodés via ``encode_labels``.
+        Par défaut ``False``.
 
-    Returns:
-        dict: Dictionnaire contenant :
-            - X_train, y_train
-            - X_val, y_val
-            - X_test, y_test
-        ou, si `splitted=False` :
-            - X
-            - y
+    Returns
+    -------
+    dict
+        - Si ``splitted=False`` :
+            - ``X`` : pandas.DataFrame
+            - ``y`` : numpy.ndarray
+        - Si ``splitted=True`` :
+            - ``X_train``, ``y_train``
+            - ``X_val``, ``y_val``
+            - ``X_test``, ``y_test``
     """
     X = pd.read_csv(DATA_DIR / "X_train_update.csv")
     X['image_path'] = get_image_path(X)
