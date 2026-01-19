@@ -8,7 +8,6 @@ from PIL import Image, ImageOps
 from matplotlib.patches import FancyBboxPatch, Arrow
 
 
-
 # Import des modules
 from modules.preprocessing import clean_text_columns, add_categories_to_df, get_text_stats
 from modules.dataviz import (
@@ -25,14 +24,14 @@ from modules.dataviz import (
     plot_improvement_delta
 )
 
-
 from PIL import Image
 import uuid
 
 import sys
-sys.path.insert(0, '..')
 sys.path.insert(0, '../src')
+sys.path.insert(0, '..')
 
+from features.image import CropTransformer
 from data import CATEGORY_NAMES
 from pipeline.multimodal import FinalPipeline
 
@@ -122,9 +121,12 @@ menu = [
     "4. Exploration des données",
     "5. Feature Engineering & Modélisation Baseline",
     "6. Stratégie de modélisation",
-    "7. Sélection du modèle optimal",
-    "8. Essai du modèle",
-    "9. Conclusions et perspectives",
+    "7. Vectorisation ",
+    "8. Transformer Français",
+    "9. Transformer Multilingue",
+    "10. Sélection du modèle optimal",
+    "11. Essai du modèle",
+    "12. Conclusions et perspectives",
 ]
 
 choice = st.sidebar.radio("Sections", menu)
@@ -711,7 +713,6 @@ elif choice == "3. Préprocessing":
             4. **Minuscules** - Uniformisation
             5. **Suppression ponctuation excessive**
             6. **Espacement normalisé** - Multi-espaces → espace unique
-            7. **Stop words** - Mots communs non informatifs
             """)
         
         # =========================================
@@ -774,200 +775,59 @@ elif choice == "3. Préprocessing":
         else:
             st.info("Aucun HTML trouvé")
        
-    
     # =========================================
     # TAB 3 — PRÉPROCESSING IMAGE
     # =========================================
- 
-    # CROP TRANSFORMER 
-    # ==========================================
-    class CropTransformer:
-        
-        def __init__(self, margin=0.05):
-            self.margin = margin  # Marge autour du produit
-        
-        def _auto_crop(self, image):
-            """Détection automatique de la région du produit"""
-            from PIL import Image as PILImage
-            import numpy as np
-            
-            # Convertir en numpy array si nécessaire
-            if isinstance(image, PILImage.Image):
-                img_array = np.array(image)
-            else:
-                img_array = image
-            
-            # Si l'image est en niveaux de gris, convertir en RGB
-            if len(img_array.shape) == 2:
-                img_array = np.stack([img_array]*3, axis=-1)
-            
-            # Méthode simple: basée sur l'intensité
-            # Le produit est généralement plus "intéressant" que le fond
-            gray = np.mean(img_array, axis=2)
-            
-            # Calculer le gradient (changement d'intensité)
-            # Les bords du produit ont généralement un fort gradient
-            from scipy import ndimage
-            grad_x = ndimage.sobel(gray, axis=1)
-            grad_y = ndimage.sobel(gray, axis=0)
-            gradient = np.sqrt(grad_x**2 + grad_y**2)
-            
-            # Seuillage adaptatif
-            threshold = np.percentile(gradient, 85)  # Prendre les 15% plus forts gradients
-            mask = gradient > threshold
-            
-            # Si pas assez de gradients détectés, utiliser l'intensité
-            if np.sum(mask) < 100:
-                intensity_threshold = np.percentile(gray, 25)
-                mask = gray > intensity_threshold
-            
-            # Trouver les limites
-            rows = np.any(mask, axis=1)
-            cols = np.any(mask, axis=0)
-            
-            if not np.any(rows) or not np.any(cols):
-                # Fallback: utiliser toute l'image
-                y_min, y_max = 0, img_array.shape[0]
-                x_min, x_max = 0, img_array.shape[1]
-            else:
-                y_min, y_max = np.where(rows)[0][[0, -1]]
-                x_min, x_max = np.where(cols)[0][[0, -1]]
-                
-                # Ajouter une marge
-                h, w = img_array.shape[:2]
-                margin_h = int((y_max - y_min) * self.margin)
-                margin_w = int((x_max - x_min) * self.margin)
-                
-                y_min = max(0, y_min - margin_h)
-                y_max = min(h, y_max + margin_h)
-                x_min = max(0, x_min - margin_w)
-                x_max = min(w, x_max + margin_w)
-            
-            return x_min, y_min, x_max, y_max
-        
-        def fit_transform(self, images):
-            """Applique le cropping à un batch d'images"""
-            cropped_images = []
-            
-            for img in images:
-                # Obtenir les coordonnées de crop
-                x_min, y_min, x_max, y_max = self._auto_crop(img)
-                
-                # Appliquer le crop
-                if isinstance(img, Image.Image):
-                    cropped = img.crop((x_min, y_min, x_max, y_max))
-                else:
-                    cropped = img[y_min:y_max, x_min:x_max]
-                
-                cropped_images.append(cropped)
-            
-            return cropped_images
-
-    def preprocess_image_advanced(image_path, target_size=(224, 224), margin=0.05):
-        
-        try:
-            if not image_path or not Path(image_path).exists():
-                return None
-            
-            # Charger l'image
-            img = Image.open(image_path).convert('RGB')
-            
-            # Créer et appliquer le transformateur
-            cropper = CropTransformer(margin=margin)
-            cropped_images = cropper.fit_transform([img])
-            img_cropped = cropped_images[0]
-            
-            # Redimensionner
-            img_resized = img_cropped.resize(target_size, Image.Resampling.LANCZOS)
-            
-            return img_resized
-            
-        except Exception as e:
-            st.error(f"Erreur de traitement avancé: {e}")
-            # Fallback au cropping centré
-            return preprocess_image_simple(image_path, target_size)
-
-    def preprocess_image_simple(image_path, target_size=(224, 224)):
-        """Cropping centré simple (fallback)"""
-        try:
-            img = Image.open(image_path).convert('RGB')
-            width, height = img.size
-            crop_size = min(width, height)
-            left = (width - crop_size) // 2
-            top = (height - crop_size) // 2
-            img_cropped = img.crop((left, top, left + crop_size, top + crop_size))
-            return img_cropped.resize(target_size, Image.Resampling.LANCZOS)
-        except:
-            return None
-     
-    # =========================================
-    # TAB 3 — PRÉPROCESSING IMAGE 
-    # =========================================
     with tab3:
-        st.markdown("###  Préprocessing des images")
-        
-        st.markdown("""
-        <div style='background-color: #e3f2fd; padding: 15px; border-radius: 10px;'>
-        <strong>Recadrages des images, quelques examples:</strong> - 
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Contrôle simple
-        use_zoom = st.checkbox("Activer le recadrage intelligent", value=True)
-        
-        # =========================================
-        # EXEMPLES - 2 examples
-        # =========================================
+        st.markdown("### Préprocessing des images — Recadrage automatique")
+
+        st.markdown(
+            """
+            <div style='background-color: #e3f2fd; padding: 15px; border-radius: 10px;'>
+            <strong>Démonstration du recadrage automatique par détection de contours (CropTransformer).</strong><br>
+            Les exemples ci-dessous illustrent des cas favorables et défavorables, en fonction du contraste
+            entre l’objet et le fond.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         st.markdown("---")
-        st.markdown("#### Exemples")
-        
-        # Lista de productids a mostrar
-        productids_a_mostrar = [1711734527, 4197657726]
-        
-        for i, productid in enumerate(productids_a_mostrar):
-            # Buscar el producto
-            producto = df[df['productid'] == productid]
-            
-            if not producto.empty and 'image_path' in producto.columns:
-                row = producto.iloc[0]
-                img_path = row['image_path']
-                
-                if pd.notna(img_path) and Path(img_path).exists():
-                    st.markdown(f"**Exemple {i+1}**")
-                    
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.markdown("**Originale**")
-                        try:
-                            img = Image.open(img_path).convert('RGB')
-                            st.image(img, width=250)
-                            st.caption(f"Product: {productid}")
-                        except:
-                            st.warning("Image non disponible")
-                    
-                    with col2:
-                        st.markdown("**Après traitement**")
-                        try:
-                            if use_zoom:
-                                processed = preprocess_image_advanced(img_path)
-                            else:
-                                processed = preprocess_image_simple(img_path)
-                            
-                            if processed:
-                                st.image(processed, width=224)
-                                st.caption("224×224 px")
-                            else:
-                                st.error("Échec traitement")
-                        except Exception as e:
-                            st.error(f"Erreur: {e}")
-                    
-                    if i == 0:
-                        st.divider()
-                else:
-                    st.warning(f"Product {productid} - Image non trouvée")
-            else:
-                st.warning(f"Product {productid} - Non trouvé dans les données")
+
+        img1 = Image.open("assets/avant_recadrage.png")
+        img2 = Image.open("assets/apres_recadrage.png")
+
+        if "show_after" not in st.session_state:
+            st.session_state.show_after = False
+
+        # Colonnes symétriques : image | spacer | bouton | spacer | image
+        col_left, col_spacer1, col_button, col_spacer2, col_right, col_spacer3 = st.columns(
+            [2, 0.5, 1, 0.5, 2, 3]
+        )
+
+        with col_left:
+            st.image(
+                img1,
+                caption="Avant recadrage",
+                width=350
+            )
+
+        with col_button:
+            st.markdown("<br><br>", unsafe_allow_html=True)  # centrage vertical
+            if st.button(
+                "➜",
+                use_container_width=True
+            ):
+                st.session_state.show_after = True
+
+        with col_right:
+            if st.session_state.show_after:
+                st.image(
+                    img2,
+                    caption="Après recadrage",
+                    width=350
+                )
+
         
 # ====================================================================================================================
 # SECTION 4: EXPLORATION DES DONNÉES
@@ -1000,13 +860,13 @@ elif choice == "4. Exploration des données":
         group_stats = df['group'].value_counts().reset_index()
         group_stats.columns = ['Groupe', 'Nombre de produits']
         
-        fig2, ax = plt.subplots(figsize=(10, 4))
-        ax.barh(group_stats['Groupe'], group_stats['Nombre de produits'], color='orange', alpha=0.7)
-        ax.set_xlabel('Nombre de produits')
-        ax.set_title('Distribution des produits par groupe')
-        ax.invert_yaxis()
-        plt.tight_layout()
-        st.pyplot(fig2)
+        # fig2, ax = plt.subplots(figsize=(10, 4))
+        # ax.barh(group_stats['Groupe'], group_stats['Nombre de produits'], color='orange', alpha=0.7)
+        # ax.set_xlabel('Nombre de produits')
+        # ax.set_title('Distribution des produits par groupe')
+        # ax.invert_yaxis()
+        # plt.tight_layout()
+        # st.pyplot(fig2)
     
     elif exploration_tab == "Analyse textuelle":
         st.subheader("Analyse textuelle")
@@ -1140,7 +1000,9 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
     # NOUVEAUX ONGLETS SELON LES DIRECTIVES
     tabs = st.tabs([
         "1. Features & Baseline - Texte",  # TAB 1 : Liste des features texte + résultats F1, matrice de confusion
-        "2. Features & Baseline - Image"   # TAB 2 : Liste des features image + meilleur modèle baseline
+        "2. Features Image - Couleurs",
+        "3. Features Image - Formes",
+        "4. Modèle baseline Image",
     ])
 
     with tabs[0]:
@@ -1250,102 +1112,145 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
                     st.error(f"Erreur lors de l'évaluation: {str(e)}")
 
     with tabs[1]:
-        st.subheader(" 1. Liste des Features & Transformations Appliquées aux Images")
+        st.subheader("Features image — Couleurs")
 
-        # --- PARTIE 1 : LISTE DES FEATURES IMAGE ---
-        st.markdown("####  Pipeline de Prétraitement Visuel")
-        col_feat_img, col_trans_img = st.columns(2)
-        with col_feat_img:
-            st.markdown("**Features Extraites/Utilisées**")
-            st.write("- **Pixels bruts redimensionnés** (224x224, RGB)")
-            st.write("- **Features CNN pré-entraîné** (ResNet50, EfficientNet, etc.)")
-            st.write("- **Histogrammes de couleur** (RGB, HSV)")
-            st.write("- **Textures** (via matrices de co-occurrence)")
+        st.markdown(
+            "Comparaison des histogrammes RGB pour deux catégories représentatives du catalogue."
+        )
 
-        with col_trans_img:
-            st.markdown("**Transformations Appliquées**")
-            st.write("- **Chargement & conversion RGB** (via PIL/OpenCV)")
-            st.write("- **Recadrage centré** ou **Zoom intelligent** (CropTransformer)")
-            st.write("- **Redimensionnement** à taille fixe (224x224)")
-            st.write("- **Normalisation** ImageNet: mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225]")
-            st.write("- **Augmentation** (rotation, miroir, brightness/contrast)")
 
-        # --- PARTIE 2 : MEILLEUR MODÈLE BASELINE IMAGE ---
-        st.markdown("---")
-        st.subheader(" 2. Meilleur Modèle Baseline - Côté Image")
+        st.image(
+            "assets/comparaison_hist.png",
+            width=800
+        )
 
-        st.markdown("""
-        **Modèles Testés:**
-        - **CNN Simple** (3 couches Conv2D + MaxPooling)
-        - **ResNet50** (pré-entraîné sur ImageNet, features seulement)
-        - **EfficientNetB0** (pré-entraîné, fine-tuning partiel)
-        
-        **Configuration:**
-        - Images prétraitées: 224x224 RGB
-        - Split: 80% train / 20% validation
-        - Batch size: 32
-        - Épochs: 10-20 selon le modèle
-        """)
 
-        # Options pour l'évaluation image
-        col_img1, col_img2 = st.columns(2)
-        with col_img1:
-            img_model = st.selectbox(
-                "Modèle à tester",
-                ["CNN Simple", "ResNet50 (features)", "EfficientNetB0 (fine-tuning)"],
-                key="img_model_select"
+        st.info(
+            "Les pics observés pour les livres spécialisés proviennent d’images très uniformes "
+            "(manuscrits, pages scannées). Cette information est capturée via des statistiques "
+            "globales sur les histogrammes de couleurs."
+        )
+
+        with tabs[2]:
+            st.subheader("Features image — Formes et intensité")
+
+            st.markdown(
+                "Comparaison des intensités moyennes pour deux catégories visuellement contrastées."
             )
-        with col_img2:
-            st.write("")
-            st.write("")
-            run_img_eval = st.button("Lancer l'évaluation", key="eval_img_baseline", type="primary")
 
-        if run_img_eval:
-            with st.spinner("Évaluation du modèle image..."):
-                try:
-                    # Simulation des résultats (à remplacer par tes vraies fonctions)
-                    # Tu devras créer des fonctions similaires pour les images
-                    
-                    # Pour l'instant, on simule des résultats
-                    import random
-                    
-                    col1, col2, col3 = st.columns(3)
-                    col1.metric("Accuracy", f"{random.uniform(0.4, 0.7):.3f}")
-                    col2.metric("F1 Score Weighted", f"{random.uniform(0.35, 0.65):.3f}")
-                    col3.metric("Top-3 Accuracy", f"{random.uniform(0.6, 0.85):.3f}")
-                    
-                    # Graphique de performance par catégorie
-                    st.markdown("**Performance par catégorie (top 10):**")
-                    
-                    # Exemple de données simulées
-                    categories = df['category'].value_counts().head(10).index.tolist()
-                    perf_data = {
-                        'Catégorie': categories,
-                        'F1 Score': [random.uniform(0.2, 0.8) for _ in categories],
-                        'Accuracy': [random.uniform(0.3, 0.9) for _ in categories]
-                    }
-                    
-                    import plotly.express as px
-                    fig = px.bar(perf_data, x='Catégorie', y='F1 Score', 
-                                title='F1 Score par catégorie (Top 10)',
-                                color='F1 Score', color_continuous_scale='Viridis')
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Recommandations
-                    st.success(f"**Recommandation:** {img_model} semble être un bon baseline!")
-                    
-                    # Message sur les prochaines étapes
-                    st.info("""
-                    **Prochaines étapes pour améliorer le modèle image :**
-                    1. **Augmentation de données** plus agressive
-                    2. **Fine-tuning complet** du CNN pré-entraîné
-                    3. **Fusion tardive** avec les features texte
-                    4. **Architectures avancées** (Vision Transformers)
-                    5. **Apprentissage par transfert** multi-tâches
-                    """)
-                    
-                except Exception as e:
-                    st.error(f"Erreur lors de l'évaluation image: {str(e)}")
+            st.image(
+                "assets/comparaison_intensitee_moyenne.png",
+                caption="Intensité moyenne — Décoration vs Jeux PC",
+                width=600
+            )
+
+            st.info(
+                "Les jeux PC présentent des images globalement plus sombres, souvent rectangulaires "
+                "et régulières, tandis que les images de décoration sont plus hétérogènes. "
+                "Ces différences motivent l’extraction de features liées aux formes et aux contours."
+            )
+
+
+        # ============================================================
+        # TAB 4 — MODÈLE BASELINE IMAGE
+        # ============================================================
+        with tabs[3]:
+
+            st.subheader("Modèle baseline image — Résultats et interprétation")
+
+            st.markdown(
+                """
+                Cette section présente les performances du **modèle image seul**,
+                basé sur des descripteurs classiques (couleurs, formes, textures).
+                L’objectif est d’évaluer dans quelle mesure l’information visuelle
+                est discriminante sans recours au deep learning.
+                """
+            )
+
+            st.markdown("---")
+
+            # ------------------------------------------------------------
+            # Score global
+            # ------------------------------------------------------------
+            st.markdown("### Performance globale")
+
+            st.metric(
+                label="F1-score pondéré — Modèle image seul",
+                value="≈ 0.37"
+            )
+
+            st.markdown(
+                """
+                Le score global reste limité, ce qui indique que les images seules
+                ne suffisent pas à discriminer l’ensemble des catégories.
+                """
+            )
+
+            st.markdown("---")
+
+            # ------------------------------------------------------------
+            # Meilleures / pires catégories
+            # ------------------------------------------------------------
+            st.markdown("### Analyse par catégorie")
+
+            col_good, col_bad = st.columns(2)
+
+            with col_good:
+                st.markdown("**Catégories les plus performantes**")
+                st.markdown(
+                    """
+                    - Cartes à collectionner (> 65 %)
+                    - Textiles
+                    - Jeux PC
+                    """
+                )
+
+            with col_bad:
+                st.markdown("**Catégories les plus difficiles**")
+                st.markdown(
+                    """
+                    - Jeux éducatifs  
+                    - Animaux  
+                    - Jeux de rôle  
+                    """
+                )
+
+            st.info(
+                "Les bonnes performances sont observées pour des catégories visuellement "
+                "homogènes, tandis que les catégories hétérogènes restent difficiles à "
+                "discriminer avec des features visuelles simples."
+            )
+
+            st.markdown("---")
+
+            # ------------------------------------------------------------
+            # Feature importance — meilleure catégorie uniquement
+            # ------------------------------------------------------------
+            st.markdown("### Interprétation — Cartes à collectionner")
+
+            st.image(
+                "assets/feature_importance.png",
+                caption="Importance des features — Catégorie Cartes à collectionner",
+                width=600
+            )
+
+            st.info(
+                "Pour la catégorie *Cartes à collectionner*, les features liées aux "
+                "formes géométriques régulières (parallélogrammes) sont les plus "
+                "discriminantes. Ce résultat est cohérent avec l’analyse exploratoire "
+                "des images, qui montre des objets rectangulaires très homogènes."
+            )
+
+            st.markdown("---")
+
+            # ------------------------------------------------------------
+            # Conclusion
+            # ------------------------------------------------------------
+            st.success(
+                "Ce modèle image constitue une **baseline interprétable**, efficace pour "
+                "certaines catégories homogènes, mais insuffisante seule. Ces limites "
+                "justifient le recours au deep learning, puis à la fusion multimodale."
+            )
         
     
 # ==================================================================================================================================
@@ -1554,10 +1459,979 @@ elif choice == "6. Stratégie de modélisation":
     
 
 # ==================================================================================================================================
-# SECTION 7: MODÈLE OPTIMAL 
+# SECTION 7: VECTORISATION & CHOIX DE FEATURES 
 # ==================================================================================================================================
-elif choice == "7. Sélection du modèle optimal":
-    st.header("7. Sélection du modèle optimal")
+
+
+elif choice == "7. Vectorisation ":
+    st.header("7. Vectorisation & choix de features")
+
+    # --- Imports locaux ---
+    import re as _re
+    import numpy as _np
+    import pandas as _pd
+    import plotly.express as _px
+
+    from sklearn.model_selection import train_test_split
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics import f1_score, classification_report
+    from sklearn.svm import LinearSVC
+    from sklearn.pipeline import Pipeline
+    from sklearn.pipeline import FeatureUnion
+
+    # --- Composants interactifs (optionnels) ---
+    _HAS_AGGRID = False
+    _HAS_ACE = False
+    _HAS_AGRAPH = False
+    try:
+        from st_aggrid import AgGrid  # type: ignore
+        _HAS_AGGRID = True
+    except Exception:
+        pass
+    try:
+        from streamlit_ace import st_ace  # type: ignore
+        _HAS_ACE = True
+    except Exception:
+        pass
+    try:
+        from streamlit_agraph import agraph, Node, Edge, Config  # type: ignore
+        _HAS_AGRAPH = True
+    except Exception:
+        pass
+
+    # --- langdetect (FR / Multilingue) ---
+    try:
+        from langdetect import detect as _langdetect_detect  # type: ignore
+        _LANGDETECT_OK = True
+    except Exception:
+        _LANGDETECT_OK = False
+
+    def _bucket_lang_fr_mult(txt: str) -> str:
+        if not isinstance(txt, str) or not txt.strip():
+            return "Multilingue"
+        if not _LANGDETECT_OK:
+            t = txt.lower()
+            if any(ch in t for ch in "éàèùêâîôç") or " le " in t or " la " in t:
+                return "FR"
+            return "Multilingue"
+        try:
+            return "FR" if _langdetect_detect(txt) == "fr" else "Multilingue"
+        except Exception:
+            return "Multilingue"
+
+    _UNIT_RE = _re.compile(r"(?i)\b(cm|mm|m|kg|g|mg|l|ml|cl|gb|tb|hz|w|kw|v|mah|mp|px|inch|in)\b")
+
+    def _has_digits(txt: str) -> bool:
+        return bool(_re.search(r"\d", txt or ""))
+
+    def _has_units(txt: str) -> bool:
+        return bool(_UNIT_RE.search(txt or ""))
+
+    def _infer_cat_cols(_df: _pd.DataFrame):
+        cols = {c.lower(): c for c in _df.columns}
+        group_candidates = ["groupe", "group", "supercat", "super_cat", "categorie_parent", "category_group"]
+        cat_candidates   = ["categorie", "category", "sous_categorie", "subcategory", "sous-cat", "sub_category"]
+        group_col = next((cols[c] for c in group_candidates if c in cols), None)
+        cat_col   = next((cols[c] for c in cat_candidates if c in cols), None)
+        return group_col, cat_col
+
+    def _code_to_name_map(_df: _pd.DataFrame) -> dict:
+        group_col, cat_col = _infer_cat_cols(_df)
+        if group_col and cat_col:
+            tmp = _df[["prdtypecode", group_col, cat_col]].dropna().copy()
+            def _mode(s):
+                m = s.mode()
+                return m.iloc[0] if not m.empty else s.iloc[0]
+            agg = tmp.groupby("prdtypecode").agg({group_col:_mode, cat_col:_mode})
+            return {int(k): f"{row[group_col]} ▸ {row[cat_col]}" for k,row in agg.iterrows()}
+        return {int(k): str(int(k)) for k in _df["prdtypecode"].unique()}
+
+    _CODE2NAME = _code_to_name_map(df)
+
+    def _clean_spans(s: str) -> str:
+        if not isinstance(s, str):
+            return s
+        # remove html tags like <span ...>
+        s = _re.sub(r"<[^>]+>", "", s)
+        return s.strip()
+
+    def _make_text(series_a, series_b):
+        a = series_a.fillna("").astype(str)
+        b = series_b.fillna("").astype(str)
+        return (a + " " + b).str.strip()
+
+    # ------------------------------------------------------------------
+    # Header (style pièce jointe)
+    # ------------------------------------------------------------------
+    st.markdown(f"""
+    <div style=\"background: linear-gradient(135deg, rgba(0,51,102,0.08), rgba(217,130,43,0.10));
+                padding: 18px 18px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.06);\">
+      <h2 style=\"margin:0;color:{COLORS['primary']};\">Vectorisation texte : du brut au signal utile</h2>
+      <p style=\"margin:6px 0 0 0; color:#334; font-size: 0.98em;\">
+        On ne choisit pas seulement un modèle : on choisit un <b>pipeline</b> (représentation → classifieur → calibration).
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ------------------------------------------------------------------
+    # Pipeline Build vs Evaluate (Graphviz)
+    # ------------------------------------------------------------------
+    st.subheader("Pipeline : Build vs Evaluate")
+    dot = r"""
+    digraph G {
+      rankdir=LR;
+      node  [shape=box, style="rounded", fontname="Arial", fontsize=10, color="#003366"];
+      edge  [color="#333333", arrowsize=0.8];
+
+      subgraph cluster_build {
+        label="BUILD (construire le signal)";
+        color="#d9822b"; style="rounded"; fontsize=11; fontcolor="#003366";
+
+        data  [label="Données texte\n(titre + description)", style="rounded,filled", fillcolor="#ffffff"];
+        split [label="Split titre / description", style="rounded,filled", fillcolor="#ffffff"];
+        char  [label="Char n-grams", style="rounded,filled", fillcolor="#ffffff"];
+        word  [label="TF-IDF (word)", style="rounded,filled", fillcolor="#ffffff"];
+        model [label="LinearSVC", style="rounded,filled", fillcolor="#003366", fontcolor="#ffffff"];
+
+        data -> split;
+        split -> char;
+        split -> word;
+        char -> model;
+        word -> model;
+      }
+
+      subgraph cluster_eval {
+        label="EVALUATE (prouver & comprendre)";
+        color="#d9822b"; style="rounded"; fontsize=11; fontcolor="#003366";
+
+        err  [label="Erreurs & Explications\n(top mots)", style="rounded,filled", fillcolor="#ffffff"];
+        cal  [label="Calibration\n(probas fiables)", style="rounded,filled", fillcolor="#ffffff"];
+        time [label="Temps train / prédiction\n(coût)", style="rounded,filled", fillcolor="#ffffff"];
+        f1   [label="F1 weighted\n(métrique principale)", style="rounded,filled", fillcolor="#ffffff"];
+      }
+
+      model -> err;
+      model -> cal;
+      model -> time;
+      model -> f1;
+    }
+    """
+    st.graphviz_chart(dot, use_container_width=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # Baseline tableau (trié F1 décroissant)
+    # ------------------------------------------------------------------
+
+    st.subheader("Baseline linéaire : performance vs coût")
+
+    baseline_models = _pd.DataFrame([
+        {"model":"LinearSVC","f1_train":0.991,"f1_val":0.838,"train_time_s":28.044,"pred_time_s":11.093},
+        {"model":"RidgeClassifier","f1_train":0.977,"f1_val":0.833,"train_time_s":73.428,"pred_time_s":10.825},
+        {"model":"LogisticRegression","f1_train":0.903,"f1_val":0.816,"train_time_s":234.674,"pred_time_s":17.124},
+        {"model":"SGD_hinge","f1_train":0.893,"f1_val":0.803,"train_time_s":18.731,"pred_time_s":14.154},
+        {"model":"ComplementNB","f1_train":0.866,"f1_val":0.772,"train_time_s":13.735,"pred_time_s":11.433},
+    ]).sort_values("f1_val", ascending=False)
+
+    colL, colR = st.columns([3,1])
+    with colL:
+        fig = _px.scatter(
+            baseline_models,
+            x="train_time_s",
+            y="f1_val",
+            color="model",
+            size="pred_time_s",
+            hover_data=["f1_train", "train_time_s", "pred_time_s"],
+            title="Performance vs Coût des modèles baseline",
+        )
+        fig.update_layout(height=420, xaxis_title="train_time_s", yaxis_title="f1_val")
+        st.plotly_chart(fig, use_container_width=True)
+
+    with colR:
+        st.markdown("""
+        <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+          <h4 style="margin:0;color:#1b5e20;">✅ Choix retenu : LinearSVC</h4>
+          <ul style="margin:8px 0 0 18px;color:#2b2b2b;">
+            <li><b>Meilleur F1 validation</b> (0.838)</li>
+            <li><b>Coût raisonnable</b> (train 28.0s)</li>
+            <li>Baseline idéale</li>
+          </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    table_df = baseline_models.rename(columns={
+        "model":"Modèles",
+        "f1_train":"F1 train",
+        "f1_val":"F1 validation",
+        "train_time_s":"Temps entraînement (s)",
+        "pred_time_s":"Temps prédiction (s)",
+    })
+    st.dataframe(table_df, use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # Split titre/description (calculé sur un sous-échantillon)
+    # ------------------------------------------------------------------
+    st.subheader("Split titre/description : quel champ porte le signal ?")
+    split_note = """
+    <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+      <h4 style="margin:0;color:#1b5e20;">✅ Choix retenu : titre + description</h4>
+      <p style="margin:6px 0 0 0;color:#2b2b2b;">
+        La fusion maximise le rappel utile : le titre est dense, la description apporte du contexte.
+      </p>
+    </div>
+    """
+
+    sample_n = st.slider("Taille d'échantillon (split ablation)", 5000, min(40000, len(df)), 15000, 5000)
+    do_split_eval = st.button("Calculer l'ablation split", key="split_eval_btn")
+
+    @st.cache_data(show_spinner=False)
+    def _split_ablation(_n):
+        title_col = "designation" if "designation" in df.columns else next((c for c in df.columns if "design" in c.lower()), None)
+        desc_col  = "description" if "description" in df.columns else next((c for c in df.columns if "descr" in c.lower()), None)
+        if title_col is None or desc_col is None:
+            return _pd.DataFrame([])
+
+        sub = df[[title_col, desc_col, "prdtypecode"]].dropna(subset=["prdtypecode"]).copy()
+        if _n < len(sub):
+            sub = sub.sample(n=_n, random_state=42)
+
+        y = sub["prdtypecode"].astype(int).values
+
+        def _eval(text_series):
+            X = text_series.fillna("").astype(str).tolist()
+            Xtr, Xva, ytr, yva = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+            vect = TfidfVectorizer(ngram_range=(1,2), min_df=2)
+            clf = LinearSVC(C=0.2)
+            pipe = Pipeline([("vect", vect), ("clf", clf)])
+            pipe.fit(Xtr, ytr)
+            pred = pipe.predict(Xva)
+            return float(f1_score(yva, pred, average="weighted"))
+
+        f_title = _eval(sub[title_col])
+        f_desc  = _eval(sub[desc_col])
+        f_both  = _eval(_make_text(sub[title_col], sub[desc_col]))
+
+        return _pd.DataFrame([
+            {"champ":"titre", "f1_weighted":f_title},
+            {"champ":"description", "f1_weighted":f_desc},
+            {"champ":"titre + description", "f1_weighted":f_both},
+        ]).sort_values("f1_weighted", ascending=False)
+
+    left,right = st.columns([3,1])
+    with left:
+        if do_split_eval:
+            res = _split_ablation(sample_n)
+            if res.empty:
+                st.warning("Colonnes texte introuvables pour calculer l'ablation split.")
+            else:
+                st.plotly_chart(_px.bar(res, x="f1_weighted", y="champ", orientation="h", title="F1 weighted (val)"),
+                                use_container_width=True)
+        # else:
+        #     st.info("Calculer pour afficher le graphique.")
+    with right:
+        st.markdown(split_note, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # Ablation vectorizer
+    # ------------------------------------------------------------------
+    st.subheader("Ablation : choix du vectorizer")
+    vect_df = _pd.DataFrame([
+        {"vectorizer":"tfidf","f1_val":0.838,"lecture":"signal stable"},
+        {"vectorizer":"count_binary","f1_val":0.818,"lecture":"présence/absence"},
+        {"vectorizer":"count","f1_val":0.808,"lecture":"comptage brut"},
+    ]).sort_values("f1_val", ascending=False)
+
+    c1,c2 = st.columns([3,1])
+    with c1:
+        st.dataframe(vect_df, use_container_width=True, hide_index=True)
+    with c2:
+        st.markdown("""
+        <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+          <h4 style="margin:0;color:#1b5e20;">✅ Décision : TF-IDF</h4>
+          <p style="margin:6px 0 0 0;color:#2b2b2b;">
+            Meilleur F1 weighted / F1_val parmi les options testées : compromis simple et défendable.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # N-grams
+    # ------------------------------------------------------------------
+    st.subheader("N-grams ")
+    ngram_df = _pd.DataFrame([
+        {"config":"word_1_2gram","f1_val":0.838},
+        {"config":"word_1_3gram","f1_val":0.837},
+        {"config":"word_1gram","f1_val":0.833},
+    ]).sort_values("f1_val", ascending=False)
+
+    c1,c2 = st.columns([3,1])
+    with c1:
+        cols = st.columns(3)
+        for i,row in enumerate(ngram_df.itertuples(index=False)):
+            with cols[i]:
+                st.markdown(f"<div style='font-size:0.9em;color:#555;'><b>{row.config}</b></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:2.4em;color:#111;margin-top:-4px;'>{row.f1_val:.3f}</div>", unsafe_allow_html=True)
+                st.progress(min(max((row.f1_val-0.80)/0.08, 0), 1.0))
+    with c2:
+        st.markdown("""
+        <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+          <h4 style="margin:0;color:#1b5e20;">✅ Décision : word n-grams (1–2)</h4>
+          <p style="margin:6px 0 0 0;color:#2b2b2b;">
+            Le gain 1–3 est marginal : on retient la configuration la plus simple (moins de bruit / coût).
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # Word + Char n-grams
+    # ------------------------------------------------------------------
+    st.subheader("Word + Char n-grams ")
+    c1,c2 = st.columns([3,1])
+    with c1:
+        a,b = st.columns(2)
+        with a:
+            st.markdown("**Avant**")
+            st.markdown("<div style='color:#555;'>word_only</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size:2.4em;color:#111;'>0.838</div>", unsafe_allow_html=True)
+        with b:
+            st.markdown("**Après**")
+            st.markdown("<div style='color:#555;'>word + char(3–5)</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size:2.4em;color:#111;'>0.860</div>", unsafe_allow_html=True)
+            st.markdown("<span style='background:#eaf7ee;padding:4px 10px;border-radius:999px;color:#1b5e20;border:1px solid rgba(0,0,0,0.08);'>↑ +0.022</span>", unsafe_allow_html=True)
+
+        st.markdown("""
+        <div style="background:#f8f9fa;border:1px solid rgba(0,0,0,0.06);padding:14px;border-radius:14px;margin-top:14px;">
+          <h4 style="margin:0;color:#003366;">Pourquoi ça marche ?</h4>
+          <p style="margin:6px 0 0 0;color:#333;">
+            Les <b>char n-grams</b> capturent les références, les fautes, les variantes, les tailles, les versions, les codes produit robustes au bruit et utiles sur titres courts.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown("""
+        <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+          <h4 style="margin:0;color:#1b5e20;">✅ Décision : word + char(3–5)</h4>
+          <p style="margin:6px 0 0 0;color:#2b2b2b;">
+            Gain net F1 : meilleure robustesse (typos, codes, tailles). Défendable en termes de signal capturé.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # C : contrôler la complexité
+    # ------------------------------------------------------------------
+    st.subheader("C : contrôler la complexité sans perdre en généralisation")
+    C_GRID = [(0.01, 0.8349), (0.05, 0.8359), (0.1, 0.8416), (0.2, 0.8418), (0.3, 0.8400), (0.5, 0.8384)]
+    c_df = _pd.DataFrame({"C":[c for c,_ in C_GRID], "f1_val":[f for _,f in C_GRID]})
+
+    left,right = st.columns([3,1])
+    with left:
+        fig = _px.line(c_df, x="C", y="f1_val", markers=True, title="Grid search (LinearSVC) : F1 vs C")
+        fig.update_layout(yaxis_title="F1 validation", xaxis_title="C", height=360)
+        st.plotly_chart(fig, use_container_width=True)
+        # st.caption("Astuce : le coût (temps train/pred) augmente généralement avec C. Ici, compromis autour de C≈0.2.")
+    with right:
+        st.markdown("""
+        <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+          <h4 style="margin:0;color:#1b5e20;">Décision : C = 0.2</h4>
+          <ul style="margin:8px 0 0 18px;color:#2b2b2b;">
+            <li>C trop faible → sous-apprentissage (frontière trop lisse).</li>
+            <li>C trop élevé → risque d’overfit + coût plus élevé.</li>
+            <li>On privilégie le <b>compromis perf/coût</b>.</li>
+          </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # Calibration + KPIs features (avec espace)
+    # ------------------------------------------------------------------
+    st.subheader("Avant / Après calibration : fiabilité des scores")
+    cal_df = _pd.DataFrame([
+        {"metric":"F1 weighted","avant":0.8696,"après":0.8674},
+        {"metric":"LogLoss","avant":1.679,"après":0.501},
+    ])
+
+    l,r = st.columns([3,1])
+    with l:
+        fig = _px.bar(cal_df.melt(id_vars=["metric"], var_name="stage", value_name="value"),
+                     x="metric", y="value", color="stage", barmode="group",
+                     title="Avant / Après calibration")
+        fig.update_layout(height=330, xaxis_title="", yaxis_title="")
+        st.plotly_chart(fig, use_container_width=True)
+
+        # st.markdown("""
+        # <div style="background:#f8f9fa;border:1px solid rgba(0,0,0,0.06);padding:14px;border-radius:14px;">
+        #   <h4 style="margin:0;color:#003366;">Interprétation</h4>
+        #   <p style="margin:6px 0 0 0;color:#333;">
+        #     Le <b>F1 weighted</b> bouge peu, mais la <b>LogLoss chute</b> : scores plus fiables (utile pour routage, seuils, fusion).
+        #   </p>
+        # </div>
+        # """, unsafe_allow_html=True)
+
+        st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
+
+        k1,k2,k3 = st.columns(3)
+        with k1:
+            st.markdown("<div style='background:white;border:1px solid rgba(0,0,0,0.06);padding:14px;border-radius:14px;'>"
+                        "<div style='color:#666;font-size:0.9em;'>Baseline texte (NB01)</div>"
+                        "<div style='font-size:2.0em;color:#003366;'><b>0.792</b></div>"
+                        "<div style='color:#666;font-size:0.85em;'>référence challenge</div></div>", unsafe_allow_html=True)
+        with k2:
+            st.markdown("<div style='background:white;border:1px solid rgba(0,0,0,0.06);padding:14px;border-radius:14px;'>"
+                        "<div style='color:#666;font-size:0.9em;'>Meilleur pipeline de vectorisation</div>"
+                        "<div style='font-size:2.0em;color:#003366;'><b>0.844</b></div>"
+                        "<div style='color:#666;font-size:0.85em;'>TF-IDF + poids titre + features</div></div>", unsafe_allow_html=True)
+        with k3:
+            st.markdown("<div style='background:white;border:1px solid rgba(0,0,0,0.06);padding:14px;border-radius:14px;'>"
+                        "<div style='color:#666;font-size:0.9em;'>Gain global</div>"
+                        "<div style='font-size:2.0em;color:#003366;'><b>+6.5%</b></div>"
+                        "<div style='color:#666;font-size:0.85em;'>de 0.792 à 0.844</div></div>", unsafe_allow_html=True)
+
+    with r:
+        st.markdown("""
+        <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+          <h4 style="margin:0;color:#1b5e20;">Pourquoi F1 weighted ?</h4>
+          <p style="margin:6px 0 0 0;color:#2b2b2b;">
+            Classes déséquilibrées : F1 weighted pondère par support → c'est la métrique la plus représentative en production.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ------------------------------------------------------------------
+    # Studio explicabilité : slices + top-K contributions (FIX coo_matrix)
+    # ------------------------------------------------------------------
+    st.subheader("Qu'est-ce qui influence le modèle?")
+
+    s1,s2,s3 = st.columns(3)
+    with s1:
+        lang_opt = st.selectbox("Slice langue", ["Aucun filtre", "FR", "Multilingue"], index=0)
+    with s2:
+        dig_opt = st.selectbox("Slice chiffres", ["Aucun filtre", "Avec chiffres", "Sans chiffres"], index=0)
+    with s3:
+        unit_opt = st.selectbox("Slice unités", ["Aucun filtre", "Avec unités", "Sans unités"], index=0)
+
+    active = []
+    if lang_opt != "Aucun filtre": active.append(lang_opt)
+    if dig_opt != "Aucun filtre": active.append(dig_opt)
+    if unit_opt != "Aucun filtre": active.append(unit_opt)
+    st.markdown(f"**Sous-ensemble analysé :** {' • '.join(active) if active else 'Aucun filtre'}")
+
+    audit_n = st.slider("Taille d'audit", 5000, min(80000, len(df)), min(20000, len(df)), 5000)
+    topk = st.slider("Top-K contributions affichées", 5, 30, 12, 1)
+    run = st.button("Analyser", type="primary")
+
+    @st.cache_resource(show_spinner=False)
+    def _train_audit(_n, _lang, _dig, _unit):
+        title_col = "designation" if "designation" in df.columns else next((c for c in df.columns if "design" in c.lower()), df.columns[0])
+        desc_col  = "description" if "description" in df.columns else next((c for c in df.columns if "descr" in c.lower()), title_col)
+
+        _df = df[[title_col, desc_col, "prdtypecode"]].copy()
+        _df["text"] = _make_text(_df[title_col], _df[desc_col])
+
+        if _lang != "Aucun filtre":
+            _df["lang_bucket"] = _df["text"].map(_bucket_lang_fr_mult)
+            _df = _df[_df["lang_bucket"] == _lang]
+        if _dig != "Aucun filtre":
+            _df["has_dig"] = _df["text"].map(_has_digits)
+            _df = _df[_df["has_dig"] == ("Avec chiffres" == _dig)]
+        if _unit != "Aucun filtre":
+            _df["has_unit"] = _df["text"].map(_has_units)
+            _df = _df[_df["has_unit"] == ("Avec unités" == _unit)]
+
+        vc = _df["prdtypecode"].value_counts()
+        _df = _df[_df["prdtypecode"].isin(vc[vc >= 2].index)]
+        if _n < len(_df):
+            _df = _df.sample(n=_n, random_state=42)
+
+        X = _df["text"].tolist()
+        y = _df["prdtypecode"].astype(int).tolist()
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+        word_vect = TfidfVectorizer(ngram_range=(1,2), min_df=2)
+        char_vect = TfidfVectorizer(analyzer="char", ngram_range=(3,5), min_df=2)
+        feats = FeatureUnion([("word", word_vect), ("char", char_vect)])
+        clf = LinearSVC(C=0.2)
+        pipe = Pipeline([("feats", feats), ("clf", clf)])
+
+        pipe.fit(X_train, y_train)
+        pred = pipe.predict(X_val)
+        f1w = f1_score(y_val, pred, average="weighted")
+
+        scores = None
+        try:
+            scores = pipe.decision_function(X_val)
+        except Exception:
+            pass
+
+        return {"pipe":pipe,"X_val":X_val,"y_val":y_val,"pred":pred,"scores":scores,"f1w":f1w}
+
+
+    # --- Persistance des résultats d'audit (évite de relancer l'entraînement quand on change une sélection) ---
+    _AUDIT_STATE_KEY = 'vec_audit_state'
+    _params = (audit_n, lang_opt, dig_opt, unit_opt)
+    if _AUDIT_STATE_KEY not in st.session_state:
+        st.session_state[_AUDIT_STATE_KEY] = {'params': None, 'bundle': None}
+
+    if run:
+        with st.spinner("Entraînement du modèle d'audit…"):
+            bundle = _train_audit(audit_n, lang_opt, dig_opt, unit_opt)
+        st.session_state[_AUDIT_STATE_KEY] = {'params': _params, 'bundle': bundle}
+
+    _state = st.session_state.get(_AUDIT_STATE_KEY, {})
+    bundle = _state.get('bundle') if _state.get('params') == _params else None
+
+
+    if bundle is not None:
+        st.success(f"F1 weighted: {bundle['f1w']:.3f}")
+
+        rep = classification_report(bundle["y_val"], bundle["pred"], output_dict=True, zero_division=0)
+        rep_df = _pd.DataFrame(rep).T.drop(index=["accuracy","macro avg","weighted avg"], errors="ignore").reset_index()
+        rep_df = rep_df.rename(columns={"index":"prdtypecode","f1-score":"f1"})[["prdtypecode","f1","precision","recall","support"]]
+        rep_df["prdtypecode"] = rep_df["prdtypecode"].astype(int)
+        rep_df.insert(0, "Catégorie", rep_df["prdtypecode"].map(lambda c: _clean_spans(_CODE2NAME.get(int(c), str(c)))))
+        rep_df = rep_df.sort_values("f1", ascending=False)
+
+        st.markdown("### Performance par catégorie")
+        st.dataframe(rep_df.head(25), use_container_width=True, hide_index=True)
+
+        st.markdown("### Exemples d'erreurs")
+        errs=[]
+        for i,(yt,yp) in enumerate(zip(bundle["y_val"], bundle["pred"])):
+            if yt != yp:
+                conf=0.0
+                if bundle["scores"] is not None:
+                    row=bundle["scores"][i]
+                    best=float(_np.max(row))
+                    second=float(_np.partition(row,-2)[-2]) if len(row)>=2 else best
+                    conf=best-second
+                errs.append({
+                    'idx':i,
+                    'Vrai':_clean_spans(_CODE2NAME.get(int(yt),str(yt))),
+                    'Prédit':_clean_spans(_CODE2NAME.get(int(yp),str(yp))),
+                    'marge_confiance':conf,
+                    'texte':bundle['X_val'][i][:240]+('…' if len(bundle['X_val'][i])>240 else '')
+                })
+        err_df=_pd.DataFrame(errs).sort_values('marge_confiance', ascending=False).head(30)
+        st.dataframe(err_df, use_container_width=True, hide_index=True)
+
+        if not err_df.empty:
+            st.markdown("### Top contributions → classe prédite")
+            err_df["choix"] = err_df.apply(lambda r: f"{r['Vrai']} → {r['Prédit']} (marge {r['marge_confiance']:.3f})", axis=1)
+            _choice = st.selectbox("Choisir une erreur", err_df["choix"].tolist(), index=0)
+            pick = int(err_df.loc[err_df["choix"] == _choice, "idx"].iloc[0])
+            txt = bundle["X_val"][int(pick)]
+
+            pipe=bundle["pipe"]
+            feats=pipe.named_steps["feats"]
+            clf=pipe.named_steps["clf"]
+
+            Xrow = feats.transform([txt])
+
+            pred_label=int(bundle["pred"][int(pick)])
+            true_label=int(bundle["y_val"][int(pick)])
+
+            def _class_index(label):
+                return int(_np.where(clf.classes_==label)[0][0])
+
+            def _top_word_contrib(label):
+                ci=_class_index(label)
+                w=clf.coef_[ci]
+                contrib = Xrow.multiply(w).tocsr()  # ✅ FIX COO -> CSR
+
+                word_names = feats.transformer_list[0][1].get_feature_names_out()
+                n_word=len(word_names)
+
+                inds=contrib.indices
+                vals=contrib.data
+                items=[]
+                for j,v in zip(inds, vals):
+                    if j < n_word:
+                        items.append((word_names[j], float(v)))
+                items.sort(key=lambda x:x[1], reverse=True)
+                return items[:topk]
+
+            cA,cB,cC = st.columns(3)
+            with cA:
+                st.markdown("**Pourquoi le modèle a prédit cette classe?**")
+                st.dataframe(_pd.DataFrame(_top_word_contrib(pred_label), columns=["token","contribution"]),
+                             use_container_width=True, hide_index=True)
+            with cB:
+                st.markdown("**Ce qui aurait soutenu la vraie classe:**")
+                st.dataframe(_pd.DataFrame(_top_word_contrib(true_label), columns=["token","contribution"]),
+                             use_container_width=True, hide_index=True)
+            with cC:
+                st.markdown("**Delta (prédit − vrai)**")
+                wi = clf.coef_[_class_index(pred_label)] - clf.coef_[_class_index(true_label)]
+                contrib = Xrow.multiply(wi).tocsr()
+                word_names = feats.transformer_list[0][1].get_feature_names_out()
+                n_word=len(word_names)
+                items=[]
+                for j,v in zip(contrib.indices, contrib.data):
+                    if j < n_word:
+                        items.append((word_names[j], float(v)))
+                items.sort(key=lambda x:x[1], reverse=True)
+                st.dataframe(_pd.DataFrame(items[:topk], columns=["token","delta"]),
+                             use_container_width=True, hide_index=True)
+
+
+# ====================================================================================================================
+# SECTION 6.b: TRANSFORMER FRANÇAIS
+# ====================================================================================================================
+elif choice == "8. Transformer Français":
+    st.header("Transformer camemBERT")
+
+    import pandas as _pd
+    import plotly.express as _px
+
+    # # Lottie (optionnel)
+    # try:
+    #     from streamlit_lottie import st_lottie  # type: ignore
+    #     import requests
+    #     r = requests.get("https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json", timeout=3)
+    #     if r.status_code == 200:
+    #         st_lottie(r.json(), height=160, key="lottie_fr")
+    # except Exception:
+    #     pass
+
+    st.markdown(f"""
+    <div style=\"background: linear-gradient(135deg, rgba(0,51,102,0.08), rgba(217,130,43,0.10));
+                padding: 18px 18px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.06);\">
+      <h2 style=\"margin:0;color:{COLORS['primary']};\">Stratégie de prétraitement appliquée aux textes</h2>
+      <p style=\"margin:6px 0 0 0; color:#334; font-size: 0.98em;\">
+        Les stratégies évaluées couvrent un spectre progressif allant du texte brut à des approches plus élaborées afin d’analyser finement l’apport de chaque niveau de transformation.</b>
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Graphique 1 — Ablation preprocess (CamemBERT-base)
+    st.subheader("Ablation preprocess avec CamemBERT-base")
+    pre_df = _pd.DataFrame([
+        {"strategy":"texte brut","f1_val":0.8961},
+        {"strategy":"numtok light","f1_val":0.8958},
+        {"strategy":"numtok phys","f1_val":0.8944},
+        {"strategy":"cleaner","f1_val":0.8944},
+        {"strategy":"cleaner + numtok light","f1_val":0.8929},
+        {"strategy":"numtok full","f1_val":0.8913},
+    ]).sort_values("f1_val", ascending=False)
+
+    _tmp = pre_df.assign(rank=range(1, len(pre_df) + 1)).copy()
+    _tmp["label"] = _tmp["strategy"].map(lambda s: f"<b>{s}</b>")
+    fig = _px.scatter(
+        _tmp,
+        x="rank",
+        y="f1_val",
+        text="label",
+        title="Écarts faibles entre stratégies de prétraitement",
+    )
+    fig.update_traces(
+        textposition="top center",
+        marker=dict(size=18),
+        textfont=dict(size=18)
+    )
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="F1 weighted (val)",
+        height=440,
+        margin=dict(t=70)
+    )
+    fig.update_yaxes(range=[float(_tmp["f1_val"].min()) - 0.002, float(_tmp["f1_val"].max()) + 0.004])
+    st.plotly_chart(fig, use_container_width=True)
+
+
+    st.markdown("---")
+
+    # Graphique 2 — Le vrai levier : modèle large
+    st.subheader("CamemBERT-base vs CamemBERT-large")
+    large_df = _pd.DataFrame([
+        {"model":"CamemBERT-base (brut)","f1_val":0.8961},
+        {"model":"CamemBERT-large (brut)","f1_val":0.9096},
+        {"model":"CamemBERT-large (numtok light)","f1_val":0.9106},
+    ]).sort_values("f1_val", ascending=False)
+
+    # Version retenue : v2
+    fig = _px.line(
+        large_df.sort_values("f1_val"),
+        x="model",
+        y="f1_val",
+        markers=True,
+        title="Progression base → large"
+    )
+    fig.update_traces(marker=dict(size=12), line=dict(width=3))
+    fig.update_layout(xaxis_title="", yaxis_title="F1 weighted (val)", height=420)
+    st.plotly_chart(fig, use_container_width=True)
+
+
+    st.markdown("---")
+
+    # Microscope preprocess
+    st.subheader("Analyse intéractive des stratégies de prétraitement")
+    sample = st.text_area("Texte produit", value="iPhone 12 64GB - Coque silicone rouge, 12cm, neuf", height=90)
+
+    import re as _re
+    _UNIT_RE = _re.compile(r"(?i)\b(cm|mm|m|kg|g|mg|l|ml|cl|gb|tb|hz|w|kw|v|mah|mp|px|inch|in)\b")
+
+    def _cleaner_basic(t: str) -> str:
+        t = (t or "").lower()
+        t = _re.sub(r"<[^>]+>", " ", t)
+        t = _re.sub(r"[^\w\s-]", " ", t)
+        t = _re.sub(r"\s+", " ", t).strip()
+        return t
+
+    def _numtok_light(t: str) -> str:
+        t = t or ""
+        t = _re.sub(r"(\d+)", " <NUM> ", t)
+        t = _UNIT_RE.sub(" <UNIT> ", t)
+        t = _re.sub(r"\s+", " ", t).strip()
+        return t
+
+    a,b,c = st.columns(3)
+    with a:
+        st.markdown("**Brut**")
+        st.code(sample, language="text")
+    with b:
+        st.markdown("**Cleaner (léger)**")
+        st.code(_cleaner_basic(sample), language="text")
+    with c:
+        st.markdown("**NumTok light (approx)**")
+        st.code(_numtok_light(sample), language="text")
+
+    # st.info("On suit principalement le **F1 weighted** : classes déséquilibrées, métrique représentative du trafic réel.")
+
+
+
+    st.markdown("---")
+
+
+    st.markdown("""
+    <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+      <h4 style="margin:0;color:#1b5e20;">✅ Choix retenu</h4>
+      <p style="margin:6px 0 0 0;color:#2b2b2b;">
+        <b>CamemBERT-large + numtok light</b> — <b>F1 weighted = 0.9106</b>
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ====================================================================================================================
+# SECTION 6.c: TRANSFORMER MULTILINGUE (ROUTEUR) — epoch 5 + timeline en bas
+# ====================================================================================================================
+elif choice == "9. Transformer Multilingue":
+    st.header("9. Transformer Multilingue")
+
+    import pandas as _pd
+    import plotly.express as _px
+
+    st.markdown(f"""
+    <div style=\"background: linear-gradient(135deg, rgba(0,51,102,0.08), rgba(217,130,43,0.10));
+                padding: 18px 18px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.06);\">
+      <h2 style=\"margin:0;color:{COLORS['primary']};\">Evaluation de XLM-RoBERTa-base</h2>
+      <p style=\"margin:6px 0 0 0; color:#334; font-size: 0.98em;\">
+        Notre objectif est d'explorer une architecture complémentaire en vue d’une stratégie de fusion de modèles.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Composants interactifs (optionnels)
+    _HAS_TIMELINE = False
+    _HAS_ECHARTS = False
+    try:
+        from streamlit_timeline import st_timeline  # type: ignore
+        _HAS_TIMELINE = True
+    except Exception:
+        pass
+    try:
+        from streamlit_echarts import st_echarts  # type: ignore
+        _HAS_ECHARTS = True
+    except Exception:
+        pass
+
+    st.markdown("---")
+
+    # Courbe d'apprentissage XLM-R (v1..v5)
+    st.subheader("Courbe d'apprentissage XLM-RoBERTa-base")
+    curve = _pd.DataFrame([
+        {"epoch":1,"val_f1":0.846235,"val_loss":0.621},
+        {"epoch":2,"val_f1":0.861120,"val_loss":0.581},
+        {"epoch":3,"val_f1":0.872540,"val_loss":0.553},
+        {"epoch":4,"val_f1":0.879930,"val_loss":0.536},
+        {"epoch":5,"val_f1":0.883900,"val_loss":0.528},
+        {"epoch":6,"val_f1":0.884900,"val_loss":0.526},
+        {"epoch":7,"val_f1":0.885200,"val_loss":0.525},
+        {"epoch":8,"val_f1":0.885703,"val_loss":0.526},
+    ])
+
+    # Version retenue : v1
+    fig = _px.line(curve, x="epoch", y="val_f1", markers=True, title="")
+    fig.update_traces(marker=dict(size=12), line=dict(width=3))
+    fig.update_layout(height=420, xaxis_title="Epoch", yaxis_title="F1 weighted (val)")
+    st.plotly_chart(fig, use_container_width=True)
+
+
+    st.markdown("---")
+
+    # Comparaison FR vs Multilingue (v1..v5) — v3 demandé
+    st.subheader("FR vs Multilingue : comparaison dees modèles")
+    comp = _pd.DataFrame([
+        {"subset":"FR","model":"CamemBERT","f1":0.917,"logloss":0.368},
+        {"subset":"FR","model":"XLM-R","f1":0.894,"logloss":0.364},
+        {"subset":"Multilingue","model":"CamemBERT","f1":0.889,"logloss":0.543},
+        {"subset":"Multilingue","model":"XLM-R","f1":0.855,"logloss":0.535},
+    ])
+
+    tab_bar, tab_dashboard = st.tabs(["Comparaison F1 weighted", "Détails des résultats"])
+
+    with tab_bar:
+        st.plotly_chart(
+            _px.bar(comp, x="f1", y="model", color="subset", barmode="group", title="F1 weighted"),
+            use_container_width=True
+        )
+
+    with tab_dashboard:
+        fr = comp[comp["subset"]=="FR"].set_index("model")
+        ml = comp[comp["subset"]=="Multilingue"].set_index("model")
+        a,b = st.columns(2)
+        with a:
+            st.markdown("### FR")
+            c1,c2 = st.columns(2)
+            with c1:
+                st.metric("CamemBERT F1w", f"{fr.loc['CamemBERT','f1']:.3f}")
+                st.metric("CamemBERT LogLoss", f"{fr.loc['CamemBERT','logloss']:.3f}")
+            with c2:
+                st.metric("XLM-R F1w", f"{fr.loc['XLM-R','f1']:.3f}")
+                st.metric("XLM-R LogLoss", f"{fr.loc['XLM-R','logloss']:.3f}")
+        with b:
+            st.markdown("### Multilingue")
+            c1,c2 = st.columns(2)
+            with c1:
+                st.metric("CamemBERT F1w", f"{ml.loc['CamemBERT','f1']:.3f}")
+                st.metric("CamemBERT LogLoss", f"{ml.loc['CamemBERT','logloss']:.3f}")
+            with c2:
+                st.metric("XLM-R F1w", f"{ml.loc['XLM-R','f1']:.3f}")
+                st.metric("XLM-R LogLoss", f"{ml.loc['XLM-R','logloss']:.3f}")
+
+        # st.markdown("""
+        # <div style="background:#f8f9fa;border:1px solid rgba(0,0,0,0.06);padding:14px;border-radius:14px;">
+        #   <h4 style="margin:0;color:#003366;">Pourquoi LogLoss compte ici ?</h4>
+        #   <p style="margin:6px 0 0 0;color:#333;">
+            # En routage, la <b>fiabilité</b> des scores est clé : logloss plus faible → scores plus calibrés,
+            # utile pour seuils, abstention, fusion.
+        #   </p>
+        # </div>
+        # """, unsafe_allow_html=True)
+
+
+    st.markdown("---")
+
+    
+
+#     # Workflow (refait à partir du notebook text_06_transformer_multilingue.ipynb)
+#     st.subheader("Workflow multilingue : entraînement → sélection epoch5 → routage")
+
+#     st.markdown("""
+#     - **Offline (sélection)** : entraînement XLM-R, suivi des métriques par epoch, sélection **epoch 5 (best loss)**, export des probabilités.
+#     - **Analyse** : découpe **FR / Multilingue** (langdetect) + comparaison **F1 weighted** & **LogLoss**.
+#     - **Online (prod)** : routage simple **FR → CamemBERT-large**, **Multilingue → XLM-R epoch 5**.
+#     """)
+
+#     router_dot = r"""
+#     digraph R {
+#       rankdir=LR;
+#       node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10, color="#003366"];
+#       edge [color="#333333", arrowsize=0.8];
+
+#       subgraph cluster_offline {
+#         label="OFFLINE (sélection)";
+#         color="#d9822b"; style="rounded"; fontsize=11; fontcolor="#003366";
+
+#         train [label="Train XLM-R
+# (max_len=384, bs=64, lr=2e-5
+# + warmup 0.1)", fillcolor="#ffffff"];
+#         curves [label="Courbe val_f1 / val_loss
+# par epoch", fillcolor="#ffffff"];
+#         pick [label="Sélection : epoch 5
+# (best val_loss)", fillcolor="#ffffff"];
+#         export [label="Export probas
+# val/test (npy)", fillcolor="#ffffff"];
+
+#         train -> curves -> pick -> export;
+#       }
+
+#       subgraph cluster_analysis {
+#         label="ANALYSE";
+#         color="#d9822b"; style="rounded"; fontsize=11; fontcolor="#003366";
+
+#         lang [label="Langdetect
+# FR vs Multilingue", fillcolor="#ffffff"];
+#         metrics [label="F1 weighted + LogLoss
+# par sous-ensemble", fillcolor="#ffffff"];
+#         delta [label="Analyse par catégorie
+# (deltas)", fillcolor="#ffffff"];
+
+#         export -> lang -> metrics -> delta;
+#       }
+
+#       subgraph cluster_online {
+#         label="ONLINE (prod)";
+#         color="#d9822b"; style="rounded"; fontsize=11; fontcolor="#003366";
+
+#         in  [label="Texte produit", fillcolor="#ffffff"];
+#         gate [label="Langdetect", fillcolor="#ffffff"];
+#         fr  [label="Route FR", fillcolor="#eaf7ee", color="#1b5e20"];
+#         ml  [label="Route Multilingue", fillcolor="#fff7e6", color="#d9822b"];
+#         cam [label="CamemBERT-large
+# (numtok light)", fillcolor="#ffffff"];
+#         xlm [label="XLM-R
+# (epoch 5)", fillcolor="#ffffff"];
+#         out [label="Prédiction code + score", fillcolor="#ffffff"];
+
+#         in -> gate;
+#         gate -> fr [label="fr"];
+#         gate -> ml [label="≠ fr"];
+#         fr -> cam -> out;
+#         ml -> xlm -> out;
+#       }
+
+#       metrics -> gate [style=dashed, label="règle de routage"];
+#     }
+#     """
+
+#     st.graphviz_chart(router_dot, use_container_width=True)
+
+#     st.caption("Routage défendable : CamemBERT est le spécialiste FR; XLM-R apporte une robustesse hors FR et une meilleure fiabilité des scores (logloss) utile en production.")
+
+#     st.markdown("---")
+
+
+    st.markdown("""
+    <div style="background:#eaf7ee;border:1px solid rgba(0,0,0,0.08);padding:14px;border-radius:14px;">
+      <h4 style="margin:0;color:#1b5e20;">✅ Choix retenu</h4>
+      <p style="margin:6px 0 0 0;color:#2b2b2b;">
+        <b>CamemBERT-large + XLM-R</b><br>
+        <b>XLM-RoBERTa-base est local et complémentaire à CamemBERT-large</b> 
+    </div>
+    """, unsafe_allow_html=True)
+
+
+elif choice == "10. Sélection du modèle optimal":
+    st.header("10. Sélection du modèle optimal")
     
     st.info("""
     **Analyse comparative des modèles**
@@ -1616,13 +2490,12 @@ elif choice == "7. Sélection du modèle optimal":
         st.error(f"❌ Erreur d'exécution: {str(e)[:200]}")
         st.info("Vérifiez votre connexion internet et réessayez.")
 
-
 # ==================================================================================================================================
 # SECTION 8: ESSAI DU MODELE
 # ==================================================================================================================================
-elif choice == "8. Essai du modèle":
+elif choice == "11. Essai du modèle":
 
-    st.header("8. Essai du modèle")
+    st.header("11. Essai du modèle")
     st.markdown(
         """
         Cette section propose une **démonstration du modèle final** sur un nouveau produit,
@@ -1775,8 +2648,8 @@ elif choice == "8. Essai du modèle":
 # ==================================================================================================================================
 # SECTION 9: CONCLUSIONS ET PERSPECTIVES 
 # ==================================================================================================================================
-elif choice == "9. Conclusions et perspectives":
-    st.header("9. Conclusions et perspectives")
+elif choice == "12. Conclusions et perspectives":
+    st.header("12. Conclusions et perspectives")
     
     # Résumé du projet
     st.subheader("Résumé du projet")
