@@ -36,7 +36,7 @@ sys.path.insert(0, '..')
 from data import CATEGORY_NAMES
 from pipeline.multimodal import FinalPipeline
 import pickle
-
+from features.text.numeric_tokens import replace_numeric_expressions
 
 
 
@@ -109,7 +109,7 @@ def load_complete_data():
     """Charge et prépare toutes les données."""
     BASE_DIR = Path(__file__).parent.parent
     DATA_DIR = BASE_DIR / "data" 
-    IMAGE_TRAIN_DIR = DATA_DIR / "images" / "image_train"
+    IMAGE_TRAIN_DIR = DATA_DIR / "raw" / "images" / "image_train"
     
     try:
         # Chargement des données
@@ -510,7 +510,6 @@ elif choice == "2. Données et Volumétrie":
     # =========================================
     with tab2:
         st.markdown("####  Images associées")
-
         if "image_path" in df.columns and df["image_path"].notna().any():
             images_sample = df[df["image_path"].notna()].groupby("prdtypecode", as_index=False).first().head(16)
 
@@ -1098,65 +1097,127 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
                     st.error(f"Erreur: {e}")
 
         # B. RÉSULTATS DU MODÈLE ENRICHI (F1 Score, Matrice de Confusion)
-        st.markdown("####  Résultats du Modèle Baseline")
+        st.subheader(" 2. Résultats du Modèle Baseline")
+
+        results = {
+            "kw": {
+                "f1_train": 0.493,
+                "f1_val": 0.488,
+                "delta": 0.000
+            },
+            "kw + length": {
+                "f1_train": 0.524,
+                "f1_val": 0.520,
+                "delta": 0.032
+            },
+            "kw + unit": {
+                "f1_train": 0.533,
+                "f1_val": 0.532,
+                "delta": 0.043
+            },
+            "kw + unit + length": {
+                "f1_train": 0.552,
+                "f1_val": 0.551,
+                "delta": 0.063
+            }
+        }
+
+        baseline_f1 = results["kw"]["f1_val"]
+        best_model = "kw + unit + length"
+
+        f1_val = results[best_model]["f1_val"]
+        f1_train = results[best_model]["f1_train"]
+        delta = results[best_model]["delta"]
+
+        # ---- Metrics ----
+        st.metric(
+            "F1 Score (Validation)",
+            f"{f1_val:.3f}",
+            f"+{delta:.3f}"
+        )
+
+        st.markdown("**Comparaison des modèles**")
+
+        comparison_df = pd.DataFrame([
+            {
+                "Modèle": name,
+                "F1 Train": v["f1_train"],
+                "F1 Validation": v["f1_val"],
+                "Δ vs Baseline": v["delta"],
+            }
+            for name, v in results.items()
+        ])
+
+        comparison_df = comparison_df.sort_values("F1 Validation", ascending=False)
+
+        st.dataframe(
+            comparison_df,
+            use_container_width=True
+        )
+
+
+        st.success(
+            f"🏆 Meilleur modèle : **{best_model}** "
+            f"(F1 validation = {f1_val:.3f}, +{delta:.3f} vs baseline)"
+        )
+
+        # # Options pour l'évaluation
+        # col_size, col_btn = st.columns([2, 1])
+        # with col_size:
+        #     sample_size = st.slider("Taille échantillon", 1000, 5000, 1000, 500, key="full_model_sample")
+        # with col_btn:
+        #     run_eval = st.button("Lancer l'évaluation du modèle enrichi", key="eval_full_model", type="primary")
         
-        # Options pour l'évaluation
-        col_size, col_btn = st.columns([2, 1])
-        with col_size:
-            sample_size = st.slider("Taille échantillon", 1000, 5000, 2000, 500, key="full_model_sample")
-        with col_btn:
-            run_eval = st.button("Lancer l'évaluation du modèle enrichi", key="eval_full_model", type="primary")
-        
-        if run_eval:
-            with st.spinner("Évaluation en cours..."):
-                try:
-                    # Utiliser ta fonction existante d'enrichissement
-                    results = evaluate_feature_enrichment(df, sample_size=sample_size)
+        # if run_eval:
+        #     with st.spinner("Évaluation en cours..."):
+        #         try:
+        #             # Utiliser ta fonction existante d'enrichissement
+        #             results = evaluate_feature_enrichment(df, sample_size=sample_size)
                     
-                    if results and 'kw + unités + longueur' in results:
-                        # 1. Afficher les scores F1
-                        f1_train = results['kw + unités + longueur']['f1_train']
-                        f1_val = results['kw + unités + longueur']['f1_val']
-                        baseline_f1 = results.get('kw seul', {}).get('f1_val', 0)
+        #             if results and 'kw + unités + longueur' in results:
+        #                 # 1. Afficher les scores F1
+        #                 f1_train = results['kw + unités + longueur']['f1_train']
+        #                 f1_val = results['kw + unités + longueur']['f1_val']
+        #                 baseline_f1 = results.get('kw seul', {}).get('f1_val', 0)
                         
-                        col1, col2, col3 = st.columns(3)
-                        col1.metric("F1 Score (Validation)", f"{f1_val:.3f}")
-                        col2.metric("F1 Score (Train)", f"{f1_train:.3f}")
-                        col3.metric("Amélioration vs Baseline", 
-                                  f"{(f1_val - baseline_f1):.3f}",
-                                  f"{(f1_val - baseline_f1)/baseline_f1*100:.1f}%" if baseline_f1 > 0 else "N/A")
+        #                 col1, col2, col3 = st.columns(3)
+        #                 col1.metric("F1 Score (Validation)", f"{f1_val:.3f}")
+        #                 col2.metric("F1 Score (Train)", f"{f1_train:.3f}")
+        #                 col3.metric("Amélioration vs Baseline", 
+        #                           f"{(f1_val - baseline_f1):.3f}",
+        #                           f"{(f1_val - baseline_f1)/baseline_f1*100:.1f}%" if baseline_f1 > 0 else "N/A")
                         
-                        # 2. Tableau synthèse des performances
-                        st.markdown("**Comparaison des modèles:**")
-                        comparison_df = pd.DataFrame({
-                            'Modèle': ['Baseline (Keywords seul)', 'Modèle Enrichi (Complet)'],
-                            'F1 Train': [
-                                results.get('kw seul', {}).get('f1_train', 0),
-                                f1_train
-                            ],
-                            'F1 Validation': [
-                                results.get('kw seul', {}).get('f1_val', 0),
-                                f1_val
-                            ],
-                            'Nombre Features': [
-                                results.get('kw seul', {}).get('n_features', 'N/A'),
-                                results['kw + unités + longueur'].get('n_features', 'N/A')
-                            ]
-                        })
-                        st.dataframe(comparison_df)
+        #                 # 2. Tableau synthèse des performances
+        #                 st.markdown("**Comparaison des modèles:**")
+        #                 comparison_df = pd.DataFrame({
+        #                     'Modèle': ['Baseline (Keywords seul)', 'Modèle Enrichi (Complet)'],
+        #                     'F1 Train': [
+        #                         results.get('kw seul', {}).get('f1_train', 0),
+        #                         f1_train
+        #                     ],
+        #                     'F1 Validation': [
+        #                         results.get('kw seul', {}).get('f1_val', 0),
+        #                         f1_val
+        #                     ],
+        #                     'Nombre Features': [
+        #                         results.get('kw seul', {}).get('n_features', 'N/A'),
+        #                         results['kw + unités + longueur'].get('n_features', 'N/A')
+        #                     ]
+        #                 })
+        #                 st.dataframe(comparison_df)
                         
-                        # 3. Graphique d'amélioration
-                        st.markdown("**Amélioration relative par combinaison:**")
-                        fig_delta = plot_improvement_delta(results)
-                        if fig_delta:
-                            st.pyplot(fig_delta)
+        #                 # 3. Graphique d'amélioration
+        #                 st.markdown("**Amélioration relative par combinaison:**")
+        #                 fig_delta = plot_improvement_delta(results)
+        #                 if fig_delta:
+        #                     st.pyplot(fig_delta)
                         
                         
-                    else:
-                        st.warning("Résultats non disponibles pour le modèle complet")
+        #             else:
+        #                 st.warning("Résultats non disponibles pour le modèle complet")
                         
-                except Exception as e:
-                    st.error(f"Erreur lors de l'évaluation: {str(e)}")
+        #         except Exception as e:
+        #             st.error(f"Erreur lors de l'évaluation: {str(e)}")
 
     with tabs[1]:
         st.subheader("Features image — Couleurs")
@@ -1342,7 +1403,7 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
                     """
                     - **Cartes à collectionner** : **73.6 %**
                     - **Textiles** : **66.9 %**
-                    - **Jeux PC** : **59.9 %**
+                    - **Romans & littérature** : **59.9 %**
                     """
                 )
 
@@ -2325,9 +2386,7 @@ elif choice == "8. Transformer Français":
 
     def _numtok_light(t: str) -> str:
         t = t or ""
-        t = _re.sub(r"(\d+)", " <NUM> ", t)
-        t = _UNIT_RE.sub(" <UNIT> ", t)
-        t = _re.sub(r"\s+", " ", t).strip()
+        t = replace_numeric_expressions(t, mode='light')
         return t
 
     a,b,c = st.columns(3)
@@ -2338,7 +2397,7 @@ elif choice == "8. Transformer Français":
         st.markdown("**Cleaner (léger)**")
         st.code(_cleaner_basic(sample), language="text")
     with c:
-        st.markdown("**NumTok light (approx)**")
+        st.markdown("**NumTok light**")
         st.code(_numtok_light(sample), language="text")
 
     # st.info("On suit principalement le **F1 weighted** : classes déséquilibrées, métrique représentative du trafic réel.")
