@@ -1164,32 +1164,61 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
         # On suppose exactement 2 catégories dans le dictionnaire
         categories = list(hist_dict.keys())
 
+
+        # ========= LIGNE 1 =========
         col1, col2 = st.columns(2)
 
-        for col, category in zip([col1, col2], ['Piscine', 'Jeux PC']):
-            with col:
-                fig = plot_rgb_histogram(
-                    hist_dict[category],
-                    title=category,
-                    y_max=350
-                )
-                st.pyplot(fig)
+        with col1:
+            st.markdown("**Histogramme à dominante bleue**  \n"
+                        "_Les images contiennent majoritairement des tons bleus, "
+                        "représentatifs de l’eau._")
+            fig = plot_rgb_histogram(
+                hist_dict["Piscine"],
+                title="Piscine",
+                y_max=350
+            )
+            st.pyplot(fig)
+
+        with col2:
+            st.markdown("**Histogramme à dominante sombre**  \n"
+                        "_Présence marquée de couleurs foncées, typiques des interfaces "
+                        "et visuels de jeux vidéo._")
+            fig = plot_rgb_histogram(
+                hist_dict["Jeux PC"],
+                title="Jeux PC",
+                y_max=350
+            )
+            st.pyplot(fig)
+
+        # Espace vertical entre les deux lignes
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
 
 
-        st.markdown(
-            "### Comparaison des histogrammes RGB pour deux catégories représentatives du catalogue."
-        )
 
-        for col, category in zip([col1, col2], ['Journaux & magazines', 'Livres techniques']):
-            with col:
-                fig = plot_rgb_histogram(
-                    hist_dict[category],
-                    title=category,
-                    y_max=350
-                )
-                st.pyplot(fig)                
+        # ========= LIGNE 2 =========
+        col1, col2 = st.columns(2)
 
-        st.markdown("### Exemple d’image monochrome — Livres spécialisés")
+        with col1:
+            st.markdown("**Histogramme lissé — répartition homogène des couleurs**  \n"
+                        "_Les intensités RGB sont réparties de manière continue._")
+            fig = plot_rgb_histogram(
+                hist_dict["Journaux & magazines"],
+                title="Journaux & magazines",
+                y_max=350
+            )
+            st.pyplot(fig)
+
+        with col2:
+            st.markdown("**Histogramme avec pics marqués — répartition non uniforme des couleurs**  \n"
+                        "_Certaines intensités dominent fortement l’image._")
+            fig = plot_rgb_histogram(
+                hist_dict["Livres techniques"],
+                title="Livres techniques",
+                y_max=350
+            )
+            st.pyplot(fig)
+
+        st.markdown("### Exemple de l'image d'un objet monochrome — Livres spécialisés")
 
         st.markdown(
             "Cet exemple illustre l’origine des **pics observés dans les histogrammes RGB** "
@@ -1199,7 +1228,14 @@ elif choice == "5. Feature Engineering & Modélisation Baseline":
         col_img, col_hist = st.columns([1, 1])
 
         with col_img:
-            display_image(example["image"], caption="image d'un manusctrit")
+            left, center, right = st.columns([1, 2, 1])
+            with center:
+                st.markdown("<br><br><br>", unsafe_allow_html=True)
+                display_image(
+                    example["image"],
+                    caption="Image d’un manuscrit",
+                    width=400
+                )
 
         with col_hist:
             fig = plot_rgb_histogram(
@@ -2723,142 +2759,63 @@ elif choice == "11. Essai du modèle":
 # ==================================================================================================================================
 elif choice == "12. Conclusions et perspectives":
     st.header("12. Conclusions et perspectives")
-    
-    # Résumé du projet
-    st.subheader("Résumé du projet")
-    
+
+    # Objectif
+    st.subheader("🎯 Objectif du projet")
+    st.markdown(
+        """
+        Classification automatique de produits e-commerce à partir de **données textuelles et visuelles**
+        dans le cadre du challenge Rakuten, avec une analyse fine de la contribution de chaque modalité.
+        """
+    )
+
+    # Résultats clés
+    st.subheader("🔑 Résultats clés")
     col1, col2 = st.columns(2)
-    
+
     with col1:
-        st.markdown("""
-        **Travaux réalisés :**
-        
-        ✅ Analyse exploratoire approfondie des données texte et image  
-        ✅ Préprocessing robuste et spécifique à chaque modalité  
-        ✅ Construction de baselines solides et interprétables  
-        ✅ Enrichissement progressif via modèles avancés  
-        ✅ Approche multimodale avec méta-modélisation  
-        """)
-    
+        st.markdown(
+            """
+            **Texte**
+            - Signal principal pour la majorité des catégories  
+            - Excellentes performances avec **CamemBERT**  
+            - Probabilités mieux calibrées via combinaison de modèles
+            """
+        )
+
     with col2:
-        st.markdown(f"""
-        **Résultats obtenus :**
-        
-        📊 **Baseline unitaire :** F1 ≈ 0.45  
-        📈 **Avec enrichissement et sélection :** F1 ≈ 0.85+  
-        🚀 **Approche multimodale :** F1 ≈ 0.90+  
-        
-        **Jeu de données :**
-        - {len(df):,} produits analysés  
-        - {df['prdtypecode'].nunique()} catégories  
-        - {df['image_path'].notna().sum()} images exploitables  
-        """)
-    
-    # Leçons apprises
-    st.subheader("Leçons apprises")
-    
-    with st.expander("Principaux enseignements", expanded=True):
-        st.markdown("""
-        1. **Préprocessing comme facteur clé**
-           - Le nettoyage et la structuration du texte ont un impact majeur
-           - Les choix de normalisation influencent directement la stabilité des modèles
-        
-        2. **Forte hétérogénéité des catégories**
-           - Certaines classes sont bien séparables, d’autres intrinsèquement ambiguës
-           - Les erreurs sont souvent structurelles plutôt que bruitées
-        
-        3. **Complémentarité des modalités**
-           - Le texte reste dominant mais l’image apporte une information discriminante
-           - La fusion tardive permet de mieux contrôler les contributions
-        
-        4. **Importance d’une approche incrémentale**
-           - Baselines indispensables pour interpréter les gains
-           - La complexité n’est pertinente que si elle est ciblée
-        """)
-    
-    # Perspectives
-    st.subheader("Perspectives d'amélioration")
-    
-    perspectives_tab = st.tabs(["Court terme", "Moyen terme", "Long terme"])
-    
-    with perspectives_tab[0]:
-        st.markdown("""
-        **Améliorations immédiates :**
-        
-        - **Normalisation avancée des expressions numériques**
-          - Remplacement des dimensions, quantités et unités par des tokens canoniques  
-          - Réduction du bruit lexical et meilleure généralisation inter-produits
-        
-        - **Affinage du préprocessing texte**
-          - Gestion spécifique des références produits
-          - Désambiguïsation des termes dépendants du contexte
-        
-        - **Optimisation ciblée des modèles existants**
-          - Recherche d’hyperparamètres par catégorie
-          - Ajustement des seuils de décision
-        """)
-    
-    with perspectives_tab[1]:
-        st.markdown("""
-        **Développements structurants :**
-        
-        - **Modélisation hiérarchique des catégories**
-          - Prédiction coarse → fine (famille → sous-classe)
-          - Réduction des confusions entre catégories proches
-        
-        - **Modèles complémentaires pour classes difficiles**
-          - Détection préalable des classes à forte ambiguïté
-          - Spécialisation de modèles secondaires dédiés
-        
-        - **Amélioration de la fusion multimodale**
-          - Pondération dynamique texte / image
-          - Prise en compte de la confiance par modalité
-        """)
-    
-    with perspectives_tab[2]:
-        st.markdown("""
-        **Perspectives à plus long terme :**
-        
-        - **Systèmes adaptatifs**
-          - Ré-entraînement ciblé sur les erreurs récurrentes
-          - Intégration de retours utilisateurs
-        
-        - **Extension du cadre de classification**
-          - Gestion explicite des produits hors taxonomie
-          - Détection d’anomalies et nouveaux types
-        
-        - **Industrialisation**
-          - Pipeline de production monitoré
-          - Suivi de dérive des données et des performances
-        """)
-    
-    # Impact business
-    st.subheader("Impact business potentiel")
-    
-    impact_col1, impact_col2, impact_col3 = st.columns(3)
-    
-    with impact_col1:
-        with st.container(border=True):
-            st.markdown("**Amélioration de l’expérience utilisateur**")
-            st.caption("Navigation plus cohérente et recherche facilitée")
-    
-    with impact_col2:
-        with st.container(border=True):
-            st.markdown("**Meilleure valorisation catalogue**")
-            st.caption("Catégorisation plus fiable et homogène")
-    
-    with impact_col3:
-        with st.container(border=True):
-            st.markdown("**Réduction des coûts opérationnels**")
-            st.caption("Automatisation du classement produit")
-    
-    # Message final
-    st.markdown("---")
-    st.success("""
-    **Conclusion générale**
-    
-    Ce projet montre qu’une approche méthodique, data-centric et multimodale permet 
-    d’aborder efficacement un problème réel de classification e-commerce.  
-    Les résultats obtenus constituent une base solide, avec des pistes claires 
-    d’amélioration ciblant les limites structurelles observées.
-    """)
+        st.markdown(
+            """
+            **Image**
+            - Signal complémentaire mais informatif  
+            - Meilleures performances avec **ConvNeXt** et **Swin Transformer**  
+            - Robustesse accrue via fusion de modèles visuels
+            """
+        )
+
+    # Fusion multimodale
+    st.subheader("🔗 Fusion multimodale (aboutissement)")
+    st.markdown(
+        """
+        - **Stacking calibré** des pipelines texte et image  
+        - Correction des ambiguïtés textuelles  
+        - Aucune dégradation des classes déjà bien maîtrisées  
+        - Contribution moyenne : **56 % texte / 44 % image**
+        """
+    )
+
+    # Limites & perspectives
+    st.subheader("🔮 Limites et perspectives")
+    st.markdown(
+        """
+        - Catégories encore difficiles : *Jeux éducatifs*, *Jeux de rôle*, *Jouets & Figurines*  
+        - Enrichissement des **signaux numériques** (discrétisation plus fine)  
+        - **Classification hiérarchique** ou **modèles spécialisés activés conditionnellement**
+        """
+    )
+
+    # Message de clôture
+    st.success(
+        "👉 Une approche **multimodale raisonnée, progressive et interprétable**, "
+        "constituant une **base solide, performante et extensible** pour la classification de produits à grande échelle."
+    )

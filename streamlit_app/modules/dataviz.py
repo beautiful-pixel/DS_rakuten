@@ -1502,13 +1502,13 @@ def plot_rgb_histogram(hist, title=None, y_max=None):
     plt.tight_layout()
     return fig
 
-def display_image(image, caption):
+def display_image(image, caption, width=250):
     """
     Affiche une image qu'elle soit en numpy ou PIL.
     """
     if isinstance(image, np.ndarray):
-        st.image(image, caption=caption, width=250)
+        st.image(image, caption=caption, width=width)
     elif isinstance(image, Image.Image):
-        st.image(image, caption=caption, width=250)
+        st.image(image, caption=caption, width=width)
     else:
         st.warning("Format d'image non reconnu")
